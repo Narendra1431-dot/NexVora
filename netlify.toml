@@ -1,0 +1,13 @@
+published_slug: ${repository.provider.publishing_deployment_slug}
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify-functions"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+  targetPort = 8000
