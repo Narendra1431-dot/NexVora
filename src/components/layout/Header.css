@@ -1,0 +1,66 @@
+/*
+ * Header premium styles
+ * Enhanced styling for the premium header component
+ */
+
+.header-premium {
+  background-color: var(--color-bg-elevated);
+  border-bottom-color: var(--color-border-primary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.header-premium:hover {
+  box-shadow: var(--shadow-md);
+  border-bottom-color: var(--color-border-secondary);
+}
+
+.search-btn {
+  transition: all var(--transition-fast);
+}
+
+.search-btn:hover {
+  background-color: var(--color-interactive-secondary-hover);
+  border-color: var(--color-border-focus);
+  color: var(--color-text-primary);
+}
+
+.career-btn {
+  transition: all var(--transition-fast);
+}
+
+.career-btn:hover {
+  background-color: var(--color-interactive-secondary-hover);
+  border-color: var(--color-border-focus);
+  transform: translateY(-1px);
+}
+
+.notification-btn {
+  transition: all var(--transition-fast);
+}
+
+.notification-btn:hover {
+  background-color: var(--color-interactive-secondary-hover);
+  color: var(--color-text-primary);
+}
+
+.profile-btn {
+  transition: all var(--transition-fast);
+}
+
+.profile-btn:hover {
+  background-color: var(--color-interactive-secondary-hover);
+  border-radius: var(--radius-md);
+}
+
+.career-dropdown {
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-bg-elevated);
+  box-shadow: var(--shadow-lg);
+}
+
+.profile-dropdown {
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-bg-elevated);
+  box-shadow: var(--shadow-lg);
+}

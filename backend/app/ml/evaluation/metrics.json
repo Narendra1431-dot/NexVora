@@ -1,0 +1,13 @@
+{
+  "modelVersion": "demo-ranker-1",
+  "seed": 42,
+  "data": "SYNTHETIC DEMO DATA; no real-world accuracy claim",
+  "train": 900,
+  "validation": 300,
+  "test": 300,
+  "validationMAE": 0.023522180780571573,
+  "testMAE": 0.0232060473220407,
+  "testRMSE": 0.028876362023403726,
+  "testNDCGAt5": 0.995991125356139,
+  "constantBaselineMAE": 0.12189751913122478
+}

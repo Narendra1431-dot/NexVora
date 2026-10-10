@@ -1,0 +1,1586 @@
+{
+  "health": {
+    "supervisor": "controlled_workflow_ready",
+    "rag": {
+      "backend": "hashing-blake2b",
+      "dimensions": 384,
+      "vectorIndex": "faiss",
+      "documents": 131,
+      "chunks": 337,
+      "indexed": true
+    },
+    "ml": "healthy_synthetic_demo_advisory_only",
+    "mongodb": "healthy",
+    "openrouter": {
+      "status": "blocked_http_401"
+    },
+    "activeProvider": {
+      "provider": "Groq",
+      "status": "blocked_http_429",
+      "available": false,
+      "apiKeySet": true,
+      "configuredModel": "openai/gpt-oss-120b"
+    },
+    "workflow": {
+      "status": "ready",
+      "automatic": true
+    }
+  },
+  "results": [
+    {
+      "query": "What should I learn next and why?",
+      "status": 200,
+      "result": {
+        "answer": "Hello! Based on your current career profile for an **AI Engineer**, the next thing you should focus on is **Python (Advanced)**.\n\n### What to learn next\n**Skill:**\u202fPython (Advanced) \u2013\u202f`prog-python-advanced`  \n**Action:**\u202fTake the *Python (Advanced) Baseline Diagnostic* assessment (`assess-python-baseline`) after reviewing the recommended resource \u201cProduction Python: Type Narrowing, Protocols and Async Patterns\u201d (`res-python-typing`).  \n\n### Why this is the right next step\n1. **Direct gap with no blockers** \u2013 Python (Advanced) is marked as a *Skill Gap* with a required mastery of\u202f90\u202f% but your current mastery is\u202f0\u202f%\u202f[prog-python-advanced]. There are no prerequisite skills blocking progress on this competency, so you can start immediately\u202f[prog-python-advanced].\n\n2. **Readiness impact** \u2013 Your overall readiness for the AI Engineer role is currently\u202f0\u202f%\u202f[prog-python-advanced]. Improving Python mastery is the fastest way to raise that score because it is a required core competency for the role\u202f[prog-python-advanced].\n\n3. **Prerequisite cascade** \u2013 Many other required skills (e.g., PyTorch, Transformers, Model Evaluation, RAG, Vector DBs, LLM Fine\u2011Tuning, Model Serving) list Python (Advanced) as a prerequisite\u202f[prog-python-advanced]. Completing Python first will unlock those downstream skills\u202f[prog-python-advanced].\n\n4. **Available learning material** \u2013 The system has already recommended a focused resource that matches the skill\u2019s difficulty and your available time (\u22482\u202fhours)\u202f[res-python-typing]. Using this resource will prepare you for the assessment.\n\n5. **Clear success criteria** \u2013 Passing the linked assessment with at least\u202f80\u202f% (the assessment\u2019s passing score) will automatically generate verified evidence and move the \u201cMaster Python (Advanced)\u201d milestone to completed\u202f[ms-01-prog-python-advanced].\n\n### Suggested immediate actions\n| Action | Where to find it |\n|--------|------------------|\n| **Learn** \u2013 work through the \u201cProduction Python: Type Narrowing, Protocols and Async Patterns\u201d course | Resource ID `res-python-typing` |\n| **Assess** \u2013 take the \u201cPython (Advanced) Baseline Diagnostic\u201d | Assessment ID `assess-python-baseline` |\n| **Review** \u2013 after passing, check the milestone status to confirm the skill is marked as mastered | Milestone ID `ms-01-prog-python-advanced` |\n\nBy completing this step, you\u2019ll create the first verified piece of evidence for your AI Engineer pathway and unlock the next set of prerequisite\u2011heavy skills. Good luck, and let me know if you\u2019d like guidance on any of the subsequent milestones!",
+        "sources": [],
+        "relatedSkills": [
+          {
+            "id": "prog-python-advanced",
+            "name": "Python (Advanced)",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 90,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "AsyncIO",
+              "Metaclasses & Decorators",
+              "Memory Profiling & C-Extensions"
+            ],
+            "remainingGap": "Required mastery is 90%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.9,
+            "x": 80,
+            "y": 350,
+            "updatedAt": null
+          },
+          {
+            "id": "prog-data-structures",
+            "name": "Data Structures & Algorithms",
+            "domain": "Core Programming",
+            "type": "Prerequisite",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Graphs & Trees",
+              "Dynamic Programming",
+              "Trie & Hash Indexes"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 240,
+            "y": 350,
+            "updatedAt": null
+          },
+          {
+            "id": "math-linear-algebra",
+            "name": "Linear Algebra",
+            "domain": "Math & Foundations",
+            "type": "Prerequisite",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "Eigenvalues & Eigenvectors",
+              "Matrix Decomposition (SVD)",
+              "Tensor Operations"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 80,
+            "y": 100,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-neural-networks",
+            "name": "Neural Network Architecture",
+            "domain": "Deep Learning & NLP",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "math-multivariate-calculus",
+              "ml-supervised"
+            ],
+            "unmetPrerequisites": [
+              "math-multivariate-calculus",
+              "ml-supervised"
+            ],
+            "prerequisiteChain": [
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Backpropagation through Time",
+              "Activation Functions",
+              "Layer & Batch Normalization"
+            ],
+            "remainingGap": "Blocked by prerequisites: Multivariate Calculus, Supervised Learning Algorithms.",
+            "recommendedAction": "Close Multivariate Calculus first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 720,
+            "y": 240,
+            "updatedAt": null
+          },
+          {
+            "id": "data-numpy-pandas",
+            "name": "NumPy & Pandas Processing",
+            "domain": "Data Systems",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Vectorization & Broadcasting",
+              "Memory Mapping",
+              "Time Series Alignment"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 400,
+            "y": 250,
+            "updatedAt": null
+          },
+          {
+            "id": "math-prob-stats",
+            "name": "Probability & Statistics",
+            "domain": "Math & Foundations",
+            "type": "Concept",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "math-linear-algebra"
+            ],
+            "unmetPrerequisites": [
+              "math-linear-algebra"
+            ],
+            "prerequisiteChain": [
+              "math-linear-algebra"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Bayes Theorem",
+              "Maximum Likelihood Estimation (MLE)",
+              "Markov Chains"
+            ],
+            "remainingGap": "Blocked by prerequisite: Linear Algebra.",
+            "recommendedAction": "Close Linear Algebra first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 240,
+            "y": 100,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-pytorch",
+            "name": "PyTorch Framework & Tensors",
+            "domain": "Deep Learning & NLP",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "dl-neural-networks",
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "dl-neural-networks",
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "dl-neural-networks",
+              "prog-python-advanced",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Autograd Engine",
+              "Custom Dataset & DataLoader",
+              "DistributedDataParallel (DDP)"
+            ],
+            "remainingGap": "Blocked by prerequisites: Neural Network Architecture, Python (Advanced).",
+            "recommendedAction": "Close Neural Network Architecture first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 880,
+            "y": 200,
+            "updatedAt": null
+          },
+          {
+            "id": "ml-supervised",
+            "name": "Supervised Learning Algorithms",
+            "domain": "Machine Learning",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Critical",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "unmetPrerequisites": [
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "prerequisiteChain": [
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Gradient Boosted Trees (XGBoost)",
+              "Regularization (L1/L2)",
+              "Support Vector Machines"
+            ],
+            "remainingGap": "Blocked by prerequisites: Linear Algebra, Probability & Statistics.",
+            "recommendedAction": "Close Linear Algebra first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 560,
+            "y": 120,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-transformers",
+            "name": "Transformer Architecture & Attention",
+            "domain": "Deep Learning & NLP",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "dl-pytorch"
+            ],
+            "unmetPrerequisites": [
+              "dl-pytorch"
+            ],
+            "prerequisiteChain": [
+              "dl-pytorch",
+              "dl-neural-networks",
+              "prog-python-advanced",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Scaled Dot-Product Attention",
+              "Multi-Head Attention",
+              "Rotary Positional Embeddings",
+              "KV Cache"
+            ],
+            "remainingGap": "Blocked by prerequisites: PyTorch Framework & Tensors, Neural Network Architecture.",
+            "recommendedAction": "Close PyTorch Framework & Tensors first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.85,
+            "x": 1040,
+            "y": 180,
+            "updatedAt": null
+          },
+          {
+            "id": "ml-model-evaluation",
+            "name": "Model Evaluation & Validation",
+            "domain": "Machine Learning",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 80,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "ml-supervised",
+              "math-prob-stats"
+            ],
+            "unmetPrerequisites": [
+              "ml-supervised",
+              "math-prob-stats"
+            ],
+            "prerequisiteChain": [
+              "ml-supervised",
+              "math-prob-stats",
+              "math-linear-algebra",
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "ROC-AUC & Precision-Recall",
+              "Cross-Validation & Leakage",
+              "LLM Benchmark Metrics"
+            ],
+            "remainingGap": "Blocked by prerequisites: Supervised Learning Algorithms, Probability & Statistics.",
+            "recommendedAction": "Close Supervised Learning Algorithms first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.8,
+            "x": 720,
+            "y": 120,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-rag-systems",
+            "name": "Retrieval Augmented Generation (RAG)",
+            "domain": "Deep Learning & NLP",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 80,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "data-vector-databases",
+              "dl-transformers"
+            ],
+            "unmetPrerequisites": [
+              "data-vector-databases",
+              "dl-transformers"
+            ],
+            "prerequisiteChain": [
+              "data-vector-databases",
+              "dl-transformers",
+              "prog-data-structures",
+              "data-sql-querying",
+              "dl-pytorch",
+              "prog-python-advanced",
+              "dl-neural-networks",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Contextual Chunking",
+              "Cross-Encoder Re-ranking",
+              "Self-RAG & Agentic Loops"
+            ],
+            "remainingGap": "Blocked by prerequisites: Vector DBs & Embeddings Index, Transformer Architecture & Attention.",
+            "recommendedAction": "Close Vector DBs & Embeddings Index first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.8,
+            "x": 1040,
+            "y": 320,
+            "updatedAt": null
+          },
+          {
+            "id": "data-vector-databases",
+            "name": "Vector DBs & Embeddings Index",
+            "domain": "Data Systems",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 75,
+            "careerImportance": "Required",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-data-structures",
+              "data-sql-querying"
+            ],
+            "unmetPrerequisites": [
+              "prog-data-structures",
+              "data-sql-querying"
+            ],
+            "prerequisiteChain": [
+              "prog-data-structures",
+              "data-sql-querying",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "HNSW vs IVF Indexing",
+              "Cosine vs Dot Product Metrics",
+              "Chroma & Milvus"
+            ],
+            "remainingGap": "Blocked by prerequisites: Data Structures & Algorithms, Advanced SQL & Data Modeling.",
+            "recommendedAction": "Close Data Structures & Algorithms first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.75,
+            "x": 560,
+            "y": 370,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-llm-finetuning",
+            "name": "LLM Fine-Tuning & Quantization",
+            "domain": "Deep Learning & NLP",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 75,
+            "careerImportance": "Preferred",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "dl-transformers",
+              "dl-pytorch"
+            ],
+            "unmetPrerequisites": [
+              "dl-transformers",
+              "dl-pytorch"
+            ],
+            "prerequisiteChain": [
+              "dl-transformers",
+              "dl-pytorch",
+              "dl-neural-networks",
+              "prog-python-advanced",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "QLoRA & PEFT",
+              "DPO vs PPO Alignment",
+              "AWQ & GGUF Quantization"
+            ],
+            "remainingGap": "Blocked by prerequisites: Transformer Architecture & Attention, PyTorch Framework & Tensors.",
+            "recommendedAction": "Close Transformer Architecture & Attention first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.4875,
+            "x": 1200,
+            "y": 200,
+            "updatedAt": null
+          },
+          {
+            "id": "mlops-model-serving",
+            "name": "Model Serving & Inference Optimization",
+            "domain": "MLOps & Deployment",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 70,
+            "careerImportance": "Preferred",
+            "careerRequired": true,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-docker-containers",
+              "dl-pytorch"
+            ],
+            "unmetPrerequisites": [
+              "prog-docker-containers",
+              "dl-pytorch"
+            ],
+            "prerequisiteChain": [
+              "prog-docker-containers",
+              "dl-pytorch",
+              "prog-python-advanced",
+              "dl-neural-networks",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "vLLM & TensorRT-LLM",
+              "Continuous Batching & PagedAttention",
+              "Triton Inference Server"
+            ],
+            "remainingGap": "Blocked by prerequisites: Docker & Containerization, PyTorch Framework & Tensors.",
+            "recommendedAction": "Close Docker & Containerization first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.455,
+            "x": 1040,
+            "y": 450,
+            "updatedAt": null
+          },
+          {
+            "id": "data-sql-querying",
+            "name": "Advanced SQL & Data Modeling",
+            "domain": "Data Systems",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Window Functions",
+              "Recursive CTEs",
+              "Query Execution Plans"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 400,
+            "y": 370,
+            "updatedAt": null
+          },
+          {
+            "id": "prog-testing-cicd",
+            "name": "Automated Testing & CI/CD",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Pytest Fixtures & Mocks",
+              "GitHub Actions Matrix",
+              "Coverage Gates"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 400,
+            "y": 470,
+            "updatedAt": null
+          },
+          {
+            "id": "mlops-production-pipeline",
+            "name": "CI/CD & Production LLM Pipelines",
+            "domain": "MLOps & Deployment",
+            "type": "Career Requirement",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "mlops-model-serving",
+              "dl-rag-systems"
+            ],
+            "unmetPrerequisites": [
+              "mlops-model-serving",
+              "dl-rag-systems"
+            ],
+            "prerequisiteChain": [
+              "mlops-model-serving",
+              "dl-rag-systems",
+              "prog-docker-containers",
+              "dl-pytorch",
+              "data-vector-databases",
+              "dl-transformers",
+              "prog-python-advanced",
+              "dl-neural-networks",
+              "prog-data-structures",
+              "data-sql-querying",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Langfuse Observability",
+              "Prompt Versioning & Registry",
+              "Cost & Token Guardrails"
+            ],
+            "remainingGap": "Blocked by prerequisites: Model Serving & Inference Optimization, Retrieval Augmented Generation (RAG).",
+            "recommendedAction": "Close Model Serving & Inference Optimization first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 1200,
+            "y": 450,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-computer-vision",
+            "name": "Computer Vision Fundamentals",
+            "domain": "Deep Learning & NLP",
+            "type": "Concept",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Medium",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "dl-pytorch"
+            ],
+            "unmetPrerequisites": [
+              "dl-pytorch"
+            ],
+            "prerequisiteChain": [
+              "dl-pytorch",
+              "dl-neural-networks",
+              "prog-python-advanced",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "CNN Architectures",
+              "Data Augmentation",
+              "Detection & Segmentation"
+            ],
+            "remainingGap": "Blocked by prerequisites: PyTorch Framework & Tensors, Neural Network Architecture.",
+            "recommendedAction": "Close PyTorch Framework & Tensors first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 1200,
+            "y": 320,
+            "updatedAt": null
+          },
+          {
+            "id": "math-optimization",
+            "name": "Convex & Stochastic Optimization",
+            "domain": "Math & Foundations",
+            "type": "Concept",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "math-multivariate-calculus"
+            ],
+            "unmetPrerequisites": [
+              "math-multivariate-calculus"
+            ],
+            "prerequisiteChain": [
+              "math-multivariate-calculus"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Gradient Descent Variants",
+              "Adam & Momentum",
+              "Learning Rate Schedules"
+            ],
+            "remainingGap": "Blocked by prerequisite: Multivariate Calculus.",
+            "recommendedAction": "Close Multivariate Calculus first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 240,
+            "y": 220,
+            "updatedAt": null
+          },
+          {
+            "id": "prog-docker-containers",
+            "name": "Docker & Containerization",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Multi-Stage GPU Builds",
+              "CUDA Base Containers",
+              "Docker Compose"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 240,
+            "y": 470,
+            "updatedAt": null
+          },
+          {
+            "id": "ml-experiment-tracking",
+            "name": "Experiment Tracking & Reproducibility",
+            "domain": "Machine Learning",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Medium",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "ml-model-evaluation"
+            ],
+            "unmetPrerequisites": [
+              "ml-model-evaluation"
+            ],
+            "prerequisiteChain": [
+              "ml-model-evaluation",
+              "ml-supervised",
+              "math-prob-stats",
+              "math-linear-algebra",
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Weights & Biases Runs",
+              "Config Sweeps",
+              "Artifact Lineage"
+            ],
+            "remainingGap": "Blocked by prerequisites: Model Evaluation & Validation, Supervised Learning Algorithms.",
+            "recommendedAction": "Close Model Evaluation & Validation first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 720,
+            "y": 20,
+            "updatedAt": null
+          },
+          {
+            "id": "data-feature-store",
+            "name": "Feature Stores & Data Versioning",
+            "domain": "Data Systems",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Medium",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "data-sql-querying",
+              "data-numpy-pandas"
+            ],
+            "unmetPrerequisites": [
+              "data-sql-querying",
+              "data-numpy-pandas"
+            ],
+            "prerequisiteChain": [
+              "data-sql-querying",
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Point-in-Time Joins",
+              "DVC & Dataset Lineage",
+              "Online/Offline Skew"
+            ],
+            "remainingGap": "Blocked by prerequisites: Advanced SQL & Data Modeling, NumPy & Pandas Processing.",
+            "recommendedAction": "Close Advanced SQL & Data Modeling first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 560,
+            "y": 490,
+            "updatedAt": null
+          },
+          {
+            "id": "web-html-css",
+            "name": "HTML & CSS",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "Semantic HTML",
+              "Responsive layout"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 80,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "ops-iac",
+            "name": "Infrastructure as Code",
+            "domain": "MLOps & Deployment",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "ops-linux",
+              "cloud-networking"
+            ],
+            "unmetPrerequisites": [
+              "ops-linux",
+              "cloud-networking"
+            ],
+            "prerequisiteChain": [
+              "ops-linux",
+              "cloud-networking"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Declarative state",
+              "Change review"
+            ],
+            "remainingGap": "Blocked by prerequisites: Linux Administration, Networking Fundamentals.",
+            "recommendedAction": "Close Linux Administration first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 1040,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "web-typescript",
+            "name": "JavaScript & TypeScript",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "Type narrowing",
+              "Promises"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 240,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "ops-linux",
+            "name": "Linux Administration",
+            "domain": "MLOps & Deployment",
+            "type": "Skill",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "Processes",
+              "Permissions"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 880,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "mlops-monitoring",
+            "name": "Model Monitoring & Drift Detection",
+            "domain": "MLOps & Deployment",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Medium",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "ml-model-evaluation",
+              "mlops-model-serving"
+            ],
+            "unmetPrerequisites": [
+              "ml-model-evaluation",
+              "mlops-model-serving"
+            ],
+            "prerequisiteChain": [
+              "ml-model-evaluation",
+              "mlops-model-serving",
+              "ml-supervised",
+              "math-prob-stats",
+              "prog-docker-containers",
+              "dl-pytorch",
+              "math-linear-algebra",
+              "data-numpy-pandas",
+              "prog-python-advanced",
+              "dl-neural-networks",
+              "math-multivariate-calculus"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Data vs Concept Drift",
+              "Latency SLO Alerting",
+              "Shadow Deployments"
+            ],
+            "remainingGap": "Blocked by prerequisites: Model Evaluation & Validation, Model Serving & Inference Optimization.",
+            "recommendedAction": "Close Model Evaluation & Validation first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 1200,
+            "y": 560,
+            "updatedAt": null
+          },
+          {
+            "id": "math-multivariate-calculus",
+            "name": "Multivariate Calculus",
+            "domain": "Math & Foundations",
+            "type": "Prerequisite",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "Foundational",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "Gradients & Jacobians",
+              "Hessian Matrices",
+              "Chain Rule in Backprop"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 80,
+            "y": 220,
+            "updatedAt": null
+          },
+          {
+            "id": "cloud-networking",
+            "name": "Networking Fundamentals",
+            "domain": "MLOps & Deployment",
+            "type": "Prerequisite",
+            "state": "Skill Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [],
+            "unmetPrerequisites": [],
+            "prerequisiteChain": [],
+            "dependents": [],
+            "relatedConcepts": [
+              "DNS",
+              "TLS",
+              "TCP/IP"
+            ],
+            "remainingGap": "Required mastery is 85%; current evidence places you at 0%.",
+            "recommendedAction": "Work the linked milestone, then assess to convert learning into proof.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 560,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "dl-prompt-engineering",
+            "name": "Prompt & Context Engineering",
+            "domain": "Deep Learning & NLP",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "dl-transformers"
+            ],
+            "unmetPrerequisites": [
+              "dl-transformers"
+            ],
+            "prerequisiteChain": [
+              "dl-transformers",
+              "dl-pytorch",
+              "dl-neural-networks",
+              "prog-python-advanced",
+              "math-multivariate-calculus",
+              "ml-supervised",
+              "math-linear-algebra",
+              "math-prob-stats",
+              "data-numpy-pandas"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Few-Shot Templates",
+              "Structured Output Constraints",
+              "Context Budgeting"
+            ],
+            "remainingGap": "Blocked by prerequisites: Transformer Architecture & Attention, PyTorch Framework & Tensors.",
+            "recommendedAction": "Close Transformer Architecture & Attention first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 1200,
+            "y": 80,
+            "updatedAt": null
+          },
+          {
+            "id": "prog-rest-apis",
+            "name": "REST API & Service Design",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "prog-python-advanced"
+            ],
+            "unmetPrerequisites": [
+              "prog-python-advanced"
+            ],
+            "prerequisiteChain": [
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Idempotency & Versioning",
+              "Pydantic Validation",
+              "Auth Middleware"
+            ],
+            "remainingGap": "Blocked by prerequisite: Python (Advanced).",
+            "recommendedAction": "Close Python (Advanced) first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 400,
+            "y": 590,
+            "updatedAt": null
+          },
+          {
+            "id": "web-react",
+            "name": "React",
+            "domain": "Core Programming",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "web-typescript",
+              "web-html-css"
+            ],
+            "unmetPrerequisites": [
+              "web-typescript",
+              "web-html-css"
+            ],
+            "prerequisiteChain": [
+              "web-typescript",
+              "web-html-css"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "Component state",
+              "Accessibility"
+            ],
+            "remainingGap": "Blocked by prerequisites: JavaScript & TypeScript, HTML & CSS.",
+            "recommendedAction": "Close JavaScript & TypeScript first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 400,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "security-threats",
+            "name": "Threat Modeling & Application Security",
+            "domain": "MLOps & Deployment",
+            "type": "Skill",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "cloud-networking",
+              "prog-rest-apis"
+            ],
+            "unmetPrerequisites": [
+              "cloud-networking",
+              "prog-rest-apis"
+            ],
+            "prerequisiteChain": [
+              "cloud-networking",
+              "prog-rest-apis",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "OWASP",
+              "Least privilege"
+            ],
+            "remainingGap": "Blocked by prerequisites: Networking Fundamentals, REST API & Service Design.",
+            "recommendedAction": "Close Networking Fundamentals first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 720,
+            "y": 650,
+            "updatedAt": null
+          },
+          {
+            "id": "ml-unsupervised",
+            "name": "Unsupervised & Dimensionality",
+            "domain": "Machine Learning",
+            "type": "Concept",
+            "state": "Prerequisite Gap",
+            "mastery": 0,
+            "confidence": 0,
+            "targetLevel": 85,
+            "careerImportance": "High",
+            "careerRequired": false,
+            "evidenceCount": 0,
+            "lastAssessed": "Never",
+            "lastAssessedAt": null,
+            "prerequisites": [
+              "data-numpy-pandas"
+            ],
+            "unmetPrerequisites": [
+              "data-numpy-pandas"
+            ],
+            "prerequisiteChain": [
+              "data-numpy-pandas",
+              "prog-python-advanced"
+            ],
+            "dependents": [],
+            "relatedConcepts": [
+              "t-SNE & UMAP",
+              "K-Means & DBSCAN",
+              "PCA Decomposition"
+            ],
+            "remainingGap": "Blocked by prerequisites: NumPy & Pandas Processing, Python (Advanced).",
+            "recommendedAction": "Close NumPy & Pandas Processing first to unlock this skill.",
+            "history": [],
+            "knowledgeDebt": 0.0,
+            "priority": 0.425,
+            "x": 560,
+            "y": 240,
+            "updatedAt": null
+          }
+        ],
+        "evidence": [],
+        "suggestedActions": [
+          {
+            "kind": "assessment",
+            "title": "Take the Python (Advanced) assessment",
+            "description": "Work the linked milestone, then assess to convert learning into proof.",
+            "skillId": "prog-python-advanced",
+            "skillName": "Python (Advanced)",
+            "state": "Skill Gap",
+            "currentMastery": 0,
+            "targetMastery": 90,
+            "assessmentId": "assess-python-baseline",
+            "tab": "assessments",
+            "estimatedEffort": "8 mins",
+            "reason": "This is a required target-role competency below its mastery bar with no prerequisite blocker.",
+            "impact": null,
+            "career": "AI Engineer"
+          }
+        ],
+        "nextBestAction": {
+          "stateVersion": 1,
+          "careerId": "career-ai-engineer",
+          "title": "Take the Python (Advanced) assessment",
+          "reason": "This is a required target-role competency below its mastery bar with no prerequisite blocker.",
+          "skillId": "prog-python-advanced",
+          "currentMastery": 0,
+          "targetMastery": 90,
+          "confidence": 0,
+          "blocks": [
+            "PyTorch Framework & Tensors",
+            "Transformer Architecture & Attention",
+            "Model Evaluation & Validation",
+            "Retrieval Augmented Generation (RAG)",
+            "Vector DBs & Embeddings Index",
+            "LLM Fine-Tuning & Quantization",
+            "Model Serving & Inference Optimization"
+          ],
+          "currentReadiness": 0,
+          "readinessImpact": "Readiness changes only after scored or reviewed evidence; no improvement is guaranteed.",
+          "evidenceUsed": [],
+          "missingEvidence": true,
+          "resources": [
+            {
+              "id": "res-python-typing",
+              "bookmarked": false,
+              "completed": false,
+              "createdAt": "2026-09-21T22:44:12.064779+00:00",
+              "difficulty": "Advanced",
+              "duration": "2 hours",
+              "prerequisites": [
+                "prog-python-advanced"
+              ],
+              "provider": "Real Python",
+              "qualityRating": 4.7,
+              "reasonRecommended": "Recommended for Python (Advanced): mastery 0%, target 90%; difficulty and available time included. Prerequisites fit current state.",
+              "skillId": "prog-python-advanced",
+              "skillName": "Python (Advanced)",
+              "title": "Production Python: Type Narrowing, Protocols and Async Patterns",
+              "type": "Course",
+              "url": "https://realpython.com/python-type-checking/",
+              "rankingScore": 0.7957,
+              "rankingModel": "demo-ranker-1 (synthetic training data)"
+            }
+          ],
+          "assessment": {
+            "id": "assess-python-baseline",
+            "category": "Baseline Diagnostic",
+            "createdAt": "2026-09-29T05:09:59Z",
+            "difficulty": "Beginner",
+            "estimatedTime": "5 mins",
+            "questionsCount": 3,
+            "skillId": "prog-python-advanced",
+            "skillName": "Python (Advanced)",
+            "targetSkillsImpacted": [
+              {
+                "skillId": "prog-python-advanced",
+                "skillName": "Python (Advanced)",
+                "baselineMastery": 0,
+                "targetMastery": 80
+              }
+            ],
+            "title": "Python (Advanced) Baseline Diagnostic",
+            "passingScore": 80
+          },
+          "project": null,
+          "resumeAction": null,
+          "actions": [
+            {
+              "label": "Learn Now",
+              "tab": "resources",
+              "skillId": "prog-python-advanced",
+              "id": "res-python-typing"
+            },
+            {
+              "label": "Take Assessment",
+              "tab": "assessments",
+              "id": "assess-python-baseline",
+              "skillId": "prog-python-advanced"
+            },
+            {
+              "label": "Why This?",
+              "tab": "competencies",
+              "skillId": "prog-python-advanced"
+            }
+          ],
+          "reasonCodes": [
+            "DETERMINISTIC_MISSION",
+            "PREREQUISITE_ORDER",
+            "VERIFIED_EVIDENCE_ONLY"
+          ],
+          "generatedAt": "2026-10-01T18:54:57Z"
+        },
+        "agentRun": {
+          "id": "run-ae5d7c7ac041d33bcd766b0f",
+          "agentRunId": "run-ae5d7c7ac041d33bcd766b0f",
+          "intent": "next_action",
+          "agentsUsed": [
+            "Supervisor",
+            "Profile",
+            "Competency",
+            "Evidence",
+            "Gap Analysis",
+            "Roadmap",
+            "Learning Resource",
+            "RAG Research"
+          ],
+          "toolsUsed": [
+            "getStudentProfile",
+            "getCompetencies",
+            "getEvidence",
+            "calculateCareerGap",
+            "getRoadmap",
+            "searchResources",
+            "retrieveRAG"
+          ],
+          "stateVersion": 1,
+          "reasonCodes": [
+            "CANONICAL_STUDENT_STATE",
+            "ALLOWLISTED_TOOLS",
+            "CITATION_VALIDATED"
+          ],
+          "citations": [],
+          "actions": [],
+          "status": "completed",
+          "partialContext": false,
+          "stale": false,
+          "errors": [],
+          "createdAt": "2026-10-01T18:54:57Z"
+        },
+        "actionsPerformed": []
+      }
+    },
+    {
+      "query": "Why is Transformers blocked?",
+      "status": 503,
+      "result": {
+        "detail": "Groq (HTTP 429): Provider rate limit reached. Wait before retrying."
+      }
+    },
+    {
+      "query": "Create my learning plan for this week",
+      "status": 503,
+      "result": {
+        "detail": "Groq (HTTP 429): Provider rate limit reached. Wait before retrying. The requested action completed; inspect Career activity before retrying."
+      }
+    }
+  ],
+  "historyCount": 2
+}

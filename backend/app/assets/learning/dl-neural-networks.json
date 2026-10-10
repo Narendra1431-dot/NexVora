@@ -1,0 +1,106 @@
+{
+  "introduction": "Neural network architecture is the backbone of modern machine learning systems. It determines how data flows, how parameters are organized, and how learning signals propagate. Understanding architecture is essential when designing models that can capture complex patterns, scale to large datasets, and train efficiently. This chapter introduces the fundamental building blocks—layers, activation functions, and normalization—before connecting them to the temporal extension of backpropagation. By mastering these concepts, a beginner can construct simple feed‑forward nets, extend them to recurrent structures, and reason about trade‑offs such as expressiveness versus computational cost. The material is self‑contained, uses exact integer examples, and prepares the reader for interview questions and practical coding tasks.",
+  "foundations": "A neural network is a directed graph of computational units called neurons. Each neuron computes a weighted sum of its inputs, adds a bias, and applies a non‑linear activation. Mathematically, for layer l we write z^{(l)} = W^{(l)} a^{(l-1)} + b^{(l)} and a^{(l)} = phi(z^{(l)}), where phi is the activation function. The weight matrix W^{(l)} maps the output of layer l-1 (a^{(l-1)}) to the pre‑activation vector z^{(l)}. Stacking layers yields a composition of functions, enabling the network to approximate highly non‑linear mappings. Training adjusts all W and b by minimizing a loss L using gradient descent. Gradients are obtained by backpropagation, which applies the chain rule from the output layer back to the input. For recurrent networks, the same equations are applied at each time step, and gradients are summed across time—a process called Backpropagation Through Time (BPTT). Normalization layers, such as batch normalization, re‑scale activations to have zero mean and unit variance, stabilizing training and allowing higher learning rates. Together, these elements define the architecture: the number of layers, their sizes, the choice of phi, and where normalization is inserted.",
+  "concepts": [
+    {
+      "title": "Layer Design",
+      "explanation": "A layer is defined by its dimensionality (input size n_in, output size n_out) and its parameter matrices. Fully connected (dense) layers use a dense weight matrix W of size n_out x n_in. Convolutional layers share weights across spatial locations, reducing parameters but adding locality bias. The choice of n_out controls model capacity: larger n_out can capture more features but increase overfitting risk and computational cost. Bias vectors b add flexibility by shifting activation thresholds. When stacking layers, the output dimension of one must match the input dimension of the next, unless a reshaping operation is inserted. Trade‑offs involve depth versus width: deep narrow networks can represent hierarchical features, while shallow wide networks may learn faster but lack hierarchical abstraction.",
+      "example": "Consider a two‑layer feed‑forward net. Layer 1 maps a 2‑dimensional input to 3 hidden units: W1 = [[1,2],[0,1],[ -1,0]] and b1 = [0,1, -1]. Input x = [2,3]. Compute z1 = W1*x + b1 = [1*2+2*3+0, 0*2+1*3+1, -1*2+0*3-1] = [8,4, -3]. Apply ReLU phi(z)=max(0,z) => a1 = [8,4,0]. Layer 2 maps 3 hidden units to a single output: W2 = [[2, -1, 0]] and b2 = [1]. z2 = W2*a1 + b2 = 2*8 + (-1)*4 + 0*0 +1 = 13. The network output is 13."
+    },
+    {
+      "title": "Activation Functions",
+      "explanation": "Activations introduce non‑linearity, allowing networks to approximate complex functions. Common choices include sigmoid, tanh, ReLU, and leaky ReLU. Sigmoid squashes to (0,1) but suffers from vanishing gradients for large |z|. Tanh outputs (-1,1) and is zero‑centered, reducing bias in gradients. ReLU(z)=max(0,z) is simple, sparse, and mitigates vanishing gradients, yet can deaden neurons if inputs stay negative. Leaky ReLU adds a small slope (e.g., 0.01) for negative inputs, preserving gradient flow. The selection depends on depth, data distribution, and hardware: ReLU dominates in deep vision models, while tanh may be preferred in recurrent cells to keep activations bounded.",
+      "example": "Using the previous layer 1 pre‑activations z1 = [8,4,-3], apply three different activations: sigmoid(8)≈0.9997, tanh(8)≈0.9999, ReLU(8)=8. For the negative unit, sigmoid(-3)≈0.047, tanh(-3)≈-0.995, ReLU(-3)=0. The choice dramatically changes the hidden representation passed to the next layer."
+    },
+    {
+      "title": "Layer & Batch Normalization",
+      "explanation": "Batch normalization (BN) normalizes each mini‑batch's activations to zero mean and unit variance, then scales and shifts them with learnable parameters gamma and beta. For a batch {a_i}, BN computes mu = (1/m) Σ a_i, sigma^2 = (1/m) Σ (a_i - mu)^2, then outputs â_i = (a_i - mu)/sqrt(sigma^2 + epsilon). Finally, y_i = gamma * â_i + beta. BN reduces internal covariate shift, allowing higher learning rates and smoother loss landscapes. However, BN introduces dependence on batch size; very small batches yield noisy statistics. In recurrent networks, applying BN per time step can break temporal consistency, so alternatives like layer normalization are sometimes preferred. Layer normalization instead computes statistics across the feature dimensions of each individual example, so it does not require a batch of other examples or running batch statistics. It is common in transformers and works naturally with variable-length sequences when the normalized feature dimensions are specified correctly. Both methods use learned scale and shift parameters, but their normalization axes differ. Batch normalization may behave differently between training and inference; layer normalization uses per-example statistics in both modes.",
+      "example": "Suppose a mini‑batch of three hidden activations after ReLU: [8,4,0]. mu = (8+4+0)/3 = 4. sigma^2 = [(8-4)^2+(4-4)^2+(0-4)^2]/3 = (16+0+16)/3 = 10.6667. Normalized values: â = [(8-4)/sqrt(10.6667), (4-4)/..., (0-4)/...] ≈ [1.2247,0,-1.2247]. With gamma=2, beta=1, final BN output = [2*1.2247+1, 1, 2*(-1.2247)+1] ≈ [3.4494,1,-1.4494]. For layer normalization of one vector [1,3], the mean is 2 and the population variance is 1. With scale 1, shift 0 and a small epsilon, its normalized values are approximately [-1,1]. Another example in the batch does not change these values. This contrasts with batch normalization, where each feature is normalized using statistics pooled over examples."
+    },
+    {
+      "title": "Backpropagation through Time",
+      "explanation": "BPTT extends standard backpropagation to recurrent networks that process sequences. At each time step t, the hidden state h_t depends on input x_t and previous state h_{t-1}: h_t = phi(Wh h_{t-1} + Wx x_t + b). The loss L aggregates over all time steps, e.g., L = Σ_t L_t(y_t, target_t). To compute gradients, we unroll the network for T steps, treat each copy as a separate layer, and apply backpropagation from the final time step back to the first. Gradients accumulate across time, leading to terms like dL/dWh = Σ_t (δ_t * h_{t-1}^T). Long sequences can cause exploding or vanishing gradients because the same weight matrix is multiplied many times; gradient clipping and gated architectures (LSTM, GRU) mitigate these issues.",
+      "example": "Consider a simple RNN with scalar hidden state h_t, weight w=0.5, bias b=0, activation identity, and inputs x_1=2, x_2=1. Recurrence: h_t = w*h_{t-1}+x_t, with h_0=0. Compute h_1 = 0.5*0+2 = 2, h_2 = 0.5*2+1 = 2. Loss L = (h_2-3)^2. dL/dh_2 = 2*(h_2-3)= -2. Gradient w.r.t w: dL/dw = dL/dh_2 * (dh_2/dw) = -2 * (h_1) = -2*2 = -4. Gradient w.r.t w accumulates from both steps if unrolled longer, illustrating BPTT accumulation."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\nW1 = np.array([[1,2],[0,1],[-1,0]])\nb1 = np.array([0,1,-1])\nW2 = np.array([[2,-1,0]])\nb2 = np.array([1])\nx = np.array([2,3])\nz1 = W1.dot(x) + b1\na1 = np.maximum(0,z1)  # ReLU\nz2 = W2.dot(a1) + b2\nprint('output', z2.item())",
+      "explanation": "The code builds the two‑layer network described in the Layer Design example. It uses NumPy for exact integer arithmetic, applies ReLU, and prints the final scalar output 13. Because all operations are integer‑based, there is no rounding error; the result matches the hand calculation. This demonstrates how a small network can be implemented and verified quickly. Limitations include the lack of bias handling for batch dimensions and no automatic differentiation; for training one would need to compute gradients manually or use a library."
+    },
+    {
+      "title": "Applied example",
+      "code": "def rnn_forward(x_seq, w, b):\n    h = 0\n    for x in x_seq:\n        h = w*h + x + b\n    return h\n# sequence [2,1], w=0.5, b=0\nprint(rnn_forward([2,1], 0.5, 0))",
+      "explanation": "This pseudocode implements the scalar RNN recurrence used in the BPTT example. It iterates over a list of inputs, updates the hidden state, and returns the final state. Running it yields 2.0, matching the manual computation of h_2. The function is deliberately simple to expose the unrolled computation; in practice one would vectorize over batches and include activation functions. Extending this to compute gradients would require storing intermediate h values and applying the chain rule backward through the loop."
+    }
+  ],
+  "flow": [
+    "1. Define the input dimension and choose an appropriate layer size for the first hidden layer.",
+    "2. Select an activation function (ReLU for deep nets, tanh for recurrent cells) and justify the choice based on gradient flow.",
+    "3. Insert batch normalization after the linear transform and before the activation to stabilize learning.",
+    "4. Stack additional layers, ensuring each output dimension matches the next input dimension.",
+    "5. For sequence data, replicate the hidden layer across time steps and apply BPTT to compute gradients.",
+    "6. Perform gradient descent with learning‑rate scheduling; clip gradients if the recurrent depth is large.",
+    "7. Evaluate on a validation set, adjust layer widths or add regularization, and repeat the cycle."
+  ],
+  "interview": [
+    {
+      "question": "Why is batch normalization usually placed before the activation function?",
+      "answer": "Placing BN before the activation ensures that the normalized values have zero mean and unit variance when they enter the non‑linear function. This reduces the chance that the activation saturates (e.g., sigmoid near 0 or 1) and keeps gradients well‑scaled. If BN were applied after activation, the distribution would be distorted by the non‑linearity, defeating the purpose of stabilizing the internal covariate shift."
+    },
+    {
+      "question": "Explain how the choice of activation affects gradient propagation in deep networks.",
+      "answer": "Activations with bounded derivatives, such as sigmoid, produce gradients less than one, causing the product of many small numbers to vanish as it back‑propagates, which slows learning in deep layers. ReLU has a derivative of 1 for positive inputs, preserving gradient magnitude and enabling deeper networks to train. However, ReLU can produce dead neurons when inputs stay negative, so leaky ReLU or parametric ReLU are sometimes used to maintain a small gradient everywhere."
+    },
+    {
+      "question": "What is the main computational difference between BPTT and standard backpropagation?",
+      "answer": "Standard backpropagation processes a static feed‑forward graph once, while BPTT unrolls a recurrent graph over T time steps, creating T copies of the same parameters. The gradient for a recurrent weight is the sum of contributions from each time step, leading to O(T) memory and compute cost. This accumulation can cause exploding or vanishing gradients, requiring techniques like gradient clipping or gated cells."
+    },
+    {
+      "question": "When would you prefer layer normalization over batch normalization?",
+      "answer": "Layer normalization computes statistics across the features of a single example rather than across a batch. It is therefore independent of batch size and works well for recurrent networks where batch statistics vary across time steps. It also simplifies inference because the same normalization parameters apply to each sample, avoiding the need for running averages."
+    },
+    {
+      "question": "How does increasing network depth affect model capacity and training difficulty?",
+      "answer": "Depth adds hierarchical representation power, allowing the model to compose simple features into complex ones, which often improves accuracy on tasks like vision or language. However, deeper networks are harder to train due to vanishing/exploding gradients, higher memory consumption, and increased risk of overfitting. Techniques such as residual connections, careful initialization, and normalization mitigate these difficulties."
+    },
+    {
+      "question": "Describe a scenario where a wide shallow network might outperform a deep narrow one.",
+      "answer": "When the target function is relatively simple and does not require hierarchical feature extraction—e.g., a linear or low‑degree polynomial mapping—a wide shallow network can capture the necessary basis functions directly, converging faster and with fewer training epochs. In contrast, a deep narrow network may struggle to propagate gradients through many layers, leading to slower convergence."
+    }
+  ],
+  "summary": "Neural network architecture combines linear transformations, non‑linear activations, and normalization to build expressive models. Layers define how data dimensions change, while activation functions inject the non‑linearity needed for universal approximation. Batch normalization stabilizes training by re‑centering and re‑scaling activations, but its effectiveness depends on batch size. For sequential data, Backpropagation Through Time extends gradient computation across time steps, exposing challenges like gradient explosion that are addressed with clipping or gated cells. Design decisions—depth versus width, activation choice, and normalization placement—balance expressiveness, computational cost, and training stability. Mastering these fundamentals enables the construction of robust models and prepares the learner for advanced topics such as residual networks and attention mechanisms.",
+  "practice": [
+    {
+      "question": "Given a 2‑input, 3‑output dense layer with W = [[1,0],[2,1],[0,1]] and b = [1,0,-1], compute the ReLU activation for input x = [3,4].",
+      "answer": "Compute z = W*x + b: first row 1*3+0*4+1 = 4; second row 2*3+1*4+0 = 10; third row 0*3+1*4-1 = 3. Apply ReLU: a = [4,10,3]."
+    },
+    {
+      "question": "Apply batch normalization to the activations [4,10,3] using gamma=1, beta=0, epsilon=1e-5. Show mu, sigma^2, normalized values.",
+      "answer": "mu = (4+10+3)/3 = 5.6667. sigma^2 = [(4-5.6667)^2+(10-5.6667)^2+(3-5.6667)^2]/3 = (2.7778+18.7778+7.1111)/3 = 9.5556. sqrt(sigma^2+epsilon) ≈ 3.091. Normalized: (4-5.6667)/3.091≈-0.539, (10-5.6667)/3.091≈1.399, (3-5.6667)/3.091≈-0.862. With gamma=1, beta=0 the BN output is [-0.539,1.399,-0.862]."
+    },
+    {
+      "question": "Implement a Python function that performs one step of BPTT for a scalar RNN with weight w, bias b, and inputs [x1,x2]. Return the gradient dL/dw assuming loss L = (h2 - target)^2 with target=5.",
+      "answer": "def bptt_scalar(w,b,inputs,target):\n    h_prev = 0.0\n    hs = []\n    for x in inputs:\n        h = w*h_prev + x + b\n        hs.append(h)\n        h_prev = h\n    h2 = hs[-1]\n    dL_dh2 = 2*(h2 - target)\n    # gradient w.r.t w accumulates through both steps\n    dh2_dw = hs[-2] if len(hs)>1 else 0.0\n    # chain rule through first step\n    dh1_dw = 0.0  # because h1 = w*0 + x1 + b\n    dL_dw = dL_dh2 * dh2_dw + dL_dh2 * w * dh1_dw\n    return dL_dw\n# Example call\nprint(bptt_scalar(0.5,0,[2,1],5))\n# Manual: h1=2, h2=0.5*2+1=2, dL/dh2= -6, dh2/dw = h1 =2, gradient = -12."
+    },
+    {
+      "question": "Design a three‑layer feed‑forward network for MNIST digit classification. Specify layer sizes, activation choices, and where you would place batch normalization. Justify each decision.",
+      "answer": "Input size 784 (28x28). Layer1: 784→256 dense, ReLU activation, batch normalization after the linear transform to keep activations centered, improving convergence. Layer2: 256→128 dense, ReLU, batch normalization again for the same reason. Layer3: 128→10 dense, softmax output for class probabilities; batch normalization is not needed after softmax because it would distort probability distribution. The decreasing widths encourage hierarchical feature extraction, while ReLU avoids vanishing gradients. Batch normalization before each ReLU stabilizes training, allowing a higher learning rate and reducing the need for careful weight initialization."
+    },
+    {
+      "question": "Explain a trade‑off between using a deep narrow network versus a shallow wide network in terms of parameter count and representational power.",
+      "answer": "A deep narrow network with L layers of width n has roughly L*n^2 parameters (ignoring biases). A shallow wide network with one hidden layer of width m has about n_input*m + m*n_output parameters. For the same parameter budget, a deep network can capture hierarchical features, which is beneficial for data with compositional structure (e.g., images). However, deeper networks suffer from gradient attenuation and require more careful training tricks. A shallow wide network is easier to train and may converge faster on simple tasks, but it lacks the ability to build abstract representations, limiting performance on complex data."
+    },
+    {
+      "question": "Given a recurrent network with hidden size 2, weight matrix Wh = [[1,0],[0,1]], input weight Wx = [[1,2],[3,4]], bias b = [0,0], and input sequence x1=[1,0], x2=[0,1]. Compute hidden states h1 and h2 using identity activation.",
+      "answer": "h0 = [0,0]. h1 = Wh*h0 + Wx*x1 + b = [1*0+0*0 + 1*1+2*0, 0*0+1*0 + 3*1+4*0] = [1,3]. h2 = Wh*h1 + Wx*x2 = [1*1+0*3 + 1*0+2*1, 0*1+1*3 + 3*0+4*1] = [1+2, 3+4] = [3,7]."
+    }
+  ],
+  "id": "dl-neural-networks",
+  "title": "Neural Network Architecture",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2552
+}

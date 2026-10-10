@@ -1,0 +1,93 @@
+{
+  "introduction": "Python has become the lingua franca for many advanced software tasks, from high‑performance networking to low‑level system integration. Mastering the advanced features of the language—concurrency with AsyncIO, the power of metaclasses and decorators, and the ability to profile memory or extend Python with C—enables developers to write code that is both expressive and efficient. This chapter introduces these capabilities in a self‑contained way, starting from the core ideas and building toward practical implementations. By the end, a beginner will understand when to use asynchronous constructs, how to shape class creation dynamically, and how to measure and improve memory usage, preparing them for real‑world projects and technical interviews.",
+  "foundations": "AsyncIO is Python's built‑in library for cooperative multitasking. Unlike pre‑emptive threads, coroutines voluntarily yield control, allowing a single thread to manage many I/O‑bound tasks without the overhead of context switches. The event loop schedules these coroutines, and futures represent pending results. Metaclasses are the \"class of a class\"; they intercept class creation, enabling automatic attribute injection or validation. Decorators are higher‑order functions that wrap other callables, adding behavior without modifying the original code. Together they support clean, reusable patterns. Memory profiling in Python involves tools such as tracemalloc and objgraph, which track allocation sites and object graphs. When Python's performance limits are reached, C‑extensions let developers write critical sections in C, exposing functions to Python via the CPython API. Understanding reference counting, the Global Interpreter Lock (GIL), and the distinction between pure Python objects and native buffers is essential before venturing into extensions. These foundations form a toolkit for writing scalable, maintainable, and high‑performance Python applications.",
+  "concepts": [
+    {
+      "title": "AsyncIO",
+      "explanation": "AsyncIO provides an event‑driven framework where coroutines, defined with async def, can pause at await points. The await keyword yields control back to the loop, which then runs other ready coroutines. This model excels for I/O‑heavy workloads such as web servers, database clients, or file processing, because the thread never blocks on network or disk latency. Trade‑offs include added complexity in error handling and debugging, as stack traces become fragmented across await boundaries. Moreover, CPU‑bound work still blocks the loop unless offloaded to a thread or process pool.",
+      "example": "Consider a simple HTTP fetcher that retrieves three URLs concurrently. The coroutine fetch(url) opens an aiohttp.ClientSession, awaits response.read(), and returns the length. The main coroutine gathers the three fetch calls with asyncio.gather, allowing the event loop to interleave network waits. The total runtime approximates the longest single request, not the sum, demonstrating true concurrency without threads."
+    },
+    {
+      "title": "Metaclasses & Decorators",
+      "explanation": "Metaclasses intervene during class creation by overriding __new__ or __init__ in a subclass of type. They can inject methods, enforce naming conventions, or register classes in a registry automatically. Decorators, on the other hand, are applied to functions or methods at definition time, returning a wrapped callable that can log, cache, or modify arguments. Using both together yields powerful patterns: a metaclass can apply a decorator to every method of a class, ensuring uniform behavior such as timing or access control. The main trade‑off is readability; excessive metaprogramming can obscure intent, making maintenance harder for newcomers.",
+      "example": "A metaclass AutoTimer scans a class dictionary, wrapping each callable with a timing_decorator that records start and end timestamps. When an instance method is called, the decorator prints the elapsed time. Defining class MyWorker(metaclass=AutoTimer) automatically equips all its methods with timing without manually decorating each one."
+    },
+    {
+      "title": "Memory Profiling & C-Extensions",
+      "explanation": "Memory profiling starts with tracemalloc.start() to capture allocation snapshots. By comparing snapshots, developers can pinpoint functions that allocate the most bytes. objgraph.show_refs can visualize reference cycles that prevent garbage collection. When profiling reveals hot spots, a C‑extension can replace a Python loop with a compiled routine, reducing per‑iteration overhead and memory churn. The CPython API requires careful reference counting: Py_INCREF and Py_DECREF manage object lifetimes, and the GIL must be held when manipulating Python objects. The trade‑off is development effort and portability; C code must be compiled for each target platform, and bugs can crash the interpreter.",
+      "example": "A pure‑Python function sum_range(n) computes the sum of squares using a for loop, allocating a new integer each iteration. Profiling shows O(n) allocations. Rewriting the core loop in C as sum_range_c(PyObject *self, PyObject *args) uses a single PyLong_FromLong result, dramatically lowering allocation count and memory usage. The extension is built with setuptools' Extension module and imported as import sum_ext."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import asyncio\nimport aiohttp\n\nasync def fetch(url):\n    async with aiohttp.ClientSession() as s:\n        async with s.get(url) as r:\n            data = await r.read()\n            return len(data)\n\nasync def main():\n    urls = ['https://example.com', 'https://httpbin.org/ip', 'https://httpbin.org/uuid']\n    lengths = await asyncio.gather(*(fetch(u) for u in urls))\n    print('Lengths:', lengths)\n\nasyncio.run(main())",
+      "explanation": "The script defines fetch as an async coroutine that opens a client session, performs a GET request, and awaits the response body. main builds a list of three URLs and uses asyncio.gather to schedule all fetch calls concurrently. Because each await yields while the network is idle, the total runtime is close to the slowest request rather than the sum of three round‑trips. Limitations include the need for an event loop (cannot be called from a blocking context without run_until_complete) and that CPU‑bound work inside fetch would still block the loop."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for a metaclass that decorates all methods\nclass AutoLog(type):\n    def __new__(mcls, name, bases, dct):\n        def log_wrapper(func):\n            def inner(*args, **kw):\n                print(f'Calling {func.__name__}')\n                return func(*args, **kw)\n            return inner\n        for attr, val in dct.items():\n            if callable(val):\n                dct[attr] = log_wrapper(val)\n        return super().__new__(mcls, name, bases, dct)\n\nclass Service(metaclass=AutoLog):\n    def start(self):\n        print('started')\n    def stop(self):\n        print('stopped')\n\nsvc = Service()\nsvc.start()\nsvc.stop()",
+      "explanation": "AutoLog is a metaclass that iterates over the class dictionary during creation. For each callable attribute, it replaces the original function with a wrapped version that prints a log line before invoking the original. When Service is defined, both start and stop are automatically logged without explicit @decorator usage. This pattern is useful for cross‑cutting concerns like logging, authentication, or timing. The trade‑off is that every method, including private helpers, receives the wrapper, which may add overhead or interfere with introspection tools."
+    }
+  ],
+  "flow": [
+    "1. Identify a performance or architectural problem (e.g., many concurrent I/O calls).",
+    "2. Choose AsyncIO if the workload is I/O‑bound; rewrite blocking functions as async coroutines.",
+    "3. Insert await points at each I/O operation and run coroutines via asyncio.run or an existing loop.",
+    "4. If repetitive cross‑cutting behavior is needed, design a decorator or metaclass to apply it uniformly.",
+    "5. Profile memory with tracemalloc.start(); capture snapshots before and after the critical section.",
+    "6. Analyze allocation differences; if Python overhead is high, implement the hot loop as a C‑extension.",
+    "7. Test the integrated solution, verify correctness, and measure speed and memory improvements."
+  ],
+  "interview": [
+    {
+      "question": "Explain how AsyncIO differs from threading and when you would prefer one over the other.",
+      "answer": "AsyncIO uses a single thread with an event loop that schedules coroutines, allowing many I/O operations to progress without OS thread switches. Threading creates multiple OS threads, each with its own stack and context, incurring higher memory usage and synchronization costs. Prefer AsyncIO for high‑concurrency I/O‑bound tasks like web servers, where the GIL is not a bottleneck. Use threading when you need true parallelism for CPU‑bound work or when interacting with libraries that block the interpreter and cannot be made async."
+    },
+    {
+      "question": "What is a metaclass in Python and how does it differ from a class decorator?",
+      "answer": "A metaclass is a subclass of type that controls the creation of classes; its __new__ or __init__ runs when the class statement is executed, allowing injection or modification of attributes before the class object exists. A class decorator is a function that receives a class object after it has been created and returns a (possibly modified) class. Metaclasses operate at class definition time, affecting the class's structure, while decorators act on the finished class, typically adding behavior. Metaclasses are more powerful but also more complex and less commonly needed."
+    },
+    {
+      "question": "How does tracemalloc help you find memory leaks, and what are its limitations?",
+      "answer": "tracemalloc records the call stack of each memory allocation, enabling you to take snapshots and compare them to see which lines allocate the most bytes. By filtering snapshots you can locate unexpected growth in specific functions, indicating a leak. Limitations include that it only tracks Python‑level allocations, not memory allocated by native extensions, and it adds overhead (typically 5‑10%). It also cannot detect reference cycles that keep objects alive unless you inspect the object graph with additional tools."
+    },
+    {
+      "question": "Describe the steps to safely expose a C function to Python using the CPython API.",
+      "answer": "First, write a C function that follows the PyCFunction signature, accepting PyObject *self and PyObject *args. Parse arguments with PyArg_ParseTuple, perform the computation, and return a new reference using PyLong_FromLong or similar. Next, create a method table (PyMethodDef array) listing the function name, pointer, flags, and docstring. Define a module initialization function (PyMODINIT_FUNC PyInit_modname) that calls PyModule_Create with a PyModuleDef struct containing the method table. Finally, compile the source into a shared library using setuptools' Extension module, and import it in Python. Throughout, manage reference counts with Py_INCREF/Py_DECREF and hold the GIL when interacting with Python objects."
+    }
+  ],
+  "summary": "Advanced Python equips developers with tools to handle massive concurrency, dynamic class behavior, and low‑level performance tuning. AsyncIO replaces threads for I/O‑bound workloads by using cooperative coroutines and an event loop, yielding efficient scaling with minimal overhead. Metaclasses and decorators enable systematic injection of cross‑cutting concerns, allowing clean, reusable modifications to classes and functions. Memory profiling with tracemalloc and objgraph reveals hidden allocation patterns, guiding decisions to rewrite hot paths as C‑extensions when Python's interpreter overhead becomes a bottleneck. Together, these techniques form a cohesive strategy: identify bottlenecks, apply the appropriate abstraction, measure impact, and iterate. Mastery of these concepts prepares engineers for real‑world systems where responsiveness, resource usage, and maintainability are paramount.",
+  "practice": [
+    {
+      "question": "Write an async function that reads three files concurrently and returns their total line count. Use only standard-library asyncio and the third-party aiofiles package.",
+      "answer": "import asyncio, aiofiles\n\nasync def count_lines(path):\n    async with aiofiles.open(path, 'r') as f:\n        cnt = 0\n        async for _ in f:\n            cnt += 1\n        return cnt\n\nasync def total():\n    files = ['a.txt', 'b.txt', 'c.txt']\n    results = await asyncio.gather(*(count_lines(p) for p in files))\n    return sum(results)\n\nprint(asyncio.run(total()))\n# aiofiles delegates ordinary file operations to worker threads, counts lines asynchronously, and aggregates the counts. Because file I/O yields control, the three reads overlap, potentially overlapping waits; speedup depends on the filesystem and workload."
+    },
+    {
+      "question": "Create a metaclass that automatically registers every subclass in a global registry dictionary keyed by class name.",
+      "answer": "registry = {}\n\nclass RegisterMeta(type):\n    def __new__(mcls, name, bases, dct):\n        cls = super().__new__(mcls, name, bases, dct)\n        registry[name] = cls\n        return cls\n\nclass Base(metaclass=RegisterMeta):\n    pass\n\nclass Foo(Base):\n    pass\n\nclass Bar(Base):\n    pass\n\nprint(registry)  # {'Base': <class '__main__.Base'>, 'Foo': <class '__main__.Foo'>, 'Bar': <class '__main__.Bar'>}\n# Each time a new subclass is defined, RegisterMeta inserts it into the registry, enabling factory patterns or plugin discovery without manual bookkeeping."
+    },
+    {
+      "question": "Using tracemalloc, compare memory usage of a list comprehension versus a generator expression that produces the squares of numbers 1..1000. Report the difference in bytes.",
+      "answer": "import gc, tracemalloc\n\ndef measure(factory):\n    gc.collect()\n    tracemalloc.start()\n    value = factory()  # retain the object while measuring\n    current, peak = tracemalloc.get_traced_memory()\n    tracemalloc.stop()\n    return current, peak\n\nlist_bytes = measure(lambda: [i*i for i in range(1, 1001)])\ngenerator_bytes = measure(lambda: (i*i for i in range(1, 1001)))\nprint(\"list current/peak:\", list_bytes)\nprint(\"generator current/peak:\", generator_bytes)\nprint(\"current difference:\", list_bytes[0] - generator_bytes[0])\n\nResults depend on the Python build and allocator; do not hardcode a byte count. The list retains computed elements. The generator retains its suspended state and produces values when consumed. This measures construction, not the work or memory of consuming and retaining all generated results. Discarding both objects before snapshots would not measure their retained memory."
+    },
+    {
+      "question": "Design a small C‑extension that provides a function fast_sum(arr) returning the sum of a Python list of integers. Outline the steps and explain reference‑count handling.",
+      "answer": "Define a method table and module initialization function, then expose a callable that parses an iterable argument. Obtain an iterator with PyObject_GetIter and release its new reference on every exit path. Each non-null PyIter_Next result is also a new reference: process it, then decrement it. A null iteration result can mean exhaustion or an exception; check PyErr_Occurred after the loop. For arbitrary Python integers, maintain a Python integer accumulator using checked PyNumber_Add results and correct reference ownership. A C long accumulator can overflow even when each input fits individually; do not use unchecked signed addition. Return a new reference to the result on success and NULL with an exception set on failure. Include Python.h, define the method table/module entry point and use an appropriate extension build configuration. Test empty input, non-integers, huge integers, an iterator that raises, and repeated calls under leak checking. A C extension is not automatically faster; benchmark against Python's built-in sum before accepting its maintenance cost."
+    },
+    {
+      "question": "Explain a scenario where using a decorator for caching (memoization) could degrade performance instead of improving it.",
+      "answer": "If the decorated function is called with a large number of unique arguments, the cache grows without reuse, consuming memory and adding lookup overhead for each call. For example, a function that processes streaming sensor data with ever‑changing timestamps will store a new entry per call, eventually causing cache thrashing and increased GC pressure. In such cases, the decorator's dictionary look‑ups and memory usage outweigh any benefit, and a simple direct call is faster."
+    },
+    {
+      "question": "You have a web service that must handle 10,000 simultaneous connections, each performing short HTTP GETs. Choose between AsyncIO and a thread pool, justify your choice, and sketch the high‑level code structure.",
+      "answer": "AsyncIO is the better fit because the workload is I/O‑bound and each request spends most of its time waiting for network responses. Creating 10,000 OS threads would exhaust system resources (stack memory, scheduler overhead). With AsyncIO, a single thread runs an event loop that schedules all coroutines, keeping memory usage low. High‑level code:\n\nimport asyncio, aiohttp\n\nasync def fetch(session, url):\n    async with session.get(url) as resp:\n        return await resp.text()\n\nasync def main(urls):\n    async with aiohttp.ClientSession() as sess:\n        tasks = [fetch(sess, u) for u in urls]\n        results = await asyncio.gather(*tasks)\n        return results\n\nurls = ['http://service/api'] * 10000\nprint(asyncio.run(main(urls)))\n# The event loop multiplexes the 10,000 coroutines, achieving high concurrency with minimal threads."
+    }
+  ],
+  "id": "prog-python-advanced",
+  "title": "Python (Advanced)",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2264
+}

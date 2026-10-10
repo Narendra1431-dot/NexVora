@@ -1,0 +1,20 @@
+{
+  "modelVersion": "learning-risk-synthetic-1",
+  "data": "SYNTHETIC DEMO DATA; advisory only; not validated on learner outcomes",
+  "seed": 42,
+  "train": 1440,
+  "validation": 480,
+  "test": 480,
+  "features": [
+    "mastery",
+    "gap",
+    "engagement",
+    "evidenceStrength",
+    "weeklyTimeFit"
+  ],
+  "task": "regression",
+  "testMAE": 0.023104428265837584,
+  "testRMSE": 0.029713652047290443,
+  "validationMAE": 0.02476861543776344,
+  "constantBaselineMAE": 0.1232795505151057
+}

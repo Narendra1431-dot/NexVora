@@ -1,0 +1,20 @@
+{
+  "modelVersion": "evidence-strength-synthetic-1",
+  "data": "SYNTHETIC DEMO DATA; advisory only; not validated on learner outcomes",
+  "seed": 42,
+  "train": 1440,
+  "validation": 480,
+  "test": 480,
+  "features": [
+    "score",
+    "quality",
+    "provenancePresent",
+    "careerRelevant",
+    "recency"
+  ],
+  "task": "classification",
+  "precisionMacro": 0.902039627039627,
+  "recallMacro": 0.913161372435625,
+  "f1Macro": 0.9070509382041161,
+  "validationF1Macro": 0.9299174215140602
+}

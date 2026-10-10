@@ -1,0 +1,93 @@
+{
+  "introduction": "Data scientists spend most of their time cleaning, reshaping, and aggregating data before any model can be built. NumPy provides the low‑level, fast array engine that underpins most scientific Python code, while Pandas builds a higher‑level, tabular abstraction that makes time‑series handling, grouping, and missing‑value logic intuitive. Mastering these libraries enables you to write code that runs at C‑speed, avoid Python loops, and express complex data pipelines in a few lines. This chapter introduces the core ideas of vectorized computation, memory‑efficient storage, and time‑series alignment, then shows how they combine in real‑world workflows. By the end you will be able to read large files, transform them without copying data unnecessarily, and align disparate series for analysis, all while keeping an eye on performance and correctness.",
+  "foundations": "NumPy arrays are homogeneous, n‑dimensional containers of fixed‑size items stored in a contiguous block of memory. Because the data type is known, the interpreter can call optimized C loops for arithmetic, eliminating the overhead of Python's dynamic typing. Vectorization means applying an operation to an entire array at once; broadcasting extends this by allowing arrays of different shapes to interact as long as their dimensions are compatible, following the rule that dimensions of size one are virtually repeated. Pandas introduces the DataFrame, a collection of labeled Series objects, each of which can hold a different dtype. The index provides alignment semantics: when two Series are combined, Pandas automatically matches rows by label, inserting NaN where data is missing. Memory mapping (numpy.memmap) lets you treat a file on disk as an array, loading only the needed chunks into RAM, which is essential for datasets larger than available memory. Time‑series alignment builds on the index concept, using timestamps as labels and providing resampling, forward‑fill, and interpolation utilities. Understanding these foundations—contiguous storage, dtype uniformity, label‑based alignment, and lazy loading—prepares you to write code that is both fast and expressive.",
+  "concepts": [
+    {
+      "title": "Vectorization & Broadcasting",
+      "explanation": "Vectorization replaces explicit Python loops with array-wide operations, leveraging SIMD instructions and cache-friendly memory access. The key trade‑off is that you must think in whole‑array terms; element‑wise logic must be expressed with boolean masks or where functions. Broadcasting allows operations between arrays of different shapes by virtually replicating the smaller array along dimensions of size one. This avoids costly data copies but requires careful shape planning to prevent unintended broadcasting that yields wrong results. Understanding the broadcasting rules—right‑most dimensions align first, and a dimension of size one can be stretched—helps you design compact, error‑free code.",
+      "example": "Suppose we have a 3x4 matrix A and a length‑4 row vector v. A = [[1,2,3,4],[5,6,7,8],[9,10,11,12]] and v = [1,0,1,0]. Adding v to A triggers broadcasting: v is treated as [[1,0,1,0]] repeated across three rows, producing [[2,2,4,4],[6,6,8,8],[10,10,12,12]]. No extra memory is allocated for the repeated v; NumPy computes each sum on the fly."
+    },
+    {
+      "title": "Memory Mapping",
+      "explanation": "Memory mapping creates an array interface to a binary file without loading the entire file into RAM. numpy.memmap opens the file, sets the dtype and shape, and maps the file's bytes into the process's address space. Reads and writes operate directly on the file, so changes persist without an explicit save step. The main trade‑off is that random access can be slower than in‑memory arrays due to page faults, and the file must remain unchanged in size and layout while the memmap is active. It is ideal for large, read‑only datasets or for incremental updates where only a slice is needed at a time.",
+      "example": "Imagine a binary file 'data.bin' containing 10,000 int32 values. Using memmap: import numpy as np; mm = np.memmap('data.bin', dtype='int32', mode='r', shape=(10000,)). Accessing mm[5000] reads the 5,001st integer directly from disk. If you compute mm[::2] + 5, NumPy reads only the even‑indexed elements, adds 5, and returns a new in‑memory array, leaving the original file untouched."
+    },
+    {
+      "title": "Time Series Alignment",
+      "explanation": "Pandas aligns series by their index labels, which are often timestamps. When two series with different sampling frequencies are combined, Pandas reindexes them to a common timeline, inserting NaN where data is missing. You can then fill gaps using forward fill, backward fill, or interpolation. The trade‑off lies in choosing an appropriate frequency: upsampling introduces many NaNs that must be filled, while downsampling discards information. Resampling with .resample() aggregates data (e.g., taking the mean per hour), while .asfreq() simply changes the index without aggregation, preserving original values where possible.",
+      "example": "Consider s1 = pd.Series([10,12,14], index=pd.to_datetime(['2021-01-01','2021-01-02','2021-01-04'])) and s2 = pd.Series([100,101], index=pd.to_datetime(['2021-01-01','2021-01-03'])). Adding s1 + s2 yields a series indexed on the union of dates: 2021-01-01 -> 110, 2021-01-02 -> NaN, 2021-01-03 -> NaN, 2021-01-04 -> NaN. Using s2.reindex(s1.index, method='ffill') fills missing dates with the last known value, enabling meaningful addition."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\nA = np.arange(1,13).reshape(3,4)\nv = np.array([1,0,1,0])\nB = A + v  # broadcasting\nprint(B)",
+      "explanation": "The code creates a 3x4 matrix A with values 1 through 12 and a row vector v of length four. Adding v to A triggers broadcasting: v is virtually repeated for each row, so each element of A is increased by the corresponding element of v. The printed result is [[2 2 4 4]\n [6 6 8 8]\n [10 10 12 12]]. This demonstrates how NumPy can perform element‑wise addition without explicit loops, saving both code length and execution time. The operation does not allocate a separate copy of v for each row; the broadcast is handled internally, which is why memory usage stays low."
+    },
+    {
+      "title": "Applied example",
+      "code": "import pandas as pd\nimport numpy as np\n# create two time series with different frequencies\nidx1 = pd.date_range('2022-01-01', periods=5, freq='D')\nidx2 = pd.date_range('2022-01-01', periods=3, freq='2D')\ns1 = pd.Series(np.arange(5), index=idx1)\ns2 = pd.Series(np.arange(3)*10, index=idx2)\n# align and forward‑fill missing values\ns2_aligned = s2.reindex(s1.index, method='ffill')\nresult = s1 + s2_aligned\nprint(result)",
+      "explanation": "Here we build two Series: s1 has daily data 0‑4, while s2 has data every two days (0,10,20). Reindexing s2 to s1's daily index with method='ffill' propagates the last known value forward, so s2_aligned becomes [0,0,10,10,20]. Adding the aligned series yields [0,1,12,13,24]. This example shows how Pandas automatically aligns on timestamps and how forward filling resolves gaps, a common requirement when merging sensor readings with different sampling rates. The limitation is that forward fill assumes the last observation remains valid, which may not hold for rapidly changing signals."
+    }
+  ],
+  "flow": [
+    "1. Load raw data into a NumPy array or Pandas DataFrame, specifying dtype to avoid implicit conversion.",
+    "2. If the file is larger than memory, replace np.load with np.memmap to map the file on disk.",
+    "3. Apply vectorized transformations (e.g., scaling, masking) using NumPy broadcasting to avoid loops.",
+    "4. Convert the cleaned array to a DataFrame, assigning meaningful column names and a datetime index.",
+    "5. Align multiple time‑series using the index; use reindex with forward/backward fill or interpolation as needed.",
+    "6. Perform group‑by or resample operations to aggregate data to the desired frequency.",
+    "7. Export the final tidy DataFrame to CSV or a binary format, ensuring that no intermediate copies remain in memory."
+  ],
+  "interview": [
+    {
+      "question": "Explain how broadcasting works in NumPy and give a case where it can lead to unexpected results.",
+      "answer": "Broadcasting allows arrays of different shapes to participate in arithmetic by virtually replicating the smaller array along dimensions of size one. The rule is that dimensions are compared from the right; if they are equal or one of them is one, broadcasting proceeds. An unexpected result occurs when a programmer assumes a (3,1) array will broadcast across columns, but actually it broadcasts across rows, leading to shape (3, n) instead of (n, 3). This can produce transposed results or silent shape mismatches if not checked."
+    },
+    {
+      "question": "What are the advantages and disadvantages of using numpy.memmap for large datasets?",
+      "answer": "Advantages include low memory footprint, as only the accessed portions are loaded, and the ability to modify data on disk without an explicit save step. Disadvantages are slower random access due to page faults, the requirement that the file layout (dtype, shape) remain constant, and limited support for complex indexing operations that may trigger many small reads, degrading performance."
+    },
+    {
+      "question": "How does Pandas handle arithmetic between two Series with non‑matching timestamps?",
+      "answer": "Pandas aligns the Series on the union of their indices. For timestamps present in only one Series, the result contains NaN for the missing operand. The user can then fill these NaNs using methods like fillna, forward fill, or interpolation, depending on the semantics of the data. This alignment ensures that operations are label‑driven rather than position‑driven."
+    },
+    {
+      "question": "Describe a scenario where you would prefer to use DataFrame.resample() over DataFrame.asfreq().",
+      "answer": "When aggregating high‑frequency sensor data to a lower frequency (e.g., minute to hourly), you need to compute a summary statistic such as the mean or sum for each hour. resample() allows you to specify the aggregation function, whereas asfreq() merely changes the index without aggregating, potentially leaving multiple rows per new period and requiring manual reduction."
+    }
+  ],
+  "summary": "NumPy provides the fast, memory‑contiguous array core that enables vectorized arithmetic and broadcasting, eliminating Python loops. Pandas builds on this foundation with labeled Series and DataFrames, offering automatic alignment of data by index, powerful time‑series utilities, and group‑by aggregation. Memory mapping extends NumPy to handle datasets larger than RAM by treating files as arrays, while careful use of broadcasting avoids unnecessary copies. Together, these tools let you ingest raw data, transform it efficiently, align disparate time series, and produce tidy outputs ready for analysis or modeling. Mastery of these concepts reduces runtime, prevents subtle bugs from misaligned data, and prepares you for real‑world data pipelines.",
+  "practice": [
+    {
+      "question": "Given A = np.array([[2,4],[6,8]]) and B = np.array([1,2]), compute A - B using broadcasting and show the result.",
+      "answer": "A - B triggers broadcasting of B to shape (2,2): B becomes [[1,2],[1,2]]. Subtraction yields [[1,2],[5,6]]. Code: import numpy as np; A=np.array([[2,4],[6,8]]); B=np.array([1,2]); print(A-B) -> [[1 2]\n [5 6]]."
+    },
+    {
+      "question": "Create a memmap of a file 'ints.bin' containing 100 int16 numbers from 0 to 99. Then compute the sum of the first 10 elements without loading the whole file.",
+      "answer": "import numpy as np; mm = np.memmap('ints.bin', dtype='int16', mode='r', shape=(100,)); total = mm[:10].sum(); print(total) -> sum of 0..9 = 45. The memmap reads only the first 10 values from disk."
+    },
+    {
+      "question": "You have two daily price series: s1 indexed Jan 1‑5 with values [100,101,102,103,104]; s2 indexed Jan 3‑7 with values [200,201,202,203,204]. Align them, forward‑fill missing values, and compute the daily spread s1 - s2.",
+      "answer": "import pandas as pd; idx1=pd.date_range('2022-01-01', periods=5); idx2=pd.date_range('2022-01-03', periods=5); s1=pd.Series([100,101,102,103,104], index=idx1); s2=pd.Series([200,201,202,203,204], index=idx2); s2_aligned=s2.reindex(s1.index, method='ffill'); spread=s1 - s2_aligned; Result: 2022-01-01 NaN, 2022-01-02 NaN, 2022-01-03 -100, 2022-01-04 -102, 2022-01-05 -104."
+    },
+    {
+      "question": "Design a data ingestion pipeline that reads a 2 GB CSV, filters rows where column 'status' == 'active', and writes the result to a compressed Parquet file, using vectorized operations and minimal memory.",
+      "answer": "Use pandas.read_csv with chunksize to stream the file, e.g., for chunk in pd.read_csv('big.csv', chunksize=100000, dtype={'status':'category'}): filtered = chunk[chunk['status']=='active']; filtered.to_parquet('out.parquet', engine='pyarrow', compression='snappy', index=False, append=True). This avoids loading the whole file, leverages vectorized boolean indexing, and writes incrementally to a compressed columnar format."
+    },
+    {
+      "question": "Explain the trade‑off between forward‑fill and linear interpolation when aligning irregular time‑series data.",
+      "answer": "Forward‑fill assumes the last observed value remains valid until a new measurement arrives, which is simple and fast but can introduce step‑like artifacts, especially for rapidly changing signals. Linear interpolation estimates intermediate values by assuming a straight line between known points, providing smoother estimates but requiring at least two surrounding observations and potentially misrepresenting non‑linear dynamics. Choose forward‑fill for categorical or slowly varying data, interpolation for continuous measurements where smoothness is desired."
+    },
+    {
+      "question": "Write a NumPy function that takes a 2‑D integer array and returns a new array where each row is normalized to have zero mean and unit variance, using only vectorized operations.",
+      "answer": "def normalize_rows(arr):\n    mean = arr.mean(axis=1, keepdims=True)\n    std = arr.std(axis=1, keepdims=True)\n    return (arr - mean) / std\n# Example: A=np.array([[1,2,3],[4,5,6]]); print(normalize_rows(A))\n# Output: [[-1.2247 0. 1.2247]\n#          [-1.2247 0. 1.2247]]"
+    }
+  ],
+  "id": "data-numpy-pandas",
+  "title": "NumPy & Pandas Processing",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 1967
+}

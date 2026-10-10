@@ -1,0 +1,93 @@
+{
+  "introduction": "REST (Representational State Transfer) APIs have become the lingua franca for web services because they are simple, stateless, and built on ubiquitous HTTP primitives. Understanding how to design a REST API that is robust, evolvable, and secure is essential for any backend engineer. This chapter explains the core principles of RESTful service design, walks through concrete examples in Python, and shows how idempotency, versioning, data validation with Pydantic, and authentication middleware fit together. By mastering these foundations, a developer can build services that scale, are easy to test, and survive changes without breaking existing clients.",
+  "foundations": "A REST API is defined by resources, each identified by a stable URI, and a uniform interface that uses standard HTTP methods (GET, POST, PUT, PATCH, DELETE). The stateless constraint means every request must contain all information needed to process it; the server never stores client context between calls. Representations of resources are typically JSON, but any media type is allowed. Content negotiation lets clients request the format they prefer via the Accept header. Caching is controlled with Cache-Control and ETag headers, enabling intermediaries to reduce load. Errors follow the HTTP status code taxonomy, with 4xx for client errors and 5xx for server faults. Designing an API begins with modeling the domain as resources, choosing appropriate URIs, and mapping CRUD operations to HTTP verbs while respecting idempotency: GET, PUT, DELETE are idempotent, whereas POST is not. Versioning protects clients from breaking changes; common strategies include URI versioning (/v1/users) and header versioning (Accept: application/vnd.myapi.v2+json). Validation of request payloads prevents malformed data from reaching business logic; in Python, Pydantic provides declarative models that parse and validate JSON, raising clear errors. Finally, authentication middleware intercepts each request, extracts credentials (e.g., JWT tokens), verifies them, and injects the user identity into the request context, ensuring that downstream handlers can enforce authorization rules.",
+  "concepts": [
+    {
+      "title": "Idempotency & Versioning",
+      "explanation": "Idempotency guarantees that repeating the same request produces the same effect on the server and the same response, which is crucial for reliability in distributed systems where retries happen automatically. GET, PUT, and DELETE are defined as idempotent; a client can safely retry them without fearing duplicate side effects. POST is not idempotent because it typically creates a new resource each time. To make a POST operation idempotent, a client can supply an idempotency key (a unique token) that the server stores and checks before creating a resource. Versioning isolates breaking changes. URI versioning is explicit and easy to route, while header versioning keeps URLs clean but requires more sophisticated content negotiation. Both approaches must be documented so clients know which contract they are using. Trade‑offs include URL clutter versus header complexity, and the need to maintain multiple versions in code.",
+      "example": "Consider a payment service with endpoint POST /payments that creates a transaction. A client may lose the response due to a network glitch and retry the request. If the server generates a new transaction ID each time, the client could be charged twice. By requiring an Idempotency-Key header, the server stores the key with the transaction ID on the first request. On a retry with the same key, the server returns the original transaction ID, ensuring only one charge. For versioning, the original API uses /v1/payments returning fields amount, currency. In v2 the service adds a field status. Clients that still call /v1/payments receive the older schema, while new clients use /v2/payments, avoiding breaking existing integrations."
+    },
+    {
+      "title": "Pydantic Validation",
+      "explanation": "Pydantic is a Python library that uses type hints to define data models and automatically validates incoming JSON against those models. Each field can have a type, default value, and constraints such as regex patterns or numeric ranges. Validation occurs at model instantiation; if the input does not conform, Pydantic raises a ValidationError containing a detailed error map. This eliminates boilerplate parsing code and centralizes schema definitions. Pydantic also supports custom validators for complex logic, and it can export models to JSON schemas for API documentation. The trade‑off is a slight runtime overhead for validation, but the safety and clarity it provides outweigh the cost in most web services.",
+      "example": "A user registration endpoint expects a JSON payload with username, email, and age. Using Pydantic, we define:\n\nclass UserIn(BaseModel):\n    username: constr(min_length=3, max_length=30)\n    email: EmailStr\n    age: conint(ge=13)\n\nIf a client sends {\"username\":\"ab\",\"email\":\"not-an-email\",\"age\":10}, Pydantic raises a ValidationError listing three violations: username too short, email invalid, age below minimum. The API can catch this exception and return a 422 Unprocessable Entity response with a structured error body, guiding the client to correct the request."
+    },
+    {
+      "title": "Auth Middleware",
+      "explanation": "Authentication middleware sits early in the request processing pipeline. Its job is to extract credentials (often a Bearer token in the Authorization header), verify them (e.g., by checking a JWT signature or consulting an OAuth introspection endpoint), and attach the resulting user identity to the request context. This decouples authentication from business logic, allowing route handlers to assume a verified user object is present. Middleware must also handle token expiration, revocation, and scope checking. A common pattern is to raise an HTTPException with status 401 if authentication fails, or 403 if the user lacks required permissions. The trade‑off is added latency for each request due to token verification, which can be mitigated with caching of public keys or token introspection results.",
+      "example": "In a FastAPI application, an auth middleware might look like:\n\n@app.middleware(\"http\")\nasync def auth_middleware(request: Request, call_next):\n    token = request.headers.get(\"Authorization\", \"\").replace(\"Bearer \", \"\")\n    try:\n        payload = jwt.decode(token, PUBLIC_KEY, algorithms=[\"RS256\"])\n        request.state.user = payload[\"sub\"]\n    except jwt.ExpiredSignatureError:\n        return JSONResponse(status_code=401, content={\"detail\":\"Token expired\"})\n    except jwt.InvalidTokenError:\n        return JSONResponse(status_code=401, content={\"detail\":\"Invalid token\"})\n    response = await call_next(request)\n    return response\n\nAll downstream endpoints can now read request.state.user without re‑validating the token."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, EmailStr, conint\nimport uuid\napp = FastAPI()\n\nclass PaymentIn(BaseModel):\n    amount: conint(gt=0)\n    currency: str\n    idempotency_key: str\n\npayments = {}\n\n@app.post(\"/v1/payments\")\ndef create_payment(p: PaymentIn):\n    if p.idempotency_key in payments:\n        return payments[p.idempotency_key]\n    pid = str(uuid.uuid4())\n    record = {\"id\": pid, \"amount\": p.amount, \"currency\": p.currency}\n    payments[p.idempotency_key] = record\n    return record",
+      "explanation": "The code defines a FastAPI service with a POST /v1/payments endpoint. Pydantic validates that amount is a positive integer and that an idempotency_key is supplied. The in‑memory dictionary payments stores results keyed by the idempotency token. On the first request, a new UUID is generated and stored; on a retry with the same key, the previously stored record is returned, demonstrating idempotent behavior. Limitations include the volatile in‑memory store (lost on restart) and lack of authentication; in production you would replace the dict with a persistent database and add auth middleware to protect the endpoint."
+    },
+    {
+      "title": "Applied example",
+      "code": "def versioned_route(path, version):\n    return f\"/v{version}{path}\"\n\n# Example usage\nuser_url = versioned_route(\"/users\", 2)\n# user_url == \"/v2/users\"\n\n# Pseudocode for auth check\nif request.headers.get('Authorization') is None:\n    reject(401)\nelse:\n    user = verify_jwt(request.headers['Authorization'])\n    if not user.has_scope('payments:write'):\n        reject(403)\n    else:\n        process()\n",
+      "explanation": "The first function builds a versioned URI by concatenating the version number with the base path, illustrating a simple URI versioning scheme. The second block is pseudocode for an authentication check that would live in middleware. It first ensures an Authorization header exists, then verifies the JWT and checks that the token includes the required scope. If any step fails, the request is rejected with the appropriate HTTP status. This pattern separates concerns: routing logic stays clean while security is enforced uniformly across all endpoints."
+    }
+  ],
+  "flow": [
+    "1. Model the domain as resources and assign stable URIs.",
+    "2. Choose HTTP methods for each operation, ensuring idempotent methods where retries are expected.",
+    "3. Define request and response schemas using Pydantic models, adding field constraints.",
+    "4. Implement authentication middleware that validates tokens and populates request context.",
+    "5. Add idempotency handling for non‑idempotent POST endpoints by storing idempotency keys.",
+    "6. Version the API using URI prefixes or Accept headers, and document each version's contract.",
+    "7. Write automated tests that cover validation errors, auth failures, and idempotent retries."
+  ],
+  "interview": [
+    {
+      "question": "Explain why GET is considered idempotent and how that influences client retry logic.",
+      "answer": "GET is idempotent because invoking it multiple times does not change server state; each call returns the same representation of the resource (assuming no external changes). This property allows clients and intermediaries to safely retry GET requests after transient failures without risking duplicate side effects, which is essential for robust HTTP communication."
+    },
+    {
+      "question": "How would you design a versioning strategy for a public API that must support both backward compatibility and rapid iteration?",
+      "answer": "I would adopt URI versioning (e.g., /v1/, /v2/) for major breaking changes, because it makes the version explicit in routing and documentation. For minor, non‑breaking additions, I would use content negotiation with custom media types (Accept: application/vnd.myapi.v1+json) so clients can opt‑in to new fields. This hybrid approach preserves backward compatibility while allowing rapid iteration on optional features."
+    },
+    {
+      "question": "What are the advantages of using Pydantic over manual JSON parsing in a FastAPI endpoint?",
+      "answer": "Pydantic automatically validates types, enforces constraints, and produces clear error messages, reducing boilerplate code. It also generates JSON Schema for OpenAPI documentation, ensuring the API contract is always in sync with the code. Manual parsing would require repetitive checks, is error‑prone, and lacks automatic documentation generation."
+    },
+    {
+      "question": "Describe how authentication middleware can be made stateless and why that matters.",
+      "answer": "Stateless authentication middleware validates a token (e.g., JWT) that contains all necessary claims and is signed by the issuer. Because the token itself carries the user identity and expiration, the middleware does not need to query a session store, keeping each request independent. Statelessness improves scalability, as any server instance can handle any request without shared session state."
+    }
+  ],
+  "summary": "Designing a REST API involves modeling resources, applying the uniform HTTP interface, and respecting constraints such as statelessness and idempotency. Versioning protects clients from breaking changes, while idempotency keys make unsafe POST operations safe to retry. Pydantic brings declarative validation, reducing bugs and generating documentation automatically. Authentication middleware centralizes security, enabling stateless token verification and consistent user context. By following a disciplined flow—from resource modeling through testing—developers can build services that are reliable, evolvable, and easy to consume.",
+  "practice": [
+    {
+      "question": "A client sends a POST /v1/orders with payload {\"amount\": -5, \"currency\": \"USD\"}. Using the Pydantic model OrderIn(amount: conint(gt=0), currency: str), what response should the API return?",
+      "answer": "Pydantic will raise a ValidationError because amount is not greater than 0. The API should catch this exception and return HTTP 422 with a body like {\"detail\":[{\"loc\":[\"body\",\"amount\"],\"msg\":\"ensure this value is greater than 0\",\"type\":\"value_error.number.not_gt\"}]}. This informs the client that the amount field is invalid."
+    },
+    {
+      "question": "Implement a simple idempotent POST endpoint for creating a user profile using an in‑memory dict and an Idempotency-Key header. Show the code and explain how duplicate requests are handled.",
+      "answer": "from fastapi import FastAPI, Header, HTTPException\nfrom pydantic import BaseModel, EmailStr\napp = FastAPI()\n\nclass ProfileIn(BaseModel):\n    name: str\n    email: EmailStr\n\nstore = {}\n\n@app.post(\"/v1/profiles\")\ndef create_profile(profile: ProfileIn, idempotency_key: str = Header(...)):\n    if idempotency_key in store:\n        return store[idempotency_key]\n    pid = len(store) + 1\n    record = {\"id\": pid, \"name\": profile.name, \"email\": profile.email}\n    store[idempotency_key] = record\n    return record\n\n# Explanation: The endpoint extracts the Idempotency-Key header. If the key already exists in the store, the previously created record is returned, preventing duplicate profiles. Otherwise a new profile is created, stored under the key, and returned. This guarantees that retries with the same key are safe."
+    },
+    {
+      "question": "Design a trade‑off discussion: you must choose between URI versioning and header versioning for a high‑traffic public API. List pros and cons and state which you would pick.",
+      "answer": "URI versioning pros: simple routing, clear to clients, easy caching per version. Cons: URL clutter, requires redeployment of routing tables for each version. Header versioning pros: clean URLs, can negotiate multiple versions via Accept, easier to deprecate older versions without changing routes. Cons: adds complexity to content negotiation, many HTTP clients need custom header handling, caching proxies may ignore custom Accept values. For a high‑traffic public API where simplicity and cache friendliness are paramount, I would pick URI versioning because it works with CDNs and browsers out of the box, reducing operational risk."
+    },
+    {
+      "question": "Given a JWT token that expires in 5 minutes, what should the auth middleware return if the token is expired, and why?",
+      "answer": "The middleware should return HTTP 401 Unauthorized with a response body indicating \"Token expired\". A 401 signals that authentication failed and that the client may retry after obtaining a fresh token. Using 403 would be inappropriate because the credentials were valid but no longer active."
+    },
+    {
+      "question": "Write a Python function that validates a list of integers is strictly increasing using Pydantic's validator decorator. Show a short test case.",
+      "answer": "from pydantic import BaseModel, validator\n\nclass StrictList(BaseModel):\n    values: list[int]\n\n    @validator('values')\n    def check_strict(cls, v):\n        if any(v[i] >= v[i+1] for i in range(len(v)-1)):\n            raise ValueError('list must be strictly increasing')\n        return v\n\n# Test case\ntry:\n    StrictList(values=[1, 3, 5])\n    print('valid')\nexcept Exception as e:\n    print(e)\n\ntry:\n    StrictList(values=[1, 2, 2])\nexcept Exception as e:\n    print(e)\n\n# Output: valid \\n 1 validation error for StrictList \\n values \\n   list must be strictly increasing (type=value_error)"
+    },
+    {
+      "question": "A GET request to /v1/items returns a JSON array of 100 objects. The client wants only items where \"type\" == \"book\" without changing the server. Propose a solution using query parameters and explain how the server should handle it.",
+      "answer": "The client can request /v1/items?type=book. The server parses the optional \"type\" query parameter and filters the collection before serialization. Implementation example in FastAPI:\n\n@app.get(\"/v1/items\")\ndef list_items(type: str | None = None):\n    all_items = get_all_items()\n    if type:\n        all_items = [i for i in all_items if i[\"type\"] == type]\n    return all_items\n\nThis keeps the endpoint generic while allowing clients to retrieve subsets, reducing bandwidth and processing on the client side."
+    }
+  ],
+  "id": "prog-rest-apis",
+  "title": "REST API & Service Design",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2233
+}

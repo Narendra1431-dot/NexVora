@@ -1,0 +1,30 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-8.4.2, pluggy-1.6.0 -- F:\Download\NSRIT HACKTHON\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: F:\Download\NSRIT HACKTHON\backend
+configfile: pytest.ini
+plugins: anyio-4.15.1, langsmith-0.14.4
+collecting ... collected 5 items
+
+app/tests/test_password_reset_security.py::test_register_password_contract_is_unchanged PASSED [ 20%]
+app/tests/test_password_reset_security.py::test_reset_request_never_returns_or_logs_a_token PASSED [ 40%]
+app/tests/test_password_reset_security.py::test_unknown_and_known_email_responses_are_indistinguishable PASSED [ 60%]
+app/tests/test_password_reset_security.py::test_only_a_digest_of_the_token_is_persisted PASSED [ 80%]
+app/tests/test_password_reset_security.py::test_token_is_single_use_and_expires PASSED [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:40
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv\Lib\site-packages\fastapi\routing.py:233: 290 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+.venv\Lib\site-packages\starlette\_utils.py:39: 294 warnings
+app/tests/test_password_reset_security.py: 14 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 5 passed, 599 warnings in 34.67s =======================

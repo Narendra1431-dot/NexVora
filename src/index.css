@@ -1,0 +1,347 @@
+@import "tailwindcss";
+
+/* Locally served, licensed variable fonts; no external stylesheet or font request. */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Manrope";
+  src: url("/fonts/manrope-latin.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: optional;
+}
+
+/* Import design system tokens */
+@import "./design-system";
+
+@theme {
+  /* Extend Tailwind with design system tokens */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-heading: "Manrope", "Inter", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+  
+  /* Text sizes override design system where needed */
+  --text-xs--line-height: 1.5;
+  --text-sm--line-height: 1.55;
+  --text-base--line-height: 1.6;
+  
+  /* Extended color palette */
+  --color-navy-900: #0F172A;
+  --color-navy-800: #1E293B;
+  --color-navy-700: #334155;
+  --color-navy-600: #475569;
+  --color-navy-500: #64748B;
+  --color-navy-400: #94A3B8;
+  --color-navy-300: #CBD5E1;
+  --color-navy-200: #E2E8F0;
+  --color-navy-100: #F1F5F9;
+  --color-navy-50: #F8FAFC;
+  
+  --color-indigo-900: #312E81;
+  --color-indigo-800: #4338CA;
+  --color-indigo-700: #6366F1;
+  --color-indigo-600: #818CF8;
+  --color-indigo-500: #A5B4FC;
+  --color-indigo-400: #C7D2FE;
+
+  --color-violet-900: #581C87;
+  --color-violet-800: #7C3AED;
+  --color-violet-700: #8B5CF6;
+  --color-violet-600: #A78BFA;
+  --color-violet-500: #C4B5FD;
+
+  --color-pink-900: #831843;
+  --color-pink-800: #BE185D;
+  --color-pink-700: #EC4899;
+  --color-pink-600: #F472B6;
+  --color-pink-500: #F9A8D4;
+
+  --color-success-600: #059669;
+  --color-success-500: #10B981;
+  --color-success-400: #34D399;
+
+  --color-warning-600: #D97706;
+  --color-warning-500: #F59E0B;
+  --color-warning-400: #FBBF24;
+
+  --color-error-600: #DC2626;
+  --color-error-500: #EF4444;
+  --color-error-400: #F87171;
+
+  /* Shadow scale */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  /* Border radius scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Spacing scale (4px base) */
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;  /* 4px */
+  --spacing-2: 0.5rem;   /* 8px */
+  --spacing-3: 0.75rem;  /* 12px */
+  --spacing-4: 1rem;     /* 16px */
+  --spacing-5: 1.25rem; /* 20px */
+  --spacing-6: 1.5rem;  /* 24px */
+  --spacing-7: 1.75rem; /* 28px */
+  --spacing-8: 2rem;    /* 32px */
+  --spacing-9: 2.5rem;  /* 40px */
+  --spacing-10: 3rem;   /* 48px */
+  --spacing-11: 3.5rem; /* 56px */
+  --spacing-12: 4rem;   /* 64px */
+}
+
+@layer base {
+  /* Enhanced base styles using design system tokens */
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-primary);
+    background-color: var(--color-bg-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--transition-normal), color var(--transition-normal);
+  }
+  
+  /* Apply design system heading styles */
+  :where(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-heading);
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+    color: var(--color-text-primary);
+  }
+  
+  :where(h1, h2) { 
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.025em;
+    line-height: var(--line-height-tight);
+  }
+  :where(h3) { 
+    font-weight: calc(var(--font-weight-semibold) + 50);
+    letter-spacing: -0.015em;
+    line-height: var(--line-height-snug);
+  }
+  :where(h4, h5, h6) { 
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    line-height: var(--line-height-snug);
+  }
+  
+  :where(h1, h2, h3, h4) + p { margin-top: var(--spacing-3); }
+  
+  :where(input, textarea, select) { 
+    font: inherit;
+    color: var(--color-text-primary);
+  }
+  
+  :where(label, dt, small) { 
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+  }
+  
+  /* Form element styling */
+  :where(button, [role="button"]) {
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0;
+    color: var(--color-text-primary);
+  }
+  
+  :where(progress, meter, time) {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+}
+
+/* Component base styles using design system */
+:where(h1, h2) { 
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.025em;
+  line-height: var(--line-height-tight);
+}
+:where(h3) { 
+  font-weight: calc(var(--font-weight-semibold) + 50);
+  letter-spacing: -0.015em;
+  line-height: var(--line-height-snug);
+}
+:where(h4, h5, h6) { 
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: var(--line-height-snug);
+}
+
+main :where(h2) { 
+  font-size: clamp(var(--font-size-base), var(--font-size-base) + 0.4vw, var(--font-size-lg));
+}
+main :where(h3) { font-size: var(--font-size-base); }
+main :where(h4) { font-size: var(--font-size-sm); }
+
+main :where(.text-2xl, .text-3xl, .text-4xl) {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.035em;
+  line-height: var(--line-height-tight);
+}
+
+:where(progress, meter, time) { 
+  font-variant-numeric: tabular-nums;
+}
+
+/* Enhanced card styles */
+.card {
+  background-color: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-primary);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-secondary);
+}
+
+/* Enhanced button styles */
+:where(button, [role="button"]).btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  position: relative;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+}
+
+/* Enhanced input styles */
+.input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  transition: all var(--transition-fast);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.1);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* Certificate artwork is server-rendered. No certificate SVG/PDF styles are changed. */
+
+/* Animation utilities */
+.animate-fast {
+  transition: all var(--transition-fast);
+}
+
+.animate-normal {
+  transition: all var(--transition-normal);
+}
+
+.animate-slow {
+  transition: all var(--transition-slow);
+}
+
+/* Responsive utilities */
+@layer utilities {
+  .text-responsive-sm {
+    font-size: var(--font-size-base);
+  }
+  
+  .text-responsive-base {
+    font-size: var(--font-size-lg);
+  }
+  
+  @media (min-width: 768px) {
+    .text-responsive-sm {
+      font-size: var(--font-size-lg);
+    }
+    
+    .text-responsive-base {
+      font-size: var(--font-size-xl);
+    }
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Premium UI/UX enhancement utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+}
+
+.interactive-card {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+.interactive-card:active {
+  transform: translateY(0);
+}
+
+.interactive-btn {
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.interactive-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.interactive-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive-card,
+  .interactive-btn {
+    transition: none !important;
+    transform: none !important;
+  }
+}

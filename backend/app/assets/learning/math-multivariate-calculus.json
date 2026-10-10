@@ -1,0 +1,91 @@
+{
+  "introduction": "Multivariate calculus is the mathematical backbone of many modern scientific and engineering fields, from physics to machine learning. It extends the ideas of single‑variable calculus—limits, derivatives, integrals—to functions that accept several inputs and produce either scalar or vector outputs. Understanding how rates of change behave in multiple dimensions enables you to model surfaces, optimize complex systems, and propagate gradients through deep neural networks. This chapter introduces the core constructs—gradients, Jacobians, Hessians, and the multivariate chain rule—building intuition before moving to algorithmic applications. By mastering these foundations, a beginner can confidently tackle problems involving surface geometry, constrained optimization, and the back‑propagation algorithm that powers modern AI.",
+  "foundations": "Begin with a scalar function f(x1, x2, ..., xn). Its partial derivative with respect to xi measures how f changes when only xi varies, holding all other variables constant. Collecting all partials yields the gradient vector ∇f, which points in the direction of steepest ascent and whose magnitude equals the maximal rate of increase. For vector‑valued functions F: R^n → R^m, each component Fj has its own gradient; arranging these gradients as rows forms the Jacobian matrix J, an m×n array that linearly approximates F near a point. The Jacobian generalizes the derivative: multiplying a small input perturbation Δx gives an output change Δy ≈ J·Δx. When the function is twice differentiable, the gradient itself varies with direction, captured by the Hessian matrix H, an n×n symmetric matrix of second‑order partial derivatives. H encodes curvature; positive‑definite Hessians indicate local minima, while indefinite ones signal saddle points. The multivariate chain rule links these objects: for a composition y = g(F(x)), the gradient of y with respect to x is ∇y = J_F(x)^T ∇g(F(x)). In neural networks, g often represents a loss and F the network mapping, so the chain rule becomes the back‑propagation algorithm, efficiently computing gradients layer by layer. Mastery of these concepts requires practice with concrete functions, careful handling of dimensions, and awareness of common pitfalls such as confusing row‑ versus column‑vector conventions or neglecting symmetry in Hessians.",
+  "concepts": [
+    {
+      "title": "Gradients & Jacobians",
+      "explanation": "The gradient ∇f of a scalar field f(x1,…,xn) is the vector of its first‑order partial derivatives: ∇f = [∂f/∂x1, …, ∂f/∂xn]^T. It points toward the direction where f increases most rapidly, and its length equals the steepest ascent rate. For a vector‑valued function F: R^n → R^m, the Jacobian J_F is an m×n matrix where entry (i,j) = ∂F_i/∂x_j. The Jacobian acts as the best linear map approximating F near a point: F(x+Δx) ≈ F(x) + J_F(x)·Δx. Gradients are column vectors, while Jacobians are often written with rows as component gradients; mixing these conventions can cause sign errors in code. In optimization, the gradient guides descent steps, whereas the Jacobian is essential for transforming uncertainties, performing change‑of‑variables in integrals, and computing sensitivities in engineering models.",
+      "example": "Consider f(x, y) = x^2 y + 3y. The gradient is ∇f = [2xy, x^2 + 3]^T. At the point (1,2) the gradient becomes [2*1*2, 1^2+3] = [4, 4]. For the vector function F(x, y) = [x y, sin(x) + y^2], the Jacobian is J = [[y, x], [cos(x), 2y]]. Evaluating at (π/2, 1) gives J = [[1, π/2], [0, 2]]. The Jacobian tells us that a small change Δx = [0.01, -0.02] will produce ΔF ≈ J·Δx = [1*0.01 + (π/2)*(-0.02), 0*0.01 + 2*(-0.02)] ≈ [0.01 - 0.0314, -0.04] = [-0.0214, -0.04]."
+    },
+    {
+      "title": "Hessian Matrices",
+      "explanation": "The Hessian H of a twice‑differentiable scalar function f: R^n → R is the square n×n matrix of second‑order partial derivatives: H_{ij} = ∂^2 f / (∂x_i ∂x_j). Because mixed partials are equal under mild conditions (Clairaut's theorem), H is symmetric. The Hessian describes local curvature: if H is positive‑definite at a point, the function is locally convex and the point is a strict local minimum; if negative‑definite, it is a local maximum; indefinite Hessians indicate saddle points. In Newton's method for optimization, the update step uses the inverse Hessian to scale the gradient, achieving quadratic convergence near a minimum. However, computing and inverting H can be expensive for high dimensions, leading to quasi‑Newton approximations like BFGS. A common mistake is to treat the Hessian as a scalar curvature; it actually encodes curvature in every direction, and eigenvalues reveal principal curvatures.",
+      "example": "Take f(x, y) = x^3 + 3xy^2. First derivatives: ∂f/∂x = 3x^2 + 3y^2, ∂f/∂y = 6xy. Second derivatives: ∂^2f/∂x^2 = 6x, ∂^2f/∂y^2 = 6x, ∂^2f/∂x∂y = ∂^2f/∂y∂x = 6y. Thus H = [[6x, 6y], [6y, 6x]]. At (1,1) the Hessian is [[6,6],[6,6]]. Its eigenvalues are 12 and 0, indicating a flat direction (zero curvature) and a steep upward curvature. The gradient at (1,1) is [3*1^2+3*1^2, 6*1*1] = [6,6]. Newton's step would require solving H·Δx = -∇f, but H is singular here, so a direct Newton update fails; regularization or a pseudo‑inverse is needed."
+    },
+    {
+      "title": "Chain Rule in Backprop",
+      "explanation": "The multivariate chain rule allows differentiation of composite functions. For a scalar loss L that depends on intermediate vector-valued outputs a = g(x) and finally on parameters θ through x = h(θ), the gradient ∇_θ L = (∂a/∂θ)^T ∇_a L. In neural networks, each layer computes a = σ(Wx + b). The Jacobian of a with respect to its inputs x is J = diag(σ'(Wx+b))·W, where σ' is the element‑wise derivative. Backpropagation proceeds backward: starting from ∂L/∂output, each layer multiplies by its Jacobian transpose to obtain gradients for its inputs and parameters. This avoids explicit construction of large Jacobians; instead, vector‑Jacobian products are computed efficiently. Pitfalls include forgetting to apply the derivative of the activation function, mixing up row‑vector versus column‑vector conventions, and numerical instability when gradients vanish or explode, which can be mitigated by careful initialization and normalization.",
+      "example": "Consider a two‑layer network: z = W1 x + b1, a = tanh(z), y = W2 a + b2, loss L = (y - t)^2/2. Forward pass: compute z, a, y. Backward: ∂L/∂y = y - t. Gradient w.r.t. W2: ∂L/∂W2 = (∂L/∂y) a^T. Gradient w.r.t. a: ∂L/∂a = W2^T (∂L/∂y). Then ∂L/∂z = (∂L/∂a) ∘ (1 - tanh(z)^2). Finally ∂L/∂W1 = (∂L/∂z) x^T. For x=[0.5, -1], W1=[[1,2],[ -0.5,0.3]], b1=[0,0], t=0.7, the forward values are z=[1*0.5+2*(-1), -0.5*0.5+0.3*(-1)] = [-1.5, -0.65]; a = tanh(z) ≈ [-0.905, -0.571]; W2=[0.8, -0.2], b2=0.1 gives y = 0.8*(-0.905)+(-0.2)*(-0.571)+0.1 ≈ -0.724+0.114+0.1 = -0.51. Loss gradient ∂L/∂y = -0.51-0.7 = -1.21. Backprop yields ∂L/∂W2 = -1.21 * a^T ≈ [ -1.21*(-0.905), -1.21*(-0.571) ] = [1.095, 0.691]. This illustrates the chain of Jacobian‑vector products."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\n\ndef f(x):\n    # scalar function f(x,y) = x^2 * y + 3*y\n    return x[0]**2 * x[1] + 3 * x[1]\n\ndef grad_f(x):\n    # analytical gradient\n    df_dx = 2 * x[0] * x[1]\n    df_dy = x[0]**2 + 3\n    return np.array([df_dx, df_dy])\n\nx0 = np.array([1.0, 2.0])\nprint('f(x0)=', f(x0))\nprint('grad f(x0)=', grad_f(x0))",
+      "explanation": "The code defines a simple two‑variable scalar function and its analytical gradient. Evaluating at x0 = (1,2) yields f = 1^2*2 + 3*2 = 8 and gradient = [2*1*2, 1^2+3] = [4,4]. This confirms the manual computation in the concept example. The function is smooth, so the gradient accurately predicts the change for small perturbations: a step of -0.1 in both directions reduces the function value by approximately 0.8, matching a finite‑difference check. Limitations include that the gradient is exact only for differentiable functions; nondifferentiable points would require subgradients."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for backpropagation through a single ReLU layer\n# Input: x (vector), W (weight matrix), b (bias), upstream_grad (∂L/∂a)\n# Output: grad_W, grad_b, grad_x\n\ndef relu(z):\n    return np.maximum(0, z)\n\ndef relu_backward(z, upstream_grad):\n    dz = upstream_grad * (z > 0).astype(float)\n    return dz\n\n# Forward pass\nz = W @ x + b\na = relu(z)\n# Assume loss L already computed and upstream_grad = ∂L/∂a is given\n# Backward pass\ndz = relu_backward(z, upstream_grad)\ngrad_W = np.outer(dz, x)   # ∂L/∂W = dz * x^T\ngrad_b = dz                 # ∂L/∂b = dz\ngrad_x = W.T @ dz           # ∂L/∂x = W^T * dz",
+      "explanation": "This pseudocode demonstrates the chain rule in a neural network layer with a ReLU activation. The Jacobian of the ReLU is a diagonal matrix with 1 where the pre‑activation z is positive and 0 elsewhere; multiplying the upstream gradient by this mask yields dz, the gradient with respect to z. The weight gradient is the outer product of dz and the input x, reflecting how each weight contributes linearly to the output. The bias gradient is simply dz because each bias adds directly to its neuron. Finally, the gradient flowing to the previous layer is the transpose of W times dz. This pattern repeats for every layer, enabling efficient gradient computation without forming full Jacobian matrices. Pitfalls include forgetting the mask, which would incorrectly propagate gradients through dead neurons, and numerical overflow if inputs are large, which can be mitigated by normalization."
+    }
+  ],
+  "flow": [
+    "Compute partial derivatives of the scalar objective with respect to each input variable to form the gradient vector.",
+    "Assemble the gradients of all output components of a vector‑valued function into the Jacobian matrix.",
+    "If second‑order information is needed, differentiate the gradient components again to obtain the Hessian matrix.",
+    "Apply the multivariate chain rule: multiply the transpose of the Jacobian of the inner function by the gradient of the outer function.",
+    "In neural networks, propagate gradients layer by layer using Jacobian‑vector products, updating weights with the resulting parameter gradients."
+  ],
+  "interview": [
+    {
+      "question": "What is the geometric interpretation of the gradient of a scalar field?",
+      "answer": "The gradient points in the direction of steepest increase of the scalar field, and its magnitude equals the maximal rate of change per unit distance. Moving a small step ε in the gradient direction raises the function value by approximately ε times the gradient norm. Orthogonal directions produce no first‑order change."
+    },
+    {
+      "question": "How does the Jacobian differ from the gradient, and when would you use each?",
+      "answer": "The gradient is a vector of first‑order partial derivatives for a scalar‑valued function, while the Jacobian is a matrix of partial derivatives for a vector‑valued function, with each row representing the gradient of one output component. Use the gradient when optimizing a single loss; use the Jacobian when transforming coordinates, computing sensitivities, or chaining multiple vector functions."
+    },
+    {
+      "question": "Explain why the Hessian matrix is symmetric and what its eigenvalues tell you about a critical point.",
+      "answer": "Under mild smoothness conditions, mixed partial derivatives commute (Clairaut's theorem), making H_{ij}=∂²f/∂x_i∂x_j equal to H_{ji}. Hence H is symmetric. Its eigenvalues are the principal curvatures: if all are positive, the point is a local minimum; if all negative, a local maximum; mixed signs indicate a saddle point. Zero eigenvalues suggest flat directions."
+    },
+    {
+      "question": "Describe how backpropagation implements the multivariate chain rule without explicitly forming large Jacobian matrices.",
+      "answer": "Backpropagation computes vector‑Jacobian products instead of full Jacobians. Starting from the loss gradient, each layer multiplies the upstream gradient by the transpose of its local Jacobian (often a simple diagonal mask for element‑wise activations) and accumulates parameter gradients via outer products. This leverages the associativity of matrix multiplication to keep memory and computation linear in the number of parameters."
+    }
+  ],
+  "summary": "Multivariate calculus equips you with tools to analyze how functions change in many dimensions. The gradient captures first‑order variation of scalar fields, while the Jacobian extends this concept to vector outputs, providing a linear approximation of a function near a point. The Hessian adds second‑order curvature information, essential for classifying critical points and for Newton‑type optimization. The multivariate chain rule ties these objects together, enabling efficient gradient propagation through compositions—a principle that underlies backpropagation in deep learning. Mastery of these constructs allows you to model surfaces, perform sensitivity analysis, and train complex models with confidence.",
+  "practice": [
+    {
+      "question": "Given f(x,y) = x^2 + 4xy + y^2, compute the gradient at (1,2) and the Hessian matrix.",
+      "answer": "Partial derivatives: ∂f/∂x = 2x + 4y, ∂f/∂y = 4x + 2y. At (1,2): ∂f/∂x = 2*1 + 4*2 = 10, ∂f/∂y = 4*1 + 2*2 = 8, so ∇f = [10,8]. Second derivatives: ∂²f/∂x² = 2, ∂²f/∂y² = 2, ∂²f/∂x∂y = ∂²f/∂y∂x = 4. Hence Hessian H = [[2,4],[4,2]]."
+    },
+    {
+      "question": "For the vector function F(x,y) = [x^2 y, e^{xy}], find the Jacobian and evaluate it at (1,0).",
+      "answer": "Compute partials: ∂F1/∂x = 2xy, ∂F1/∂y = x^2; ∂F2/∂x = y e^{xy}, ∂F2/∂y = x e^{xy}. Jacobian J = [[2xy, x^2],[y e^{xy}, x e^{xy}]]. At (1,0): J = [[0,1],[0,1*e^{0}]] = [[0,1],[0,1]]."
+    },
+    {
+      "question": "A neural network layer computes a = ReLU(Wx + b). If W = [[2, -1],[0,3]], x = [0.5, -0.2], b = [0,0], and the upstream gradient ∂L/∂a = [0.3, -0.4], compute ∂L/∂W, ∂L/∂b, and ∂L/∂x.",
+      "answer": "Forward: z = W x = [2*0.5 + (-1)*(-0.2), 0*0.5 + 3*(-0.2)] = [1.0+0.2, -0.6] = [1.2, -0.6]. a = ReLU(z) = [1.2, 0]. Mask = [1,0]. dz = upstream * mask = [0.3*1, -0.4*0] = [0.3, 0]. grad_W = outer(dz, x) = [[0.3*0.5, 0.3*(-0.2)], [0*0.5, 0*(-0.2)]] = [[0.15, -0.06],[0,0]]. grad_b = dz = [0.3,0]. grad_x = W^T dz = [[2,0],[ -1,3]] @ [0.3,0] = [2*0.3 + 0*0, -1*0.3 + 3*0] = [0.6, -0.3]."
+    },
+    {
+      "question": "Show that for a scalar function f(x) = x^T A x where A is symmetric, the gradient is ∇f = (A + A^T) x = 2A x.",
+      "answer": "Write f = Σ_i Σ_j x_i A_{ij} x_j. Partial derivative w.r.t. x_k: ∂f/∂x_k = Σ_j A_{kj} x_j + Σ_i x_i A_{ik} = (A x)_k + (A^T x)_k. Since A = A^T, the two terms are identical, giving ∂f/∂x_k = 2 (A x)_k. Hence ∇f = 2A x."
+    },
+    {
+      "question": "Design trade‑off: When would you prefer using a first‑order optimizer like gradient descent over a second‑order method such as Newton's method in training a deep neural network?",
+      "answer": "First‑order methods require only gradient evaluations, scaling linearly with the number of parameters and memory proportional to the model size. They are suitable for very large networks where computing or storing the Hessian is infeasible. Newton's method offers quadratic convergence near a well‑conditioned minimum but needs the Hessian or its inverse, which is O(n^2) memory and O(n^3) compute, prohibitive for millions of parameters. Moreover, deep nets often have non‑convex loss surfaces with many saddle points; the Hessian can be indefinite, causing Newton steps to diverge. Therefore, in practice, gradient descent (with momentum, Adam, etc.) is preferred for large‑scale training, while second‑order methods may be used for small‑scale problems or as a fine‑tuning step."
+    },
+    {
+      "question": "Numerical exercise: Approximate the directional derivative of f(x,y)=sin(xy) at point (π/4,1) in the direction v = [1,2] using the gradient.",
+      "answer": "First compute gradient: ∂f/∂x = y cos(xy), ∂f/∂y = x cos(xy). At (π/4,1): xy = π/4, cos(π/4)=√2/2≈0.7071. ∂f/∂x = 1*0.7071≈0.7071, ∂f/∂y = (π/4)*0.7071≈0.5554. Gradient vector ≈ [0.7071,0.5554]. Normalize direction v: ||v|| = sqrt(1^2+2^2)=√5≈2.2361, unit v̂ = [0.4472,0.8944]. Directional derivative = ∇f·v̂ ≈ 0.7071*0.4472 + 0.5554*0.8944 ≈ 0.316 + 0.497 ≈ 0.813. This approximates the rate of change of sin(xy) moving from (π/4,1) along v."
+    }
+  ],
+  "id": "math-multivariate-calculus",
+  "title": "Multivariate Calculus",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2457
+}

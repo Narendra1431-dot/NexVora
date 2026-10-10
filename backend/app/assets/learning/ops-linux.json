@@ -1,0 +1,88 @@
+{
+  "introduction": "Linux administration is the discipline of configuring, maintaining, and troubleshooting a Linux operating system so that it reliably serves users and applications. Whether you are preparing a single‑user workstation, a multi‑tenant server, or a cluster of containers, the core tasks revolve around managing processes and controlling access through permissions. Understanding how the kernel schedules processes, how they communicate, and how the file‑system permission model protects resources is essential before you can automate deployments, secure services, or diagnose performance problems. This chapter introduces the fundamental concepts of processes and permissions, builds a solid mental model, and then expands to practical commands, scripts, and interview‑ready knowledge.",
+  "foundations": "A Linux system is built around the concept of a process: an executing instance of a program that has its own virtual address space, open file descriptors, and scheduling attributes. The kernel creates a process by invoking the fork system call, which duplicates the calling process, and then exec replaces the duplicated memory image with a new program. Each process is identified by a unique process identifier (PID) and belongs to a process group and session, which are used for job control and signal delivery. Scheduling is pre‑emptive; the kernel's Completely Fair Scheduler assigns CPU time slices based on niceness values, allowing administrators to influence priority without compromising fairness. Processes can communicate via pipes, sockets, shared memory, or signals, each with distinct performance and safety characteristics. Permissions, on the other hand, are the access control mechanism that governs who may read, write, or execute files and directories. Linux uses a traditional Unix model of three classes—owner, group, and others—each with three bits representing read (r), write (w), and execute (x) rights. These bits are stored in the mode field of the inode and can be manipulated with chmod, chown, and chgrp. The model extends to special bits: setuid, setgid, and the sticky bit, which modify execution behavior and directory deletion rules. Understanding how the kernel checks these bits during a system call is crucial for designing secure configurations. Together, process management and permission enforcement form the backbone of system reliability and security; mismanaging either can lead to resource exhaustion, privilege escalation, or data loss.",
+  "concepts": [
+    {
+      "title": "Processes",
+      "explanation": "A process in Linux is an independent execution context that includes its own memory, registers, and open file descriptors. The lifecycle begins with fork, which creates a child process that inherits the parent's memory layout, file descriptors, and environment. Immediately after fork, the child typically calls exec to load a new program image, replacing its memory while retaining the PID. The kernel tracks each process with a PID and a parent PID (PPID), forming a tree structure useful for signal propagation and resource accounting. Scheduling decisions are based on the process's static priority (nice value) and dynamic factors such as recent CPU usage. Processes can be in states like running, sleeping, stopped, or zombie; zombies occur when a child has terminated but its parent has not yet performed a wait, leaving an entry in the process table. Inter‑process communication (IPC) mechanisms—pipes for unidirectional byte streams, sockets for networked communication, shared memory for high‑throughput data exchange, and signals for asynchronous notifications—allow processes to cooperate. Each mechanism has trade‑offs: pipes are simple but limited to parent‑child relationships; sockets are flexible but incur protocol overhead; shared memory is fast but requires explicit synchronization; signals are lightweight but carry only a small integer payload.",
+      "example": "Consider a simple parent program that launches a child to list directory contents. The parent calls fork, receiving a child PID. In the child branch, execvp replaces the process image with the \"ls\" command, inheriting the open standard output descriptor. The parent, after fork, immediately calls waitpid to reap the child, preventing a zombie. If the child exits with status 0, the parent prints \"Listing completed\". This demonstrates the fork‑exec‑wait pattern, the PID relationship, and proper cleanup. The child runs independently, and the kernel schedules it based on its default nice value of 0, sharing CPU time fairly with other processes."
+    },
+    {
+      "title": "Permissions",
+      "explanation": "Linux permissions protect files and directories by specifying which users may read, modify, or execute them. Each inode stores a 12‑bit mode: three sets of three bits for owner, group, and others, plus three special bits. The read (r) bit allows data to be read, write (w) permits modification, and execute (x) enables running a file as a program or traversing a directory. Ownership is defined by a user ID (UID) and a group ID (GID). The setuid bit, when set on an executable, causes the process to run with the file owner's UID, enabling privilege escalation for trusted programs like \"passwd\". The setgid bit on a directory forces newly created files to inherit the directory's GID, simplifying collaborative work. The sticky bit on a directory (commonly /tmp) restricts deletion: only the file's owner, the directory's owner, or root may remove a file. Permissions are manipulated with chmod (change mode), chown (change owner), and chgrp (change group). Understanding the octal representation—e.g., 0755 means owner rwx (7), group r-x (5), others r-x (5)—helps in scripting and auditing. Misconfigured permissions can expose sensitive data or allow unauthorized code execution.",
+      "example": "Suppose a shared project directory \"/proj\" should allow all members of group \"dev\" to read and write files, but others only read. The directory owner is \"alice\" (UID 1001) and group \"dev\" (GID 2001). Setting mode 2775 (rwxrwsr-x) on \"/proj\" gives owner rwx, group rwx with setgid (2), and others r-x. The setgid ensures any file created inside inherits GID 2001, so new contributors automatically have group write access. A file \"code.c\" created by Bob will have mode 664 (rw-rw-r--) by default, matching the directory's group permissions. This configuration balances collaboration with security, preventing unrelated users from modifying the source."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import os, subprocess\n\npid = os.fork()\nif pid == 0:\n    # child process\n    os.execvp('ls', ['ls', '-l', '/tmp'])\nelse:\n    # parent process\n    _, status = os.waitpid(pid, 0)\n    print('Child exit code:', os.waitstatus_to_exitcode(status))",
+      "explanation": "The Python script demonstrates the fork‑exec‑wait pattern in a high‑level language. After fork, the child replaces its image with the \"ls -l /tmp\" command, inheriting the standard output descriptor, so the directory listing appears on the console. The parent blocks on waitpid, ensuring the child is reaped and no zombie remains. On Linux, waitstatus_to_exitcode decodes normal or signal termination, yielding 0 on success. os.fork is not available on Windows; run this example in a Linux environment. This example shows how process creation, replacement, and cleanup are performed programmatically, and it highlights the importance of handling the child’s termination to maintain a clean process table."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for secure file creation\ndef secure_create(path, uid, gid):\n    fd = open(path, O_WRONLY|O_CREAT|O_EXCL, 0o600)  # initially owner only\n    fchown(fd, uid, gid)                     # set owner and group\n    fchmod(fd, 0o640)                        # enforce mode\n    write(fd, b'Secret data')\n    close(fd)\n# end",
+      "explanation": "This pseudocode assumes a trusted parent directory and a process authorized to set the intended owner/group. Exclusive creation fails when the final path already exists; it does not make arbitrary attacker-controlled parent directories safe. Create with owner-only permissions first, establish ownership, then grant group read access with mode 0640. Check every return value, handle partial writes, and close the descriptor in a finally-style cleanup path. The process umask may initially narrow permissions. O_EXCL alone is not a comprehensive filesystem security policy, and changing ownership can fail without sufficient permissions."
+    }
+  ],
+  "flow": [
+    "1. Identify the task and decide whether a new process or a permission change is required.",
+    "2. For a new process, call fork() and check the returned PID to separate parent and child logic.",
+    "3. In the child branch, replace the image with execve() or a language‑specific exec function.",
+    "4. In the parent branch, optionally set up IPC (pipe, socket) before fork, then waitpid() to reap the child.",
+    "5. If adjusting permissions, determine the target UID, GID, and desired mode bits.",
+    "6. Use chown()/chgrp() to set ownership, then chmod() to apply the mode, verifying with stat().",
+    "7. Audit the result: list -l to confirm mode, ps -f to verify process hierarchy, and check for zombies."
+  ],
+  "interview": [
+    {
+      "question": "Explain the difference between fork and exec in Linux process creation.",
+      "answer": "fork creates a new process by duplicating the calling process's address space, file descriptors, and execution context, returning a child PID to the parent and zero to the child. exec replaces the current process image with a new program, loading its code and data while preserving the PID, open file descriptors (unless marked close‑on‑exec), and environment. Typically, a program calls fork to create a child, then the child calls exec to run a different executable, allowing the parent to continue its own work."
+    },
+    {
+      "question": "What is a zombie process and how can it be avoided?",
+      "answer": "A zombie is a process that has terminated but still has an entry in the process table because its parent has not performed a wait (or waitpid) to read its exit status. The kernel keeps the entry to allow the parent to retrieve the status. To avoid zombies, the parent should always call wait/waitpid after forking, or set the SIGCHLD handler to SIG_IGN, which tells the kernel to auto‑reap children."
+    },
+    {
+      "question": "Describe the effect of the setuid bit on an executable file.",
+      "answer": "When the setuid bit is set on an executable, the kernel runs the program with the effective UID of the file's owner rather than the invoking user's UID. This allows ordinary users to perform privileged operations, as seen with /usr/bin/passwd, which needs root privileges to modify /etc/shadow. However, setuid programs must be carefully audited because they can be a vector for privilege escalation if they contain vulnerabilities."
+    },
+    {
+      "question": "How does the sticky bit improve security on a shared directory like /tmp?",
+      "answer": "The sticky bit (mode 1000) on a directory restricts file deletion: only the file's owner, the directory's owner, or root may remove or rename files within that directory. In a world‑writable directory like /tmp, this prevents a malicious user from deleting or overwriting another user's temporary files, mitigating denial‑of‑service and data‑tampering risks."
+    }
+  ],
+  "summary": "Linux administration rests on two pillars: process management and permission enforcement. Processes provide isolation, scheduling, and a framework for executing programs, while permissions define who may access system resources. Mastering fork, exec, and wait enables reliable service orchestration and prevents resource leaks such as zombies. Understanding the octal permission model, ownership, and special bits like setuid, setgid, and sticky equips administrators to secure files, collaborate safely, and avoid privilege escalation. By following a disciplined workflow—creating processes, establishing IPC, cleaning up, and rigorously setting ownership and mode bits—administrators can build robust, auditable, and secure Linux environments.",
+  "practice": [
+    {
+      "question": "Write a C program that forks a child, the child executes \"date\", and the parent prints the child's exit status.",
+      "answer": "/* C program */\n#include <stdio.h>\n#include <unistd.h>\n#include <sys/wait.h>\nint main(){\n    pid_t pid = fork();\n    if(pid==0){\n        execlp(\"date\",\"date\",(char*)NULL);\n        _exit(127); // exec failed\n    } else if(pid>0){\n        int status; waitpid(pid,&status,0);\n        if(WIFEXITED(status))\n            printf(\"Child exited with %d\\n\",WEXITSTATUS(status));\n        else\n            printf(\"Child terminated abnormally\\n\");\n    } else {\n        perror(\"fork\");\n    }\n    return 0;\n}\nThe program forks; the child runs the date command, inheriting stdout. The parent waits, extracts the exit code (0 on success), and prints it. This demonstrates proper fork‑exec‑wait handling and avoids zombies."
+    },
+    {
+      "question": "A file /var/log/app.log should be readable by the owner and the group \"loggers\", but not by others. Show the exact chmod and chgrp commands and the resulting permission string.",
+      "answer": "First set the group: chgrp loggers /var/log/app.log\nThen set mode to 0640: chmod 0640 /var/log/app.log\nResulting ls -l output: -rw-r----- 1 alice loggers 1234 Sep 10 12:00 /var/log/app.log\nOwner has read/write, group has read, others have no permissions, matching the security requirement."
+    },
+    {
+      "question": "Explain why using a world‑writable directory without the sticky bit is a security risk, and give a concrete scenario involving /tmp.",
+      "answer": "In a world‑writable directory like /tmp (mode 1777), any user can create, rename, or delete any file. Without the sticky bit, a malicious user could delete another user's temporary file that a privileged process expects, causing a denial of service or forcing the privileged process to read a maliciously crafted replacement. For example, if a root‑owned script reads /tmp/config.tmp, an attacker could replace it with a symlink to /etc/passwd, leading to unintended data exposure."
+    },
+    {
+      "question": "Design a small service that runs as a non‑root user but needs to write logs to /var/log/myservice. Outline the steps to set up permissions safely.",
+      "answer": "1. Create a dedicated group, e.g., \"mylog\". 2. chown root:mylog /var/log/myservice and chmod 2770 (rwxrws---) on the directory. 3. Add the service user to the \"mylog\" group. 4. Ensure the service runs with its own UID and the supplementary group \"mylog\". 5. The service can now create files inside /var/log/myservice with mode 660, inheriting the group and write permission. This avoids giving the service root privileges while allowing controlled log writing."
+    },
+    {
+      "question": "Write a Python snippet that creates a file \"secret.txt\" with mode 0600, writes \"top‑secret\" into it, and ensures the file is owned by UID 1002 and GID 2002.",
+      "answer": "import os, pwd, grp\n\npath = 'secret.txt'\nfd = os.open(path, os.O_CREAT|os.O_WRONLY|os.O_EXCL, 0o600)\nos.fchown(fd, 1002, 2002)  # set UID and GID\nos.write(fd, b'top-secret')\nos.close(fd)\n# Verify\nst = os.stat(path)\nprint(oct(st.st_mode & 0o777), st.st_uid, st.st_gid)\nThe file is created with strict permissions (rw-------), owned by the specified IDs, and the verification prints \"0o600 1002 2002\" confirming correct setup."
+    },
+    {
+      "question": "Compare the trade‑offs between using setuid on a helper binary versus granting the helper binary group write access and adding the user to that group.",
+      "answer": "Setuid allows any user to run the helper with the file owner's privileges, which is simple but risky: a vulnerability in the helper can be exploited for full privilege escalation. Using group write access requires managing group membership; only users in the group can modify the helper, and the helper runs with the invoking user's UID, limiting impact of bugs. However, this approach may need additional sudo or capability configuration for actions requiring elevated rights. In security‑critical environments, minimizing setuid binaries and preferring fine‑grained group permissions reduces the attack surface."
+    }
+  ],
+  "id": "ops-linux",
+  "title": "Linux Administration",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-10-01",
+  "wordCount": 2309
+}

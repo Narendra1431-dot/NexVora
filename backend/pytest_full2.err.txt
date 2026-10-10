@@ -1,0 +1,7 @@
+ImportError while loading conftest 'F:\Download\NSRIT HACKTHON\backend\app\tests\conftest.py'.
+app\tests\conftest.py:23: in <module>
+    from app.config import settings
+app\config.py:52: in <module>
+    _settings_instance = Settings()
+                         ^^^^^^^^
+E   NameError: name 'Settings' is not defined

@@ -1,0 +1,101 @@
+{
+  "introduction": "Feature stores have become a cornerstone of modern machine learning pipelines, providing a systematic way to serve, version, and monitor features for both training and inference. They bridge the gap between raw data engineering and model development, ensuring that the same logic and values are used consistently across offline experiments and online serving. Understanding when to introduce a feature store—typically when teams face duplicated feature logic, data drift, or difficulty reproducing training data—is essential. This chapter explains the core ideas behind feature stores and data versioning, introduces point‑in‑time joins, dataset lineage tools such as DVC, and the problem of online/offline skew. By mastering these foundations, a beginner can build reliable pipelines that scale from prototype to production without hidden bugs.",
+  "foundations": "A feature store is a managed repository that stores feature values as time‑stamped records, often in two layers: an offline store for batch processing (e.g., Parquet files or a data warehouse) and an online store for low‑latency lookups (e.g., Redis or a key‑value service). The key idea is that each feature is identified by a primary key (usually an entity ID) and a timestamp, allowing the system to retrieve the exact value that existed at any point in time. Data versioning adds immutable snapshots of datasets, enabling reproducibility: a model trained on version V1 can later be re‑trained on the same snapshot, guaranteeing identical inputs. Point‑in‑time joins are the technique used to assemble a training row by joining multiple feature tables on the entity and the greatest timestamp that does not exceed the label time. Online/offline skew occurs when the feature values served during inference differ from those used during training, often because the online store updates more frequently or applies different preprocessing. By controlling timestamps, version tags, and consistent transformation code, a feature store eliminates this skew and provides auditability through lineage graphs that trace each feature back to its raw source.",
+  "concepts": [
+    {
+      "title": "Point-in-Time Joins",
+      "explanation": "Point-in-time (PIT) joins align feature values with the exact moment a label was generated. For each entity, you locate the most recent feature record whose timestamp is less than or equal to the label timestamp. This guarantees that the model never sees future information, preserving causality. The tradeoff is computational cost: a naive join requires scanning all feature rows per label, but indexing on (entity, timestamp) and using window functions can reduce complexity to O(N log N). PIT joins also demand careful handling of missing data; you may need forward‑fill or default values, which introduces bias if not documented.",
+      "example": "Suppose we have a label table L with columns (user_id, event_time, churn) and a feature table F with columns (user_id, as_of, avg_spend). For user 42, L contains a row at 2023-01-15. F contains rows at 2023-01-01 (avg_spend=120) and 2023-01-10 (avg_spend=130). The PIT join selects the row with as_of=2023-01-10 because it is the latest timestamp not after 2023-01-15. The resulting training row is (user_id=42, event_time=2023-01-15, avg_spend=130, churn=0). If no prior feature exists, you might fill with a global mean or a sentinel value like -1."
+    },
+    {
+      "title": "DVC & Dataset Lineage",
+      "explanation": "Data Version Control (DVC) extends Git concepts to large data files. Each dataset version is stored as a content‑addressed artifact, and a DVC file records the path, checksum, and dependencies. Lineage graphs are built automatically: a model file depends on a specific data version, which in turn depends on raw source files and preprocessing scripts. The benefit is reproducibility; you can checkout a commit and run dvc repro to regenerate exactly the same training set. The downside is storage overhead and the need for disciplined workflow: every change to data or code must be committed and tracked, otherwise the lineage becomes incomplete.",
+      "example": "Imagine a raw CSV raw_sales.csv (10 MB). You create a DVC file dvc.yaml with stage \"preprocess\": cmd: python preprocess.py raw_sales.csv processed.parquet deps: - raw_sales.csv outs: - processed.parquet. After running dvc repro, DVC stores a hash of processed.parquet. Later, you modify preprocess.py to add a new feature. Running dvc repro creates a new hash for processed.parquet, and the DVC graph now shows two versions, each linked to the same raw file but different code. You can retrieve version 1 by checking out the commit before the change and running dvc checkout."
+    },
+    {
+      "title": "Online/Offline Skew",
+      "explanation": "Online/offline skew refers to discrepancies between feature values used during model training (offline) and those served at inference time (online). Causes include differing update frequencies, divergent preprocessing pipelines, or missing fallback logic. Skew can degrade model performance because the model learns patterns that do not exist in production. Mitigation strategies involve using the same code base for both stores (e.g., feature functions as pure Python), enforcing identical timestamp windows, and validating feature distributions with statistical tests before deployment.",
+      "example": "Consider a feature \"daily_active_minutes\" computed nightly from logs and stored in the offline warehouse. The online store updates this feature every hour from a streaming pipeline that uses a slightly different aggregation window (e.g., 60‑minute sliding vs. calendar day). A model trained on nightly aggregates may see a value of 300 minutes for a user, while the online service reports 250 minutes at inference, causing a 16% error. By aligning both pipelines to use the same calendar‑day window and timestamp, the discrepancy disappears."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import pandas as pd\n\n# label table\nL = pd.DataFrame({\n    'user_id':[1,2],\n    'event_time':pd.to_datetime(['2023-01-15','2023-01-20']),\n    'churn':[0,1]\n})\n# feature table\nF = pd.DataFrame({\n    'user_id':[1,1,2,2],\n    'as_of':pd.to_datetime(['2023-01-01','2023-01-10','2023-01-05','2023-01-18']),\n    'avg_spend':[100,120,80,90]\n})\n# PIT join using merge_asof\nF_sorted = F.sort_values('as_of')\nL_sorted = L.sort_values('event_time')\njoined = pd.merge_asof(L_sorted, F_sorted,\n    left_on='event_time', right_on='as_of',\n    by='user_id', direction='backward')\nprint(joined)\n",
+      "explanation": "The code builds two small DataFrames: labels L and feature snapshots F. pandas.merge_asof performs a point‑in‑time join by matching each label row with the most recent feature row whose as_of timestamp does not exceed the event_time. The output shows user 1 joined with avg_spend=120 (as_of 2023-01-10) and user 2 with avg_spend=90 (as_of 2023-01-18). This demonstrates how a feature store can generate training data without leaking future information. Limitations include the need for sorted inputs and the assumption that timestamps are comparable; in production you would replace pandas with a scalable join in Spark or a SQL window function."
+    },
+    {
+      "title": "Applied example",
+      "code": "def get_features(entity_id, ts, offline_store, online_store):\n    # offline: batch table with columns (entity, ts, *features)\n    row = offline_store.query(entity_id, ts)\n    if row is None:\n        # fallback to online store which may have more recent data\n        row = online_store.lookup(entity_id)\n    return row\n",
+      "explanation": "The pseudocode illustrates a typical feature retrieval function used at inference time. It first attempts a point‑in‑time lookup in the offline store using the request timestamp; if no historical record exists (e.g., new user), it falls back to the online store which holds the latest real‑time values. This pattern reduces online/offline skew because the offline store provides the exact snapshot used during training, while the online fallback ensures coverage for unseen entities. In practice you would add caching, error handling, and validation that the feature schema matches the training schema."
+    }
+  ],
+  "flow": [
+    "1. Ingest raw data into a version‑controlled lake and record a DVC snapshot.",
+    "2. Define pure feature transformation functions that accept a DataFrame and a timestamp.",
+    "3. Run the transformations on the versioned raw data to produce an offline feature table with (entity, as_of, features).",
+    "4. Store the offline table in a queryable warehouse and tag it with a version identifier.",
+    "5. Populate an online key‑value store with the latest as_of rows for low‑latency serving.",
+    "6. When building training data, perform a point‑in‑time join between label rows and the offline feature table using the label timestamp.",
+    "7. Validate that online lookups for a sample of entities return the same values as the offline snapshot to detect skew."
+  ],
+  "interview": [
+    {
+      "question": "What is a point‑in‑time join and why is it essential for training data correctness?",
+      "answer": "A point‑in‑time join aligns each label with the most recent feature record whose timestamp does not exceed the label time. It prevents leakage of future information, ensuring causality. Without it, a model could inadvertently learn from data that would not be available at inference, leading to overly optimistic performance estimates and deployment failures."
+    },
+    {
+      "question": "How does DVC help maintain dataset lineage, and what are its storage implications?",
+      "answer": "DVC tracks data files by content hash and records dependencies in a dvc.yaml file, creating a directed acyclic graph from raw sources through preprocessing scripts to final datasets. This graph enables reproducible checkout of any version. However, each version stores a copy of the data (or a pointer to a remote cache), so storage can grow quickly; using remote object stores and data deduplication mitigates the overhead."
+    },
+    {
+      "question": "Explain online/offline skew and two concrete ways to detect it before model deployment.",
+      "answer": "Online/offline skew occurs when feature values used during training differ from those served at inference, often due to different update frequencies or preprocessing. To detect it, you can (1) compare statistical summaries (mean, std) of a feature from the offline snapshot and the online store for a recent time window, and (2) run a shadow inference where the production model consumes offline features and logs predictions, then compare those predictions to the live system that uses online features."
+    },
+    {
+      "question": "What are the trade‑offs between storing features in a columnar warehouse versus a key‑value cache?",
+      "answer": "Columnar warehouses excel at batch analytics, compression, and complex joins, making them ideal for offline training pipelines. Key‑value caches provide sub‑millisecond latency for single‑entity lookups, which is critical for real‑time inference. The trade‑off is cost and freshness: warehouses are cheaper per GB but slower to update, while caches are more expensive and require eviction policies. A hybrid approach stores the authoritative snapshot in the warehouse and pushes the latest rows to the cache."
+    },
+    {
+      "question": "How would you version a feature that depends on an external API whose responses change over time?",
+      "answer": "You would capture the API response as part of the raw data snapshot, storing the raw JSON alongside a timestamp and a version tag. The feature transformation would then operate on this stored response rather than calling the live API. DVC can track the raw response files, ensuring that each model version uses the exact same external data it was trained on, eliminating nondeterminism."
+    },
+    {
+      "question": "Design a simple feature store schema for a recommendation system that needs both user and item features.",
+      "answer": "Create two offline tables: user_features(user_id, as_of, age, country, avg_rating) and item_features(item_id, as_of, category, price, popularity). Each table is partitioned by as_of date and indexed on the primary key. An online store holds the latest row per user_id and item_id in a hash map. Training data is assembled by joining the interaction label table (user_id, item_id, event_time, click) with user_features and item_features using point‑in‑time joins on event_time. This schema isolates user and item updates while enabling efficient joins."
+    }
+  ],
+  "summary": "Feature stores provide a disciplined way to manage feature lifecycles, ensuring that training and inference see identical data through time‑stamped records and versioned snapshots. Point‑in‑time joins enforce causality, DVC records immutable lineage, and careful alignment of online and offline pipelines prevents skew. By storing features in both a columnar offline store for analytics and a low‑latency online cache for serving, teams gain scalability and performance. The overall workflow—from raw ingestion, version control, transformation, storage, to validation—creates reproducible, auditable machine learning systems that can be safely deployed and iterated upon.",
+  "practice": [
+    {
+      "question": "Given label rows L: (user, time) = (1, 2023‑01‑12), (2, 2023‑01‑18) and feature rows F: (user, as_of, spend) = (1,2023‑01‑01,100), (1,2023‑01‑10,110), (2,2023‑01‑05,80), (2,2023‑01‑15,85). Perform a point‑in‑time join manually and list the resulting training rows.",
+      "answer": "For user 1, the label time is 2023‑01‑12. The latest as_of <= that is 2023‑01‑10 with spend=110. For user 2, label time 2023‑01‑18, latest as_of <= that is 2023‑01‑15 with spend=85. Resulting rows: (user=1, label_time=2023‑01‑12, spend=110) and (user=2, label_time=2023‑01‑18, spend=85)."
+    },
+    {
+      "question": "Write a Python function that, given a pandas DataFrame of features with columns (entity, ts, value) and a target timestamp, returns the most recent value not after the target. Include error handling for missing entities.",
+      "answer": "def pit_lookup(df, entity, target_ts):\n    sub = df[(df['entity']==entity) & (df['ts']<=target_ts)]\n    if sub.empty:\n        raise KeyError(f'No feature for entity {entity} before {target_ts}')\n    return sub.loc[sub['ts'].idxmax(),'value']\n# Example usage:\n# df = pd.DataFrame({'entity':[1,1,2],'ts':pd.to_datetime(['2023-01-01','2023-01-10','2023-01-05']),'value':[100,110,80]})\n# print(pit_lookup(df,1,pd.Timestamp('2023-01-12')))\n"
+    },
+    {
+      "question": "A dataset version V1 has 1,000 rows and checksum abc123. After adding a new preprocessing step, you generate V2 with 1,020 rows and checksum def456. Explain how DVC records this change and how you would revert to V1.",
+      "answer": "DVC stores a .dvc file that lists the output path, its checksum, and the command used. After the new step, the .dvc file is updated with the new checksum def456 and the new command line. Git records the commit that added this change. To revert, checkout the Git commit before the change, then run 'dvc checkout' which restores the file with checksum abc123, giving you the exact V1 dataset."
+    },
+    {
+      "question": "Design a validation test to detect online/offline skew for a feature \"session_count\" that updates hourly online but daily offline. Describe the steps and expected outcome.",
+      "answer": "1. Select a random sample of 100 user IDs. 2. For each user, query the offline store for the feature value at a fixed past date (e.g., 2023‑01‑10). 3. Immediately query the online store for the same user and the same logical date (using the latest timestamp <= that date). 4. Compute the absolute difference and aggregate statistics (mean diff, max diff). 5. If the mean difference exceeds a small threshold (e.g., 1 session) or any diff is >5, flag skew. Expected outcome: differences should be zero or within the rounding error caused by the different aggregation windows."
+    },
+    {
+      "question": "Explain a trade‑off between storing feature snapshots as separate rows per day versus a single cumulative row per entity that is updated in place.",
+      "answer": "Separate daily rows preserve full history, enabling accurate point‑in‑time joins and auditability, but increase storage and query cost. A single cumulative row reduces storage and simplifies online lookups but loses the ability to reconstruct past feature values without additional logging, making it impossible to train models with historical snapshots and increasing risk of data leakage."
+    },
+    {
+      "question": "Implement a simple in‑memory online feature cache in Python that supports get(entity) and update(entity, value). Show how you would populate it from the latest rows of an offline table.",
+      "answer": "class OnlineCache:\n    def __init__(self):\n        self.store = {}\n    def get(self, entity):\n        return self.store.get(entity, None)\n    def update(self, entity, value):\n        self.store[entity] = value\n\n# populate from offline DataFrame df_offline with columns (entity, as_of, val)\ncache = OnlineCache()\nlatest = df_offline.sort_values('as_of').groupby('entity').tail(1)\nfor _, row in latest.iterrows():\n    cache.update(row['entity'], row['val'])\n# Now cache.get(42) returns the most recent value for entity 42."
+    }
+  ],
+  "id": "data-feature-store",
+  "title": "Feature Stores & Data Versioning",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2398
+}

@@ -1,0 +1,12 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-8.4.2, pluggy-1.6.0 -- F:\Download\NSRIT HACKTHON\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: F:\Download\NSRIT HACKTHON\backend
+configfile: pytest.ini
+plugins: anyio-4.15.1, langsmith-0.14.4
+collecting ... collected 5 items
+
+app/tests/test_password_reset_security.py::test_register_password_contract_is_unchanged PASSED [ 20%]
+app/tests/test_password_reset_security.py::test_reset_request_never_returns_or_logs_a_token PASSED [ 40%]
+app/tests/test_password_reset_security.py::test_unknown_and_known_email_responses_are_indistinguishable PASSED [ 60%]
+app/tests/test_password_reset_security.py::test_only_a_digest_of_the_token_is_persisted PASSED [ 80%]

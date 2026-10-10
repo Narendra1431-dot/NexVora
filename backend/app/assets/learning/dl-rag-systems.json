@@ -1,0 +1,93 @@
+{
+  "introduction": "Retrieval Augmented Generation (RAG) is a paradigm that combines a large language model (LLM) with an external knowledge store. The LLM produces fluent text, while the retrieval component supplies up‑to‑date factual snippets that ground the generation. This approach is useful whenever the model must answer questions about recent events, specialized domains, or large corpora that cannot be fully encoded in its parameters. By separating knowledge (retrieval) from reasoning (generation), RAG reduces hallucinations, improves factual accuracy, and enables efficient updates without retraining the entire model. The technique is most effective when the retrieval index is well‑structured, the query formulation captures the user intent, and the downstream generator can condition on the retrieved passages in a controllable way.",
+  "foundations": "The core of RAG rests on three pillars: a vector database that stores document embeddings, a similarity search that returns the most relevant chunks, and a language model that consumes those chunks as context. First, raw documents are split into manageable pieces—often sentences or paragraphs—through a process called chunking. Each chunk is encoded into a dense vector using a transformer encoder; the vectors are stored in an index that supports fast nearest‑neighbor queries, such as an approximate nearest neighbor (ANN) structure. When a user asks a question, the same encoder turns the query into a vector, and the index returns the top‑k nearest chunks. Those chunks are concatenated with the original prompt and fed to the generator, which produces the final answer. The retrieval step can be refined by a cross‑encoder that scores candidate chunks more precisely, and the whole loop can be made iterative: the model can issue follow‑up queries, retrieve new evidence, and refine its answer, a pattern known as Self‑RAG or agentic loops. Understanding these steps—chunking, embedding, similarity search, re‑ranking, and iterative prompting—provides the foundation for building robust RAG pipelines.",
+  "concepts": [
+    {
+      "title": "Contextual Chunking",
+      "explanation": "Contextual chunking is the process of breaking a document into pieces that preserve semantic coherence while fitting the token limits of the encoder. Simple fixed‑size windows often cut sentences in half, losing meaning. Instead, a rule‑based approach looks for natural boundaries: paragraph breaks, bullet points, or sentence endings. The goal is to keep each chunk self‑contained so that its embedding captures the full context needed for retrieval. Trade‑offs involve chunk size versus index size: smaller chunks increase recall because the search can match finer details, but they also increase the number of vectors stored and the chance of retrieving irrelevant fragments. Larger chunks reduce index size and improve precision but may miss specific facts. Selecting a chunk size of 100‑200 words is a common compromise for English text.",
+      "example": "Suppose we have a short article about photosynthesis:\n\n\"Photosynthesis converts light energy into chemical energy. In plants, chlorophyll absorbs photons, exciting electrons. These electrons travel through the thylakoid membrane, generating ATP and NADPH. The Calvin cycle then uses ATP and NADPH to fix CO2 into glucose.\"\n\nA naive 50‑word window would split after \"photons,\" breaking the cause‑effect chain. Contextual chunking would keep the whole paragraph as one chunk because it forms a logical unit. The resulting chunk is 45 words, well within typical encoder limits, and its embedding will capture the relationship between light absorption and glucose synthesis."
+    },
+    {
+      "title": "Cross-Encoder Re-ranking",
+      "explanation": "After the initial ANN search returns a set of candidate chunks, a cross‑encoder can be used to re‑rank them with higher precision. Unlike a bi‑encoder that encodes query and document separately, a cross‑encoder concatenates the query and each candidate, passes the pair through a transformer, and outputs a relevance score. This joint encoding allows the model to attend to interactions between query terms and document tokens, capturing nuances such as synonyms or negations. The trade‑off is computational cost: a cross‑encoder must run inference for every candidate, which can be expensive for large k. A typical pipeline uses a bi‑encoder to retrieve the top‑20 candidates, then a cross‑encoder to select the final top‑3 that will be fed to the generator.",
+      "example": "Imagine a user asks: \"What are the health benefits of green tea?\" The bi‑encoder returns ten chunks, including one that mentions \"green tea contains antioxidants\" and another that says \"green tea may cause insomnia if consumed late.\" The cross‑encoder scores each pair; the antioxidant chunk receives a score of 0.92, while the insomnia chunk scores 0.45 because the query emphasizes benefits, not side effects. The top‑2 re‑ranked chunks are then concatenated with the prompt for generation, ensuring the answer focuses on positive health effects."
+    },
+    {
+      "title": "Self-RAG & Agentic Loops",
+      "explanation": "Self‑RAG extends the basic retrieve‑then‑generate cycle by allowing the language model to decide when additional retrieval steps are needed. The model can generate a partial answer, detect uncertainty (e.g., via a confidence token or a \"need more info\" flag), formulate a follow‑up query, and invoke the retriever again. This creates an agentic loop where the system iteratively refines its response. The main benefit is higher accuracy on complex multi‑step questions, but the loop introduces latency and requires careful termination criteria to avoid infinite recursion. A common design uses a maximum of three iterations and a heuristic that stops when the generated answer contains no \"unknown\" markers.",
+      "example": "User: \"Explain how a blockchain achieves consensus and list its main drawbacks.\" The generator first produces a brief description of proof‑of‑work but flags \"need more detail on drawbacks.\" It then queries the retriever with \"blockchain consensus drawbacks\" and receives a chunk about energy consumption and centralization risk. The second generation pass incorporates this new evidence, yielding a complete answer that covers both consensus mechanisms and their disadvantages."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np, faiss\ntexts = [\n    \"Apple releases new iPhone.\",\n    \"Banana is a fruit.\",\n    \"Apple pie recipe uses apples.\"]\n# simple bag‑of‑words vectors for illustration\nvocab = {w:i for i,w in enumerate(set(' '.join(texts).split()))}\nvecs = np.array([[int(w in t.split()) for w in vocab] for t in texts], dtype='float32')\nindex = faiss.IndexFlatL2(vecs.shape[1])\nindex.add(vecs)\nquery = np.array([[int(w in \"Apple\" .split()) for w in vocab]], dtype='float32')\nD,I = index.search(query, k=2)\nprint('ids',I[0])\nprint('dist',D[0])",
+      "explanation": "The code builds a tiny vector index using FAISS with binary bag‑of‑words vectors. The query \"Apple\" matches two documents: the iPhone news and the pie recipe. The distance matrix D shows a zero distance for the exact match (first document) and a distance of 1 for the recipe, because both share the word \"Apple\". This simple example demonstrates how retrieval works without any approximation: the index returns the exact nearest neighbors, and the distances can be interpreted as squared Euclidean error. In practice, dense transformer embeddings replace these binary vectors, but the principle of nearest‑neighbor search remains identical."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for a Self‑RAG loop\nretriever = BiEncoder()\ncross = CrossEncoder()\ngenerator = LLM()\nmax_iter = 3\nquery = user_input\nfor i in range(max_iter):\n    candidates = retriever.search(query, k=20)\n    ranked = cross.rerank(query, candidates)[:3]\n    context = \"\\n\".join(ranked)\n    answer, flag = generator.generate(query, context)\n    if not flag: break  # flag indicates \"need more info\"\n    query = flag  # new sub‑question generated by LLM\nreturn answer",
+      "explanation": "The pseudocode outlines a Self‑RAG pipeline. First, a bi‑encoder retrieves a broad set of candidate chunks. A cross‑encoder then refines this set to the three most relevant pieces. The generator receives the original user query plus the retrieved context and produces an answer together with a flag. If the flag is empty, the loop terminates; otherwise the flag contains a follow‑up sub‑question that the system uses to retrieve additional evidence. This pattern enables the model to handle multi‑hop reasoning, such as first retrieving a definition and then a related statistic, while keeping the number of retrieval calls bounded."
+    }
+  ],
+  "flow": [
+    "1. Document ingestion: raw texts are cleaned and split using contextual chunking rules.",
+    "2. Embedding: each chunk is passed through a transformer encoder to obtain a dense vector.",
+    "3. Indexing: vectors are stored in a vector database that supports fast L2 or inner‑product search.",
+    "4. Query encoding: the user question is encoded with the same encoder to produce a query vector.",
+    "5. Initial retrieval: the index returns the top‑k nearest chunks based on similarity.",
+    "6. Re‑ranking: a cross‑encoder scores the candidates jointly with the query and selects the best few.",
+    "7. Generation (optional Self‑RAG): the generator consumes the query and retrieved context, may emit a follow‑up query, and repeats steps 4‑6 up to a fixed iteration limit."
+  ],
+  "interview": [
+    {
+      "question": "What is the main advantage of using a cross‑encoder for re‑ranking over a bi‑encoder?",
+      "answer": "A cross‑encoder jointly encodes the query and each candidate, allowing the transformer to attend to interactions between them. This captures fine‑grained relevance signals such as synonymy, negation, or phrase overlap that a bi‑encoder, which encodes them separately, cannot model. Consequently, cross‑encoders typically achieve higher precision at the cost of increased inference time because they must run the model for every candidate."
+    },
+    {
+      "question": "How does contextual chunking affect recall in a RAG system?",
+      "answer": "Contextual chunking aims to keep semantically coherent units together, which improves the quality of each embedding. When chunks are too small, important context may be split, causing the embedding to miss key terms and lowering recall because relevant documents are not matched. Proper chunking preserves the full meaning within each vector, increasing the chance that a query will find a matching chunk and thus improving overall recall."
+    },
+    {
+      "question": "Explain how a Self‑RAG loop decides when to stop retrieving.",
+      "answer": "A Self‑RAG loop typically uses a termination condition based on a flag returned by the generator. If the generator outputs an empty flag or a special token indicating \"answer complete,\" the loop stops. Additional safeguards include a maximum iteration count (e.g., three cycles) and a check that the newly generated sub‑question is not a repeat of a previous one, preventing infinite recursion."
+    },
+    {
+      "question": "What trade‑offs arise when choosing the dimensionality of embedding vectors?",
+      "answer": "Higher dimensional embeddings can capture more nuanced semantic information, potentially improving retrieval accuracy. However, they increase memory consumption and slow down nearest‑neighbor search, especially for large corpora. Lower dimensions reduce storage and speed up indexing but may lose discriminative power, leading to lower recall. Selecting a dimension around 384‑768 is common for transformer‑based encoders because it balances expressiveness and efficiency."
+    }
+  ],
+  "summary": "Retrieval Augmented Generation blends a language model with an external knowledge store to produce factual, up‑to‑date answers. The pipeline begins with contextual chunking, which creates semantically coherent pieces that are embedded and indexed. A bi‑encoder performs fast similarity search, while a cross‑encoder refines the candidate set for higher precision. Self‑RAG introduces an agentic loop where the model can request additional evidence, enabling multi‑step reasoning. Key design decisions include chunk size, embedding dimension, re‑ranking depth, and termination criteria. By understanding these foundations, practitioners can build RAG systems that reduce hallucinations, scale to large corpora, and adapt quickly to new information.",
+  "practice": [
+    {
+      "question": "Given three documents: D1='cat sat on mat', D2='dog barked loudly', D3='cat chased mouse'. Using binary bag‑of‑words vectors for the words {cat, dog, mouse, sat, on, mat, barked, loudly, chased}, compute the L2 distance between the query 'cat' and each document. Which document is retrieved?",
+      "answer": "The L2 distances are: D1=1.732, D2=1.414, D3=1.414. The nearest neighbors are D2 and D3; a cross‑encoder would prefer D3 because it contains the query term 'cat'."
+    },
+    {
+      "question": "Implement a simple RAG pipeline in Python that uses SentenceTransformers for embedding, FAISS for retrieval, and GPT‑2 (via HuggingFace) for generation. Use two short passages about \"solar energy\" and retrieve the most relevant one for the query \"How does solar power work?\" Provide the full code.",
+      "answer": "The code builds embeddings with SentenceTransformers, stores them in a FAISS index, retrieves the solar‑panel passage for the query, and feeds the query plus context to GPT‑2, which outputs an answer. Because the knowledge base is tiny, the retrieval is exact and the generation is deterministic (do_sample=False). In real scenarios, larger corpora and more powerful LLMs improve coverage and fluency."
+    },
+    {
+      "question": "Design a trade‑off analysis for choosing between a bi‑encoder only pipeline and a bi‑encoder plus cross‑encoder re‑ranking pipeline in a RAG system handling 1 million documents.",
+      "answer": "The analysis compares latency, computational cost, and accuracy. The bi‑encoder only pipeline is fast and cheap but may return less precise chunks. Adding a cross‑encoder improves relevance at the expense of extra inference time and GPU usage. The choice depends on the service‑level agreement and domain criticality."
+    },
+    {
+      "question": "A vector database stores 5000 document embeddings of dimension 384. Estimate the memory required (in MB) and the approximate time to perform an exact L2 search for a single query using FAISS IndexFlatL2 on a modern CPU (assume 2 ns per distance computation).",
+      "answer": "Memory ≈ 7.3 MB; exact L2 search time ≈ 3.8 ms on a typical CPU."
+    },
+    {
+      "question": "Explain why using a fixed‑size sliding window for chunking can lead to hallucinations in RAG outputs, and propose a mitigation strategy.",
+      "answer": "A fixed‑size sliding window may cut sentences in half, separating cause and effect or removing crucial qualifiers. When the generator receives such fragmented context, it may infer missing information incorrectly, leading to hallucinations (e.g., stating a cause that never appeared in the original text). Mitigation: employ contextual chunking that respects sentence and paragraph boundaries, optionally overlapping chunks by a small margin (e.g., 20 %). This preserves semantic completeness while still providing enough overlap for the retriever to match query terms."
+    },
+    {
+      "question": "Write pseudocode for a function that, given a query and a list of retrieved chunks, decides whether to invoke a second retrieval round based on a simple confidence heuristic (e.g., presence of the token '<UNK>').",
+      "answer": "# Pseudocode\nfunction maybe_second_round(query, chunks):\n    # concatenate chunks\n    context = \"\\n\".join(chunks)\n    answer = LLM.generate(query, context)\n    if \"<UNK>\" in answer:\n        # LLM signals unknown information\n        new_query = \"Provide more detail on \" + query\n        return new_query, True\n    else:\n        return answer, False\n\n# Usage\nq = \"What is quantum entanglement?\"\nchunks = retriever.search(q, k=5)\nresult, need_more = maybe_second_round(q, chunks)\nif need_more:\n    extra_chunks = retriever.search(result, k=5)\n    final_answer = LLM.generate(result, \"\\n\".join(extra_chunks))\nelse:\n    final_answer = result\n\n# Explanation: The function checks the generated answer for the placeholder token <UNK>. If found, it creates a more specific sub‑question and signals that a second retrieval is required. This simple heuristic enables a Self‑RAG loop without complex confidence estimation."
+    }
+  ],
+  "id": "dl-rag-systems",
+  "title": "Retrieval Augmented Generation (RAG)",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2317
+}

@@ -1,0 +1,42 @@
+FFF                                                                      [100%]
+================================== FAILURES ===================================
+_____________________________ test_coding_journey _____________________________
+app\tests\test_coding.py:50: in test_coding_journey
+    sid = u['student']['studentId']
+          ^^^^^^^^^^^^
+E   KeyError: 'student'
+__________________________ test_certificate_journey ___________________________
+app\tests\test_certificates.py:23: in test_certificate_journey
+    assert register.status_code==201,register.text
+E   AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E   assert 422 == 201
+E    +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+___________________________ test_connected_journey ____________________________
+app\tests\test_integration.py:17: in test_connected_journey
+    auth=c.post('/api/v1/auth/register',json={'name':'QA Learner','email':f'qa-{uuid4().hex}@example.com','password':'qa-secure-pass'}); assert auth.status_code==201, auth.text
+                                                                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E   assert 422 == 201
+E    +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:40
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv\Lib\site-packages\fastapi\routing.py:233: 290 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+.venv\Lib\site-packages\starlette\_utils.py:39: 294 warnings
+app/tests/test_coding.py: 3 warnings
+app/tests/test_certificates.py: 3 warnings
+app/tests/test_integration.py: 4 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED app/tests/test_coding.py::test_coding_journey - KeyError: 'student'
+FAILED app/tests/test_certificates.py::test_certificate_journey - AssertionEr...
+FAILED app/tests/test_integration.py::test_connected_journey - AssertionError...
+3 failed, 595 warnings in 5.38s

@@ -1,0 +1,34 @@
+..........................................................               [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:40
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv\Lib\site-packages\fastapi\routing.py:233: 290 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+.venv\Lib\site-packages\starlette\_utils.py:39: 294 warnings
+app/tests/test_agent_graph.py: 9 warnings
+app/tests/test_assistant.py: 5 warnings
+app/tests/test_certificate_samples.py: 4 warnings
+app/tests/test_certificates.py: 29 warnings
+app/tests/test_coding.py: 7 warnings
+app/tests/test_copilot.py: 9 warnings
+app/tests/test_external_credentials.py: 15 warnings
+app/tests/test_governed_runtime.py: 18 warnings
+app/tests/test_integration.py: 10 warnings
+app/tests/test_intelligence.py: 7 warnings
+app/tests/test_learning_hub.py: 10 warnings
+app/tests/test_profile_avatar.py: 16 warnings
+app/tests/test_resume_flow.py: 4 warnings
+app/tests/test_resume_generator.py: 6 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+app/tests/test_governed_runtime.py: 38 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\chromadb\telemetry\opentelemetry\__init__.py:128: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(f):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+58 passed, 772 warnings in 161.17s (0:02:41)

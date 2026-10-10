@@ -1,0 +1,27 @@
+{
+  "provider": "Groq",
+  "live": true,
+  "checks": [
+    {
+      "name": "greeting",
+      "passed": true,
+      "responseCharacters": 32
+    },
+    {
+      "name": "general",
+      "passed": true,
+      "responseCharacters": 326
+    },
+    {
+      "name": "follow_up",
+      "passed": true,
+      "responseCharacters": 1297
+    },
+    {
+      "name": "grounded",
+      "passed": true,
+      "responseCharacters": 46
+    }
+  ],
+  "passed": true
+}

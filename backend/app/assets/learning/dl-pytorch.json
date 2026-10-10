@@ -1,0 +1,93 @@
+{
+  "introduction": "PyTorch has become a dominant deep‑learning framework because it blends a Pythonic programming model with a powerful tensor library and an automatic differentiation engine. Understanding the core ideas—how tensors are stored, how gradients are computed, and how data is fed to models—enables you to write correct, efficient code and to scale training across many GPUs. This chapter introduces the fundamental building blocks of PyTorch, walks through concrete numeric examples, and prepares you for interview questions that probe both theory and practical implementation. By the end you will be able to create tensors, trace gradients with autograd, build custom datasets, and launch distributed training with DistributedDataParallel.",
+  "foundations": "A PyTorch tensor is a multi‑dimensional array that lives either on CPU memory or on a GPU device. The tensor class supports standard arithmetic, broadcasting, and in‑place operations; each operation records a node in a dynamic computation graph if any input requires gradients. The autograd engine traverses this graph backward, applying the chain rule to compute dLoss/dParameter for every leaf tensor that has requires_grad=True. Gradient accumulation is performed in the .grad attribute, which must be zeroed before each optimizer step. Data loading is decoupled from model code through the Dataset abstraction, which implements __len__ and __getitem__, and the DataLoader, which batches, shuffles, and optionally uses multiple worker processes. For large‑scale training, DistributedDataParallel (DDP) replicates the model on each GPU process, synchronizes gradients after each backward pass, and ensures that each process sees a distinct subset of the data via DistributedSampler. These three pillars—tensor mechanics, autograd, and data pipelines—form the backbone of any PyTorch project and must be mastered before tackling advanced topics such as custom autograd functions or mixed‑precision training.",
+  "concepts": [
+    {
+      "title": "Autograd Engine",
+      "explanation": "The autograd engine builds a directed acyclic graph (DAG) where each node represents a tensor operation and edges represent data dependencies. When you call loss.backward(), the engine performs a reverse topological sort and computes gradients by applying the local derivative of each operation. The engine stores a Function object for each operation; this object knows how to compute both the forward output and the backward gradient. Leaf tensors that require gradients accumulate their partial derivatives in the .grad field. Autograd is dynamic: the graph is recreated at every forward pass, allowing conditional control flow but also requiring careful handling of in‑place operations that might overwrite values needed for gradient computation.",
+      "example": "Consider tensors a = torch.tensor([2.0, 3.0], requires_grad=True) and b = torch.tensor([4.0, 5.0], requires_grad=True). Compute c = a * b, then d = c.sum(). The backward pass d.backward() yields a.grad = [4.0, 5.0] and b.grad = [2.0, 3.0] because dc/da = b and dc/db = a. If we later perform e = c ** 2 and call e.sum().backward(), the gradients accumulate: a.grad becomes [4.0 + 2*2*2, 5.0 + 2*3*3] = [12.0, 23.0]. This illustrates gradient accumulation and the need to zero .grad before the next optimizer step."
+    },
+    {
+      "title": "Custom Dataset & DataLoader",
+      "explanation": "A custom Dataset subclasses torch.utils.data.Dataset and implements __len__ to return the number of samples and __getitem__ to retrieve a single sample given an index. The __getitem__ method can perform on‑the‑fly transformations, such as reading an image file, converting it to a tensor, and applying augmentations. DataLoader wraps a Dataset and provides an iterator that yields batches. It can shuffle data, drop incomplete batches, and spawn multiple worker processes for parallel I/O. The collate_fn argument allows custom batch assembly, for example padding variable‑length sequences. Proper use of Dataset and DataLoader decouples data handling from model logic and enables efficient training pipelines.",
+      "example": "Suppose we have a list of (x, y) pairs: data = [(1,2), (3,4), (5,6), (7,8)]. A SimpleDataset returns torch.tensor(x) and torch.tensor(y) for each index. Using DataLoader(dataset, batch_size=2, shuffle=True) yields batches like [[tensor([3,5]), tensor([4,6])], [tensor([1,7]), tensor([2,8])]] depending on the random seed. The DataLoader automatically stacks the tensors along a new batch dimension, so the model receives inputs of shape (batch_size, 1)."
+    },
+    {
+      "title": "DistributedDataParallel (DDP)",
+      "explanation": "DDP runs one model replica per GPU process. Each process holds its own optimizer and computes gradients on its local mini‑batch. After the backward pass, DDP performs an all‑reduce operation that sums gradients across all processes and then divides by the world size, ensuring that each replica sees the same averaged gradient. The synchronization is overlapped with computation to reduce overhead. A DistributedSampler ensures that each process receives a unique slice of the dataset, preventing duplicate data. DDP requires initializing the process group (backend='nccl' for GPUs) and wrapping the model with torch.nn.parallel.DistributedDataParallel. Correct usage yields near‑linear scaling for data‑parallel training.",
+      "example": "Imagine training on two GPUs with world_size=2. Process 0 receives samples [0,1] and Process 1 receives [2,3] from a dataset of four items. After forward and backward, each process has gradients g0 and g1. DDP performs an all‑reduce: g_avg = (g0 + g1)/2, and both processes update their parameters with g_avg. The loss printed by each process will differ because of different data, but the model parameters stay synchronized after each step."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import torch\n\na = torch.tensor([2.,3.], requires_grad=True)\nb = torch.tensor([4.,5.], requires_grad=True)\n\nc = a * b\nloss = c.sum()\nloss.backward()\nprint('a.grad', a.grad)\nprint('b.grad', b.grad)",
+      "explanation": "The script creates two leaf tensors a and b, multiplies them element‑wise to obtain c, and then sums c to produce a scalar loss. Calling loss.backward() triggers autograd, which computes the gradient of loss with respect to each leaf. Because loss = a0*b0 + a1*b1, the partial derivative with respect to a is b, giving a.grad = [4.,5.]. Similarly, the derivative with respect to b is a, giving b.grad = [2.,3.]. This simple example demonstrates how gradients flow through element‑wise operations and how they accumulate in the .grad fields. In a real training loop you would zero the gradients before the next backward call to avoid unintended accumulation."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for DDP training loop\ninitialize_process_group(backend='nccl')\nmodel = MyNet().to(device)\nmodel = torch.nn.parallel.DistributedDataParallel(model)\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\ntrain_sampler = torch.utils.data.distributed.DistributedSampler(dataset)\nloader = torch.utils.data.DataLoader(dataset, batch_size=32,\n        sampler=train_sampler)\nfor epoch in range(num_epochs):\n    train_sampler.set_epoch(epoch)\n    for x, y in loader:\n        optimizer.zero_grad()\n        out = model(x)\n        loss = criterion(out, y)\n        loss.backward()\n        optimizer.step()",
+      "explanation": "The pseudocode shows the essential steps for a DDP training script. First, a process group is created so that all processes can communicate. The model is moved to the appropriate GPU and wrapped with DistributedDataParallel, which inserts gradient synchronization hooks after each backward call. A DistributedSampler guarantees that each process sees a distinct subset of the dataset each epoch, preventing overlap. Inside the training loop, the sampler's epoch is set to shuffle deterministically across processes. The optimizer zeroes gradients, the forward pass computes loss, backward computes local gradients, and DDP automatically averages them before the optimizer step. This pattern scales to many GPUs with minimal code changes compared to a single‑GPU script."
+    }
+  ],
+  "flow": [
+    "Create tensors with requires_grad flag to indicate they participate in autograd.",
+    "Define a forward computation using tensor operations; PyTorch builds a dynamic graph.",
+    "Compute a scalar loss and call loss.backward() to trigger reverse‑mode differentiation.",
+    "Zero the .grad fields before each iteration to avoid gradient accumulation errors.",
+    "Wrap the model in DistributedDataParallel and use DistributedSampler for data partitioning.",
+    "Run the training loop: forward, backward, optimizer.step(), ensuring synchronization.",
+    "Validate results and optionally switch to evaluation mode with model.eval()."
+  ],
+  "interview": [
+    {
+      "question": "How does PyTorch's autograd engine compute gradients for a dynamic computation graph?",
+      "answer": "Autograd records each tensor operation as a node in a directed acyclic graph during the forward pass. When loss.backward() is invoked, the engine performs a reverse topological traversal, applying the chain rule at each node. Each Function object stores a backward method that receives the upstream gradient and returns the gradient with respect to its inputs. Leaf tensors with requires_grad=True accumulate the resulting gradients in their .grad attribute. Because the graph is rebuilt on every forward call, conditional branches and loops are naturally supported, making autograd dynamic."
+    },
+    {
+      "question": "What are the advantages of using a custom Dataset over a simple list of tensors?",
+      "answer": "A custom Dataset encapsulates data loading logic, allowing lazy loading, on‑the‑fly transformations, and integration with external storage formats such as images or text files. It separates concerns: the model code receives ready‑to‑use tensors, while the Dataset handles I/O, caching, and augmentation. This design enables the DataLoader to parallelize loading with multiple workers, to shuffle data efficiently, and to apply custom collate functions for variable‑length inputs. It also makes the pipeline reusable across experiments."
+    },
+    {
+      "question": "Explain how gradient synchronization works in DistributedDataParallel.",
+      "answer": "In DDP each process computes gradients on its local mini‑batch. After the backward pass, DDP inserts a hook that triggers an all‑reduce operation across all processes. The all‑reduce sums the gradients for each parameter and then divides by the world size, producing the average gradient. This averaged gradient replaces the local gradient in each replica before the optimizer step, ensuring that all model copies stay identical. The communication is overlapped with computation using NCCL for GPUs, minimizing overhead."
+    },
+    {
+      "question": "What pitfalls can arise when using in‑place tensor operations with autograd?",
+      "answer": "In‑place operations modify a tensor's data without creating a new tensor. If the modified tensor is needed later for gradient computation, autograd may lose the original value, leading to incorrect gradients or runtime errors. PyTorch detects many unsafe in‑place ops and raises a RuntimeError. To avoid pitfalls, either use out‑of‑place versions (e.g., torch.add instead of tensor.add_) or ensure the tensor is not a leaf requiring gradients when performing the in‑place change."
+    }
+  ],
+  "summary": "PyTorch provides a cohesive ecosystem where tensors, automatic differentiation, and data pipelines interlock to enable rapid deep‑learning development. Tensors store data on CPU or GPU and form the nodes of a dynamic computation graph built by autograd. The backward pass automatically applies the chain rule, accumulating gradients in leaf tensors. Custom Dataset classes abstract data access, while DataLoader handles batching, shuffling, and parallel loading. DistributedDataParallel scales this workflow across multiple GPUs by synchronizing gradients after each backward pass, using a DistributedSampler to avoid data duplication. Mastery of these three components—tensor mechanics, autograd, and distributed data handling—lays a solid foundation for building, debugging, and scaling neural‑network models in PyTorch.",
+  "practice": [
+    {
+      "question": "Given tensors x = torch.tensor([1.,2.,3.], requires_grad=True) and w = torch.tensor([0.5, -0.5, 2.0], requires_grad=True), compute y = (x * w).sum() and then the gradients dy/dx and dy/dw.",
+      "answer": "Forward: x*w = [0.5, -1.0, 6.0]; sum = 5.5, so y=5.5. Backward: dy/dx = w => [0.5, -0.5, 2.0]; dy/dw = x => [1.0, 2.0, 3.0]. After y.backward(), x.grad = [0.5, -0.5, 2.0] and w.grad = [1.0, 2.0, 3.0]."
+    },
+    {
+      "question": "Implement a custom Dataset that returns the square of an integer index as a tensor and its cube as the label. Show how DataLoader batches size 3.",
+      "answer": "class SquareCubeDataset(torch.utils.data.Dataset):\n    def __init__(self, n):\n        self.n = n\n    def __len__(self):\n        return self.n\n    def __getitem__(self, idx):\n        x = torch.tensor(idx, dtype=torch.float32)\n        y = torch.tensor(idx**3, dtype=torch.float32)\n        return x**2, y\n\ndataset = SquareCubeDataset(10)\nloader = torch.utils.data.DataLoader(dataset, batch_size=3, shuffle=False)\nfor batch_x, batch_y in loader:\n    print(batch_x, batch_y)\n# Output shows batches: [0,1,4] [0,1,8], then [9,16,25] [0,27,64], etc."
+    },
+    {
+      "question": "Explain why zeroing gradients (optimizer.zero_grad()) is essential in a training loop that uses gradient accumulation over multiple batches.",
+      "answer": "Each call to loss.backward() adds the newly computed gradient to the existing .grad field of leaf tensors. If you accumulate gradients over several mini‑batches to simulate a larger batch size, you must explicitly zero the gradients only after the desired number of accumulation steps. Forgetting to zero them each iteration would cause gradients from all previous iterations to be summed indefinitely, leading to exploding updates and incorrect learning dynamics."
+    },
+    {
+      "question": "Design a trade‑off between using DataLoader with num_workers=0 versus num_workers=4 for loading image data from disk. Discuss impact on CPU usage, GPU utilization, and reproducibility.",
+      "answer": "Using num_workers=0 runs data loading in the main process, which simplifies debugging and guarantees deterministic ordering, but it can become a bottleneck: the GPU may idle while waiting for I/O, reducing overall throughput. Setting num_workers=4 spawns four subprocesses that load and preprocess images in parallel, increasing CPU utilization and often keeping the GPU fed with data, thus improving training speed. However, multi‑process loading introduces nondeterminism due to race conditions in random augmentations unless you set worker_init_fn with a fixed seed. It also consumes more memory per worker. The choice depends on dataset size, CPU cores, and whether reproducibility is a higher priority than raw speed."
+    },
+    {
+      "question": "In a two‑GPU DDP setup, each GPU processes a batch of size 8. If the loss on GPU0 is 0.6 and on GPU1 is 0.8, what is the effective loss used for logging if you average the two losses? Compute the average and comment on why this averaging is appropriate.",
+      "answer": "Effective loss = (0.6 + 0.8) / 2 = 0.7. Averaging the per‑process losses yields a metric that reflects the model's performance on the entire dataset slice seen in that iteration. Since DDP synchronizes gradients using the average, the averaged loss aligns with the gradient computation and provides a single scalar for monitoring training progress."
+    },
+    {
+      "question": "Write a short PyTorch snippet that creates a 3x3 diagonal integer matrix, computes its inverse analytically, and verifies the product equals the identity matrix.",
+      "answer": "import torch\nD = torch.diag(torch.tensor([2,3,4], dtype=torch.float32))\nD_inv = torch.diag(1/torch.tensor([2,3,4], dtype=torch.float32))\nI = torch.mm(D, D_inv)\nprint(I)\n# Output:\n# tensor([[1., 0., 0.],\n#         [0., 1., 0.],\n#         [0., 0., 1.]])\n# The product matches the identity matrix exactly because diagonal matrices invert element‑wise."
+    }
+  ],
+  "id": "dl-pytorch",
+  "title": "PyTorch Framework & Tensors",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2188
+}

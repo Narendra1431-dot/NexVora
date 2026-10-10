@@ -1,0 +1,92 @@
+{
+  "introduction": "Linear algebra is the mathematical language that underpins many areas of computer science, data analysis, and engineering. It provides tools to represent and manipulate multidimensional data, solve systems of equations, and uncover hidden structure in datasets. Understanding linear algebra enables you to work with transformations, optimize models, and build algorithms that scale. This chapter introduces the core ideas a beginner needs—vectors, matrices, and the operations that combine them—before moving to the three key subtopics: eigenvalues and eigenvectors, singular value decomposition, and tensor operations. By mastering these concepts you will be prepared to tackle machine‑learning pipelines, graphics pipelines, and scientific simulations, and you will have a solid foundation for technical interviews that probe your analytical reasoning.",
+  "foundations": "A vector is an ordered list of numbers that can be visualized as a point or an arrow in space. Vectors support addition (component‑wise) and scalar multiplication, which together define a vector space. A matrix is a rectangular array of numbers that represents a linear transformation from one vector space to another; multiplying a matrix by a vector applies that transformation. Important matrix operations include addition, multiplication, transposition, and inversion. Matrix multiplication is not element‑wise; the entry in row i, column j of the product is the dot product of row i of the left matrix with column j of the right matrix. The determinant of a square matrix measures volume scaling and indicates invertibility: a non‑zero determinant means the matrix has an inverse. Systems of linear equations can be written as Ax = b, where A is a coefficient matrix, x the unknown vector, and b the result vector. Solving such systems involves Gaussian elimination, LU decomposition, or using the matrix inverse when it exists. Norms quantify vector length (e.g., Euclidean norm) and matrix size (e.g., Frobenius norm). Orthogonality, where vectors have zero dot product, leads to convenient bases that simplify many calculations. These building blocks are essential before exploring eigen‑analysis, singular value decomposition, and higher‑order tensor algebra.",
+  "concepts": [
+    {
+      "title": "Eigenvalues & Eigenvectors",
+      "explanation": "An eigenvector of a square matrix A is a non‑zero vector v that, when multiplied by A, changes only in magnitude, not direction: A v = λ v. The scalar λ is the eigenvalue associated with v. Eigenpairs reveal intrinsic properties of the transformation, such as scaling factors along principal directions. To find them, solve the characteristic equation det(A - λ I) = 0, where I is the identity matrix; the roots λ are the eigenvalues. For each λ, substitute back into (A - λ I) v = 0 to obtain the eigenvectors, which form the null space of (A - λ I). Eigenvalues can be real or complex, and their multiplicities affect the geometric multiplicity of eigenvectors. In practice, eigen‑analysis is used for stability analysis, dimensionality reduction (PCA), and solving differential equations. Numerical methods like the power iteration approximate the dominant eigenpair when exact computation is costly. Trade‑offs include sensitivity to rounding errors for ill‑conditioned matrices and the need for orthogonal eigenvectors in symmetric matrices.",
+      "example": "Consider the matrix A = [[4, 1], [2, 3]]. Compute det(A - λ I) = (4-λ)(3-λ) - 2*1 = λ^2 -7λ +10. Solving λ^2 -7λ +10 = 0 gives λ = 5 and λ = 2. For λ = 5, solve (A-5I)v = [[-1,1],[2,-2]]v = 0, yielding eigenvector v1 = [1,1]^T. For λ = 2, solve (A-2I)v = [[2,1],[2,1]]v = 0, giving eigenvector v2 = [-0.5,1]^T (or any scalar multiple). These eigenpairs show that applying A stretches vectors along [1,1] by factor 5 and along [-0.5,1] by factor 2, illustrating how eigen‑analysis decomposes the transformation into independent scaling actions."
+    },
+    {
+      "title": "Matrix Decomposition (SVD)",
+      "explanation": "Singular value decomposition (SVD) factorizes any m×n matrix M into three components: M = U Σ V^T. U is an m×m orthogonal matrix whose columns are left singular vectors; V is an n×n orthogonal matrix whose columns are right singular vectors; Σ is an m×n diagonal matrix with non‑negative singular values σ_i on the diagonal, sorted descending. The singular values are the square roots of the eigenvalues of M^T M (or M M^T). SVD provides optimal low‑rank approximations: truncating Σ to its top k singular values yields the best rank‑k matrix in the Frobenius norm sense. This property is exploited in data compression, noise reduction, and recommendation systems. Computing SVD involves bidiagonalization followed by iterative QR steps; modern libraries handle this efficiently. Trade‑offs include higher computational cost than simpler factorizations (LU, QR) and the need for careful handling of very large sparse matrices, where truncated or randomized SVD variants are preferred.",
+      "example": "Use M = [[3, 0, 0], [0, 2, 0]]. Then M^T M = diag(9, 4, 0). The two singular values of this 2 by 3 matrix are 3 and 2. A full SVD has U = I_2, V = I_3, and Sigma = M. The rank-1 approximation keeps only 3, giving [[3, 0, 0], [0, 0, 0]]. Its Frobenius error is 2; its squared Frobenius error is 4. Keeping both singular values reconstructs the original exactly, so there is no compression error at rank 2. This example also illustrates that a rectangular matrix has min(m,n) singular values in the usual compact representation, even though M^T M has n eigenvalues."
+    },
+    {
+      "title": "Tensor Operations",
+      "explanation": "A tensor generalizes scalars (order‑0), vectors (order‑1), and matrices (order‑2) to higher dimensions. An order‑k tensor is an array with k indices, e.g., a 3‑dimensional array T[i][j][k]. Tensor operations extend matrix algebra: contraction sums over a pair of matching indices, analogous to matrix multiplication; outer product adds new dimensions; and mode‑n multiplication multiplies a tensor by a matrix along a specific mode, reshaping that dimension. The Einstein summation convention provides concise notation for these operations. Tensors enable compact representation of multi‑way data such as color images (height × width × channel) or word embeddings across contexts. Decompositions like CANDECOMP/PARAFAC (CP) and Tucker factorize tensors into low‑rank components, facilitating compression and interpretation. Numerical stability can be challenging because tensor rank is NP‑hard to compute, and algorithms may converge to local minima. Trade‑offs involve choosing between CP (simpler but potentially less stable) and Tucker (more flexible but higher computational cost).",
+      "example": "Suppose we have a 2×2×2 tensor T with entries T[0,0,0]=1, T[0,0,1]=2, T[0,1,0]=3, T[0,1,1]=4, T[1,0,0]=5, T[1,0,1]=6, T[1,1,0]=7, T[1,1,1]=8. Contracting over the first and third modes yields a vector C where C[j] = sum_i,k T[i,j,k] δ_{i,k}. Computing C[0] = T[0,0,0]+T[1,0,1]=1+6=7, C[1] = T[0,1,0]+T[1,1,1]=3+8=11. Thus the contraction reduces the tensor to a vector [7,11], illustrating how summing over selected indices extracts aggregated information."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\nA = np.array([[4, 1], [2, 3]])\nvals, vecs = np.linalg.eig(A)\nprint('Eigenvalues:', vals)\nprint('Eigenvectors:\\n', vecs)",
+      "explanation": "The code uses NumPy's eig function to compute eigenvalues and eigenvectors of the 2x2 matrix A. The output shows eigenvalues [5. 2.] and corresponding eigenvectors as columns of the matrix printed. Each eigenvector is scaled arbitrarily; any non‑zero scalar multiple represents the same direction. This demonstration confirms the manual calculation performed earlier, and illustrates how numerical libraries handle the characteristic polynomial internally. Limitations include sensitivity to rounding errors for matrices with close or complex eigenvalues, and the fact that eig returns complex numbers even for real matrices when necessary."
+    },
+    {
+      "title": "Applied example: rank-1 reconstruction",
+      "code": "import numpy as np\nM = np.array([[3., 0., 0.], [0., 2., 0.]])\nU, s, VT = np.linalg.svd(M, full_matrices=False)\nrank1 = U[:, :1] @ np.diag(s[:1]) @ VT[:1, :]\nprint(rank1)\nprint(np.linalg.norm(M - rank1, ord='fro'))",
+      "explanation": "The rank-1 reconstruction is [[3, 0, 0], [0, 0, 0]], and the Frobenius norm of its error is 2. The squared error is 4, equal to the sum of squares of discarded singular values. Keeping both singular values reconstructs M exactly. Truncation trades fidelity for a lower rank; it is useful for large matrices only when storing the factors actually costs less than storing the original matrix. For a tiny 2 by 3 example, factorization is an illustration rather than a practical storage saving."
+    }
+  ],
+  "flow": [
+    "Represent data as vectors or matrices, identifying dimensions and meaning of each axis.",
+    "Choose appropriate operations: addition for combining, multiplication for applying transformations.",
+    "Compute eigenvalues and eigenvectors to discover scaling directions of square matrices.",
+    "Apply SVD to decompose any matrix, inspect singular values to assess rank and energy distribution.",
+    "If data has more than two modes, organize it as a tensor and perform mode‑n multiplications or contractions.",
+    "Validate results by reconstructing the original structure from decomposed components and measuring error."
+  ],
+  "interview": [
+    {
+      "question": "Explain the geometric interpretation of eigenvectors and eigenvalues for a 2D linear transformation.",
+      "answer": "In two dimensions, a linear transformation represented by matrix A maps every vector to a new location. Eigenvectors are special directions that remain on the same line after transformation; they may be stretched or shrunk but not rotated. The eigenvalue associated with an eigenvector quantifies that scaling factor. Geometrically, drawing the eigenvectors shows the axes of the transformation, and the eigenvalues indicate how much the shape expands or contracts along each axis. For example, a matrix that scales x by 3 and y by 2 has eigenvectors aligned with the x‑ and y‑axes and eigenvalues 3 and 2 respectively."
+    },
+    {
+      "question": "How does truncating singular values in SVD affect data reconstruction?",
+      "answer": "Truncating singular values means keeping only the largest k singular values and their corresponding singular vectors, discarding the rest. This yields a rank‑k approximation that minimizes the Frobenius norm of the reconstruction error. The effect is that most of the variance (energy) captured by the discarded singular values is lost, leading to a smoother or less detailed reconstruction. In image compression, for instance, keeping only a few singular values removes fine details but preserves the overall structure. The trade‑off is between compression ratio and fidelity; the squared Frobenius error equals the sum of squares of the omitted singular values."
+    },
+    {
+      "question": "What are the computational differences between CP and Tucker tensor decompositions?",
+      "answer": "CP (CANDECOMP/PARAFAC) decomposes a tensor into a sum of rank‑one components, requiring the estimation of factor matrices for each mode with a fixed rank. It is simpler and often faster but can suffer from ill‑posedness and local minima. Tucker decomposition, on the other hand, factorizes a tensor into a core tensor multiplied by factor matrices along each mode, allowing different ranks per mode. Tucker is more flexible and can capture interactions between components, but it involves computing a potentially large core tensor and is computationally heavier. Algorithms for Tucker typically use higher‑order SVD, while CP relies on alternating least squares."
+    },
+    {
+      "question": "Why is the determinant zero for a matrix with linearly dependent columns, and what does that imply for eigenvalues?",
+      "answer": "If columns are linearly dependent, the matrix maps some non‑zero vector to the zero vector, meaning its transformation collapses volume to zero. The determinant, which measures volume scaling, is therefore zero. A zero determinant implies that zero is an eigenvalue, because there exists a non‑zero vector v such that A v = 0·v. This eigenvalue reflects the direction that is annihilated by the transformation, indicating singularity and non‑invertibility of the matrix."
+    }
+  ],
+  "summary": "Linear algebra equips you with a systematic way to model and manipulate multidimensional data. Vectors and matrices form the basic objects, supporting operations that represent rotations, scalings, and projections. Eigenvalues and eigenvectors expose intrinsic scaling directions of square transformations, enabling stability analysis and dimensionality reduction. Singular value decomposition extends these ideas to any matrix, providing optimal low‑rank approximations and revealing hidden structure through singular values and orthogonal bases. Tensor operations generalize matrix algebra to higher‑order data, allowing contractions, mode‑n multiplications, and decompositions such as CP and Tucker. Mastery of these concepts gives you the analytical tools to compress data, solve systems efficiently, and design algorithms that scale across domains ranging from machine learning to scientific computing.",
+  "practice": [
+    {
+      "question": "Find the eigenvalues of matrix B = [[2, -1], [1, 4]].",
+      "answer": "Compute the characteristic polynomial det(B - λI) = (2-λ)(4-λ) - (-1)(1) = λ^2 -6λ +9 = 0. Solving λ^2 -6λ +9 = 0 gives λ = (6 ± sqrt(36-36))/2 = 3. Both eigenvalues are λ = 3 (algebraic multiplicity 2)."
+    },
+    {
+      "question": "Compute the rank-1 SVD approximation of C = [[3,0,0],[0,2,0]]. Give its Frobenius error.",
+      "answer": "C^T C = diag(9,4,0). The singular values are 3 and 2; choosing the first coordinate directions gives C_1 = [[3,0,0],[0,0,0]]. C-C_1 has a single nonzero entry 2. Thus the Frobenius error is sqrt(4)=2 and its squared error is 4."
+    },
+    {
+      "question": "Perform a mode‑2 multiplication of a 2×2×2 tensor D with matrix M = [[1,0],[0,2]] and explain the result.",
+      "answer": "Using one-based mode numbering, mode 2 acts on the second index. Define Y[i,j,k] = sum_b M[j,b] D[i,b,k]. With M = diag(1,2), entries with j=0 remain unchanged and entries with j=1 double. A slice [[a,b],[c,d]] at fixed k becomes [[a,2b],[c,2d]], equivalently D[:,:,k] @ M.T. The operation scales columns of each slice, not rows."
+    },
+    {
+      "question": "Design a data pipeline that uses SVD for image compression. List the steps and justify each.",
+      "answer": "1) Load grayscale image as matrix I (pixels). 2) Compute SVD: I = U Σ V^T. 3) Choose k based on desired compression ratio (e.g., retain 90% energy). 4) Truncate Σ to top k singular values, forming Σ_k, and keep corresponding columns of U and rows of V^T. 5) Reconstruct compressed image I_k = U_k Σ_k V_k^T. 6) Store U_k, Σ_k, V_k^T instead of full I. Justification: SVD isolates principal components; truncation reduces storage while preserving most visual information. Reconstruction error is minimized in Frobenius norm, ensuring best possible quality for given k."
+    },
+    {
+      "question": "A system of equations is represented by matrix A = [[1,2,3],[2,4,6],[3,6,9]] and vector b = [6,12,18]. Solve for x using the pseudoinverse and discuss the solution space.",
+      "answer": "Let u=[1,2,3]^T. A=u*u^T, b=6u and u^T u=14. A has a single nonzero singular value 14. A^+=u*u^T/196. The minimum-norm solution is x_min=(6/14)u=[3/7,6/7,9/7]^T. Check u^T x_min=6, hence A x_min=6u=b. Every solution is x_min+z with u^T z=0. The pseudoinverse returns the unique minimum-norm solution, not an arbitrary solution."
+    },
+    {
+      "question": "Compare the trade‑offs between using a dense matrix representation versus a sparse representation for a large adjacency matrix in graph algorithms.",
+      "answer": "Dense representation stores every entry, using O(n^2) memory, which is wasteful for graphs where edges are far fewer than n^2. Sparse formats (CSR, CSC) store only non‑zero entries, reducing memory to O(|E|). Computation on dense matrices can exploit BLAS optimizations and vectorization, yielding fast matrix‑vector products, but the overhead is prohibitive for large sparse graphs. Sparse representations enable O(|E|) operations, essential for scalability, but require more complex indexing and may incur indirect memory accesses, reducing cache efficiency. The choice depends on graph density: dense for small, fully connected graphs; sparse for large, real‑world networks."
+    }
+  ],
+  "id": "math-linear-algebra",
+  "title": "Linear Algebra",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2482
+}

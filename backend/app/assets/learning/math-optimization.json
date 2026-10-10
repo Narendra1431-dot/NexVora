@@ -1,0 +1,93 @@
+{
+  "introduction": "Convex and stochastic optimization form the backbone of modern machine learning and operations research. When a problem can be expressed as minimizing a convex objective, any local minimum is also global, which gives strong theoretical guarantees and simplifies algorithm design. Stochastic methods, most notably stochastic gradient descent, enable us to handle massive data sets by approximating gradients with a small random subset of samples. Understanding when to use a deterministic convex solver versus a stochastic variant, how to tune momentum, adaptive learning rates, and schedule decay, is essential for building reliable, fast‑converging models. This chapter introduces the fundamental geometry of convex functions, the basic gradient descent algorithm, and then expands to momentum, Adam, and learning‑rate schedules, providing concrete numeric examples and interview‑ready insights.",
+  "foundations": "A convex function f:R^n->R satisfies f(θx+(1-θ)y) ≤ θf(x)+(1-θ)f(y) for all x,y and θ∈[0,1]. Geometrically, the line segment between any two points on the graph lies above the graph itself. This property guarantees that any stationary point is a global minimizer. Differentiable convex functions have monotone gradients: (∇f(x)-∇f(y))·(x-y) ≥ 0. The simplest optimization method is gradient descent: x_{k+1}=x_k-α∇f(x_k), where α>0 is the step size. For convex quadratic f(x)=½x^TQx+b^Tx+c with Q positive semidefinite, the gradient is Qx+b and the optimal solution solves Qx*+b=0. Stochastic gradient descent (SGD) replaces the full gradient by an unbiased estimator g_k obtained from a mini‑batch, preserving convergence in expectation while reducing per‑iteration cost. Momentum augments SGD with a velocity term v_{k+1}=βv_k+αg_k, smoothing noisy updates. Adaptive methods such as Adam keep separate exponential moving averages of first and second moments of gradients, scaling each coordinate by the inverse square root of its variance estimate. Learning‑rate schedules—step decay, exponential decay, or cosine annealing—systematically reduce α over time to balance rapid initial progress with fine‑grained convergence.",
+  "concepts": [
+    {
+      "title": "Gradient Descent Variants",
+      "explanation": "Standard gradient descent uses a fixed step size, which can be inefficient if the objective has ill‑conditioned curvature. Variants include batch gradient descent (full data each step), mini‑batch SGD (random subset), and stochastic coordinate descent (update one coordinate at a time). Fixed step sizes guarantee linear convergence for strongly convex quadratics if α<2/λ_max(Q). Adaptive step sizes such as backtracking line search or Barzilai‑Borwein choose α based on local curvature, improving robustness but adding overhead. The trade‑off is between per‑iteration cost and convergence speed; mini‑batch SGD reduces cost but introduces variance that must be mitigated by momentum or decreasing step sizes.",
+      "example": "Consider f(x)=½(3x_1^2+ x_2^2). The gradient is ∇f=[3x_1, x_2]^T. Using batch GD with α=0.2 from x^0=[2,2]^T gives x^1=[2-0.2*6, 2-0.2*2]=[0.8,1.6]. After three iterations the sequence approaches the optimum at [0,0] with decreasing error. If we instead use a mini‑batch of size 1 on a data‑driven loss, the update direction fluctuates, requiring a smaller α or momentum to stabilize."
+    },
+    {
+      "title": "Adam & Momentum",
+      "explanation": "Momentum introduces a velocity vector that accumulates a decaying average of past gradients: v_{k+1}=βv_k+ (1-β)∇f(x_k). This smooths oscillations in narrow valleys, effectively pre‑conditioning the descent direction. Adam extends this idea by maintaining separate first‑moment (m) and second‑moment (v) estimates: m_{k+1}=β1 m_k+(1-β1)g_k, v_{k+1}=β2 v_k+(1-β2)g_k^2. The update uses α * m̂/(sqrt(v̂)+ε), where hats denote bias‑corrected estimates. Adam adapts the learning rate per coordinate, handling sparse gradients well. However, Adam can fail to converge on simple convex quadratics if β1,β2 are not tuned, and recent research suggests a warm‑up or AMSGrad variant for better guarantees.",
+      "example": "For f(x)=0.5*(x_1^2+4*x_2^2) at [1,1], g=[1,4]. With beta1=0.9 and beta2=0.999 and initial moments zero, m=[0.1,0.4] and v=[0.001,0.016]. At t=1, dividing m by 1-0.9 and v by 1-0.999 gives m_hat=[1,4] and v_hat=[1,16]. With alpha=0.1 and a negligible epsilon, both coordinates move by approximately 0.1, yielding [0.9,0.9]. Adam scales by the historical root second moment; it does not simply make the large-gradient coordinate move more slowly on this first step."
+    },
+    {
+      "title": "Learning Rate Schedules",
+      "explanation": "A schedule changes the learning rate with iteration. Step decay multiplies it by gamma after a fixed number of steps. Exponential decay uses alpha_t=alpha_0*gamma^t. Cosine annealing smoothly interpolates between a starting rate and a final rate over a fixed horizon. These are tuning strategies, not guarantees that one run will outperform another. For stochastic convex optimization, diminishing steps can give convergence under additional assumptions such as unbiased gradients, bounded variance and suitable regularity. Common sufficient step conditions are sum(alpha_t)=infinity and sum(alpha_t^2)<infinity. Deterministic smooth strongly convex optimization can converge to the exact optimum with a suitable constant step; stochastic constant-step methods generally retain a noise-dependent error floor.",
+      "example": "With alpha_0=0.5 and a factor 0.5 every 100 iterations, the rate is 0.5 at iterations 0-99, 0.25 at 100-199 and 0.125 at 200-299. A cosine schedule alpha_t=0.25*(1+cos(pi*t/500)) instead gives 0.5 at t=0, 0.25 at t=250 and 0 at t=500. The cosine schedule is continuous, but lower loss must be established experimentally with the same data split and compute budget; it cannot be inferred from the schedule alone."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\n\ndef gd_quad(Q,b,x0,alpha,steps):\n    x=x0.copy()\n    for _ in range(steps):\n        grad=Q.dot(x)+b\n        x-=alpha*grad\n    return x\n\nQ=np.array([[3.,0.],[0.,1.]])\nb=np.array([0.,0.])\nprint(gd_quad(Q,b,np.array([2.,2.]),0.2,5))",
+      "explanation": "For f(x)=0.5*x^T Q x with Q=diag(3,1), one update multiplies coordinate 1 by 0.4 and coordinate 2 by 0.8. From [2,2], after five steps the result is [2*(0.4^5), 2*(0.8^5)] = [0.02048,0.65536]. Both approach zero but at different speeds. A constant positive step alpha converges for this positive definite quadratic when alpha<2/lambda_max(Q)=2/3. Setting alpha=0.8 makes the first multiplier -1.4, whose magnitude exceeds 1, so that coordinate oscillates and diverges."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for Adam on a simple linear model\ninitialize m=0, v=0, x=0\nfor t in 1..T:\n    g = gradient(x)               # unbiased stochastic gradient\n    m = β1*m + (1-β1)*g\n    v = β2*v + (1-β2)*g*g\n    m_hat = m/(1-β1**t)\n    v_hat = v/(1-β2**t)\n    x = x - α * m_hat/(sqrt(v_hat)+ε)\n",
+      "explanation": "The pseudocode follows the canonical Adam update. For a convex loss such as mean‑squared error on a single‑feature regression, g is a scalar. Because v accumulates g^2, coordinates with consistently large gradients receive smaller effective steps, preventing overshooting. The bias‑correction terms (1-β^t) are crucial in early iterations; without them the estimates would be biased toward zero, causing an artificially small step size. This routine converges rapidly on smooth convex problems, but on ill‑conditioned quadratics one may observe oscillations if β1 is too high, suggesting a trade‑off between momentum smoothing and responsiveness."
+    }
+  ],
+  "flow": [
+    "Verify convexity of the objective by checking Hessian PSD or using definition",
+    "Choose an appropriate gradient estimator (full, mini‑batch, or coordinate)",
+    "Select a base step size α respecting Lipschitz constant or using a line search",
+    "If variance is high, add momentum: update velocity and combine with gradient",
+    "For adaptive scaling, switch to Adam: maintain first and second moment estimates",
+    "Define a learning‑rate schedule (step, exponential, or cosine) to decay α over iterations",
+    "Monitor convergence criteria (gradient norm, loss change) and stop when thresholds are met"
+  ],
+  "interview": [
+    {
+      "question": "Explain why any local minimum of a convex function is also a global minimum.",
+      "answer": "For a convex differentiable function on an unconstrained convex domain, the first-order inequality is f(y)>=f(x)+grad f(x)^T(y-x). At an interior stationary point x*, grad f(x*)=0, so f(y)>=f(x*) for every y. Thus x* is globally optimal. More generally, if a local minimum were not global, a line segment toward a lower point would contain arbitrarily close lower points, contradicting local minimality. Convexity means the graph lies at or below each chord; its epigraph is a convex set."
+    },
+    {
+      "question": "What is the effect of the β1 parameter in Adam, and how does it influence convergence on ill‑conditioned problems?",
+      "answer": "β1 controls the exponential decay rate of the first‑moment (mean) estimate. A high β1 (e.g., 0.9) gives strong momentum, smoothing noisy gradients but also causing the update direction to lag behind the true gradient, which can be problematic when the curvature varies sharply across dimensions. On ill‑conditioned quadratics, excessive momentum may lead to oscillations along the steep direction, slowing convergence. Reducing β1 or using a schedule that lowers β1 over time can improve stability."
+    },
+    {
+      "question": "Describe a scenario where a step‑decay learning‑rate schedule is preferable to a constant learning rate.",
+      "answer": "When training on a large, noisy dataset with stochastic gradient descent, a constant learning rate may cause the optimizer to bounce around the optimum after the initial rapid descent. A step‑decay schedule reduces the step size after a fixed number of epochs, allowing the algorithm to make large moves early for fast progress and then fine‑tune with smaller steps, leading to lower final loss and better generalization."
+    },
+    {
+      "question": "How does stochastic gradient descent guarantee convergence to the optimum for convex functions?",
+      "answer": "SGD uses an unbiased estimator g_k of the true gradient, i.e., E[g_k]=∇f(x_k). Under convexity, diminishing step sizes α_k satisfying Σα_k=∞ and Σα_k^2<∞ ensure that the expected distance to the optimum shrinks to zero. The first condition guarantees sufficient exploration, while the second bounds the accumulated variance, leading to convergence in expectation and almost surely for bounded variance gradients."
+    }
+  ],
+  "practice": [
+    {
+      "question": "Given f(x)=½(4x_1^2+ x_2^2), compute two steps of batch gradient descent with α=0.1 from x^0=[1,2].",
+      "answer": "The factor 1/2 cancels when differentiating: grad f=[4*x_1,x_2]. At [1,2], the gradient is [4,2]. With alpha=0.1, x^1=[0.6,1.8]. The next gradient is [2.4,1.8], giving x^2=[0.36,1.62]."
+    },
+    {
+      "question": "Implement Adam for a scalar quadratic f(x)=½ax^2 with a=5. Show the first update from x0=1 using α=0.2, β1=0.9, β2=0.999, ε=1e-8.",
+      "answer": "Gradient g0= a*x0 =5*1=5.\n m1=0.9*0+0.1*5=0.5\n v1=0.999*0+0.001*25=0.025\n m̂1=0.5/(1-0.9)=5\n v̂1=0.025/(1-0.999)=25\n update =0.2*5/(sqrt(25)+1e-8)=0.2*5/5=0.2\n x1=1-0.2=0.8"
+    },
+    {
+      "question": "Design a learning‑rate schedule for training a deep network over 100 epochs that starts at 0.1 and ends near 0.001. Explain the choice.",
+      "answer": "Use exponential decay: α_t = 0.1 * (0.001/0.1)^{t/99} = 0.1 * 0.01^{t/99}. This yields α_0=0.1 and α_99≈0.001. Exponential decay provides a smooth multiplicative reduction each epoch, preserving a relatively large step early for rapid loss reduction while guaranteeing a very small step near the end for fine‑tuning. The schedule is simple to implement and works well with SGD and Adam."
+    },
+    {
+      "question": "For the convex function f(x)=|x|, is gradient descent applicable? Why or why not?",
+      "answer": "The ordinary derivative is undefined at zero. Away from zero, use the sign of x as a subgradient. At zero any value in [-1,1] is a subgradient; choosing zero correctly stops at the global minimum. A fixed nonzero step may oscillate across zero, while diminishing steps or a proximal method can avoid persistent oscillation. Being at zero is success here, not a reason to keep moving."
+    },
+    {
+      "question": "Explain the trade‑off between using a large mini‑batch size versus a small one in SGD.",
+      "answer": "Large mini‑batches reduce gradient variance, leading to more stable updates and allowing larger learning rates, but they increase per‑iteration computation and may converge to sharp minima with poorer generalization. Small mini‑batches provide noisy updates that can help escape shallow basins and improve generalization, but require smaller learning rates and more iterations to reach the same error level."
+    },
+    {
+      "question": "Given a 2×2 positive‑definite matrix Q=[[2,1],[1,2]], solve Qx+ b =0 for b=[-3,-3] using exact algebra and verify the solution with one step of gradient descent with α=0.25 from x0=[0,0].",
+      "answer": "Exact solution: Solve [[2,1],[1,2]]x = [3,3]. Inverse of Q is (1/3)*[[2,-1],[-1,2]]. Multiply: x* = (1/3)*[[2,-1],[-1,2]]*[3,3]^T = (1/3)*[ (2*3-1*3), (-1*3+2*3) ] = (1/3)*[3,3] = [1,1]. Gradient at x0: ∇f=Qx0+b = [-3,-3]. GD step: x1 = x0 -0.25*[-3,-3] = [0.75,0.75]. Error after one step: x1 is 0.25 away from exact [1,1], demonstrating linear convergence for this quadratic."
+    }
+  ],
+  "summary": "Convex optimization provides a guarantee that any stationary point is globally optimal allowing simple algorithms like gradient descent to succeed. Stochastic variants reduce computational load by approximating gradients but introduce variance that must be controlled through momentum adaptive methods such as Adam or carefully designed learning‑rate schedules. Momentum smooths updates Adam scales each coordinate based on historical variance and schedules gradually shrink the step size to balance rapid early learning with precise final convergence. Understanding the interplay of curvature step size and variance is essential for selecting the right variant and tuning hyper‑parameters enabling robust solutions across machine‑learning and operations‑research tasks.",
+  "id": "math-optimization",
+  "title": "Convex & Stochastic Optimization",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 1853
+}

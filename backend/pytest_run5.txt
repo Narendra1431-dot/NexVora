@@ -1,0 +1,493 @@
+F...F..FF.F.FFF.......FF....F..F.FFF...............FFFF...               [100%]
+================================== FAILURES ===================================
+________________ test_graph_proof_isolation_sse_and_approvals _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E559BF2D70>
+tmp_path = WindowsPath('C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-251/test_graph_proof_isolation_sse0')
+
+    def test_graph_proof_isolation_sse_and_approvals(monkeypatch,tmp_path):
+        monkeypatch.setenv('NEXVORA_WORKSPACE',str(tmp_path))
+        async def no_dispatch(*args,**kwargs):pass
+        monkeypatch.setattr(queue,'dispatch',no_dispatch)
+        async def model(prompt,schema,context,**kwargs):
+            value=graph.Plan(intent='career_plan',agents=['profile','resume','career','rag','roadmap','resources']) if schema is graph.Plan else Advisory(intent='career_plan',summary='Review the recorded gaps and weekly proposal.',confidence=.8)
+            return value,Generation('','test','test-model',1,10),[]
+        monkeypatch.setattr(graph,'structured',model)
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           h,sid=login(c);other,_=login(c)
+                  ^^^^^^^^
+
+app\tests\test_agent_graph.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55AEBFB60>
+
+    def login(c):
+        r=c.post('/api/v1/auth/register',json={'name':'Agent Graph QA','email':uuid4().hex+'@example.com','password':uuid4().hex})
+>       assert r.status_code==201
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_agent_graph.py:14: AssertionError
+_______________ test_assistant_auth_history_routing_and_failure _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55ADD1130>
+
+    def test_assistant_auth_history_routing_and_failure(monkeypatch):
+        monkeypatch.delenv('BRAVE_SEARCH_API_KEY',raising=False)
+        monkeypatch.delenv('SEARXNG_URL',raising=False)
+        contexts=[]
+        async def fake(prompt,schema,context):
+            contexts.append(json.loads(context))
+            if schema is Plan:
+                q=json.loads(context)['question']
+                if q=='fail':raise ProviderError('unavailable','test')
+                return Plan(mode='external' if 'latest' in q else 'project' if 'my gaps' in q else 'general',topics=['Python']),None,[]
+            return Reply(answer='Recursion uses a base case.'),Generation('', 'test','test',1,10),[]
+        async def project(payload,student_id):
+            return {'answer':'Your stored gaps are shown here.','sources':[],'agentRun':{'status':'completed'}}
+        monkeypatch.setattr(service,'structured',fake)
+        monkeypatch.setattr(service,'project_chat',project)
+        with TestClient(app) as c:
+            assert c.get('/api/v1/assistant/history').status_code==401
+>           a,b=register(c),register(c)
+                ^^^^^^^^^^^
+
+app\tests\test_assistant.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+client = <starlette.testclient.TestClient object at 0x000001E55AECEC10>
+
+    def register(client):
+        r=client.post('/api/v1/auth/register',json={'name':'Assistant QA','email':uuid4().hex+'@example.com','password':'test-password-123'})
+>       assert r.status_code==201
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_assistant.py:15: AssertionError
+__________________________ test_certificate_journey ___________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55BD87750>
+
+    def test_certificate_journey(monkeypatch):
+        monkeypatch.setenv('CERTIFICATE_PAYMENT_MODE','demo')
+        monkeypatch.setenv('PUBLIC_APP_URL','http://localhost:5000')
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app, backend_options={'loop_factory': asyncio.SelectorEventLoop}) as client:
+            register=client.post('/api/v1/auth/register',json={'name':'Certificate QA Learner','email':f'certificate-{uuid4().hex}@example.com','password':'qa-secure-pass'})
+>           assert register.status_code==201,register.text
+E           AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E           assert 422 == 201
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_certificates.py:23: AssertionError
+_______________ test_required_modules_and_unconfigured_payment ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55BD71850>
+
+    def test_required_modules_and_unconfigured_payment(monkeypatch):
+        monkeypatch.setenv('CERTIFICATE_PAYMENT_MODE','demo')
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        course_id='certificate-qa-'+uuid4().hex
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            a=next(a for a in ASSESSMENTS if a['id']=='assess-python-baseline')
+            db.resources.insert_one({'id':course_id,'title':'Module gated QA course','type':'Course','skillId':a['skillId'],'skillName':a['skillName'],'certificatePolicy':{'moduleIds':[course_id,'res-python-typing'],'assessmentIds':[a['id']],'completionRule':'all_modules_and_assessments'}})
+            try:
+                registered=c.post('/api/v1/auth/register',json={'name':'Module QA','email':f'module-{uuid4().hex}@example.com','password':'qa-secure-pass'}).json()
+>               headers={'Authorization':'Bearer '+registered['token']}
+                                                   ^^^^^^^^^^^^^^^^^^^
+E               KeyError: 'token'
+
+app\tests\test_certificates.py:112: KeyError
+_____________________________ test_coding_journey _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55C35BB60>
+
+    def test_coding_journey(monkeypatch):
+        from app.main import app
+        from app.config import settings
+        from app.services import llm, openrouter
+        from app.coding import missions, catalog, runner
+    
+        async def available():
+            return True
+        monkeypatch.setattr(llm, 'is_available', available)
+        monkeypatch.setattr(openrouter, 'is_available', available)
+        received = []
+        async def fake_runner(code, language, tests):
+            received.append(tests)
+            return [dict(status='Accepted' if code == 'correct' else 'Wrong Answer', input=t['input'], output=t.get('output', '') if code == 'correct' else 'bad', expected=t.get('output'), executionTime=1, memory=100, error='') for t in tests]
+        monkeypatch.setattr(runner, 'execute', fake_runner)
+        monkeypatch.setattr(runner, 'configured', lambda: True)
+        assert settings.mongodb_db.endswith('_qa')
+        db = MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app, backend_options={'loop_factory': asyncio.SelectorEventLoop}) as c:
+            def register():
+                return c.post('/api/v1/auth/register', json={'name': 'Coding QA', 'email': uuid4().hex + '@example.com', 'password': 'qa-secure-pass'}).json()
+            u = register()
+>           sid = u['student']['studentId']
+                  ^^^^^^^^^^^^
+E           KeyError: 'student'
+
+app\tests\test_coding.py:50: KeyError
+_____________ test_copilot_context_memory_replanning_and_actions ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55D9A9A90>
+
+    def test_copilot_context_memory_replanning_and_actions(monkeypatch):
+        from app.services import llm
+        calls=[]
+        async def generate(prompt,**kwargs):
+            calls.append(kwargs)
+            return 'Use the current verified evidence and the next recommended learning step.'
+        monkeypatch.setattr(llm,'generate',generate)
+        # Exercise the real brain and provenance validator without external LLM
+        # credentials; its structured provider is a separate boundary from llm.
+        from app.brain import orchestrator
+        from app.brain.schemas import Advisory
+        from app.providers.base import Generation
+        async def structured(prompt,schema,context,**kwargs):
+            return Advisory(intent='recommendation',summary='Use the next verified learning step.',confidence=.8),Generation('', 'test','test-model',1,10),[]
+        monkeypatch.setattr(orchestrator,'structured',structured)
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           auth,sid=register(c);other,other_sid=register(c)
+                     ^^^^^^^^^^^
+
+app\tests\test_copilot.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55BD0F790>
+
+    def register(c):
+        r=c.post('/api/v1/auth/register',json={'name':'Copilot QA','email':f'copilot-{uuid4().hex}@example.com','password':'qa-secure-pass'})
+>       assert r.status_code==201,r.text
+E       AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_copilot.py:15: AssertionError
+_____________ test_controlled_resume_assessment_certificate_flow ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55C3451D0>
+
+    def test_controlled_resume_assessment_certificate_flow(monkeypatch):
+        from app.services import llm
+        async def generate(*args,**kwargs):return '{}'
+        monkeypatch.setattr(llm,'generate',generate)
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           auth,sid=register(c);other,_=register(c)
+                     ^^^^^^^^^^^
+
+app\tests\test_copilot.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55BD2D6A0>
+
+    def register(c):
+        r=c.post('/api/v1/auth/register',json={'name':'Copilot QA','email':f'copilot-{uuid4().hex}@example.com','password':'qa-secure-pass'})
+>       assert r.status_code==201,r.text
+E       AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_copilot.py:15: AssertionError
+______________ test_provider_failure_preserves_completed_action _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55C345A90>
+
+    def test_provider_failure_preserves_completed_action(monkeypatch):
+        from app.services import llm
+        async def unavailable(*args,**kwargs):raise HTTPException(503,'Provider rate limit reached.')
+        monkeypatch.setattr(llm,'generate',unavailable)
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           auth,sid=register(c)
+                     ^^^^^^^^^^^
+
+app\tests\test_copilot.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55BD2FCE0>
+
+    def register(c):
+        r=c.post('/api/v1/auth/register',json={'name':'Copilot QA','email':f'copilot-{uuid4().hex}@example.com','password':'qa-secure-pass'})
+>       assert r.status_code==201,r.text
+E       AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_copilot.py:15: AssertionError
+________ test_external_credentials_persistence_permissions_and_review _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55DA22820>
+
+    def test_external_credentials_persistence_permissions_and_review(monkeypatch):
+        assert settings.mongodb_db.endswith('_qa')
+        db = MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        base='/api/v1/external-certifications'
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            def register():
+                email=f'external-{uuid4().hex}@example.com'
+                r=c.post('/api/v1/auth/register',json={'name':'External QA','email':email,'password':'qa-secure-pass'})
+                assert r.status_code==201
+                d=r.json();return {'Authorization':'Bearer '+d['token']},d['student']['studentId'],email
+>           auth,sid,_=register();other,_,review_email=register()
+                       ^^^^^^^^^^
+
+app\tests\test_external_credentials.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def register():
+        email=f'external-{uuid4().hex}@example.com'
+        r=c.post('/api/v1/auth/register',json={'name':'External QA','email':email,'password':'qa-secure-pass'})
+>       assert r.status_code==201
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_external_credentials.py:20: AssertionError
+_________ test_approval_ownership_rejection_execution_and_confinement _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55C11EBD0>
+tmp_path = WindowsPath('C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-251/test_approval_ownership_reject0')
+
+    def test_approval_ownership_rejection_execution_and_confinement(monkeypatch,tmp_path):
+        monkeypatch.setenv('NEXVORA_WORKSPACE',str(tmp_path))
+        from app.services import llm,openrouter
+        async def available():return True
+        monkeypatch.setattr(llm,'is_available',available)
+        monkeypatch.setattr(openrouter,'is_available',available)
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            def user():
+                r=c.post('/api/v1/auth/register',json={'name':'Runtime QA','email':uuid4().hex+'@example.com','password':'qa-secure-pass'})
+                assert r.status_code==201,r.text
+                return {'Authorization':'Bearer '+r.json()['token']}
+>           h,o=user(),user()
+                ^^^^^^
+
+app\tests\test_governed_runtime.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def user():
+        r=c.post('/api/v1/auth/register',json={'name':'Runtime QA','email':uuid4().hex+'@example.com','password':'qa-secure-pass'})
+>       assert r.status_code==201,r.text
+E       AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_governed_runtime.py:15: AssertionError
+___________________________ test_connected_journey ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55DA2F5F0>
+
+    def test_connected_journey(monkeypatch):
+        # Supervisor path only; never hit the live Central Brain providers.
+        monkeypatch.setenv('ENABLE_CENTRAL_BRAIN','false')
+        with TestClient(app) as c:
+            assert c.get('/health').status_code==200
+            assert c.get('/api/v1/state').status_code==401
+>           auth=c.post('/api/v1/auth/register',json={'name':'QA Learner','email':f'qa-{uuid4().hex}@example.com','password':'qa-secure-pass'}); assert auth.status_code==201, auth.text
+                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: {"detail":"Password must contain at least one uppercase letter."}
+E           assert 422 == 201
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_integration.py:17: AssertionError
+__________________ test_job_pipeline_isolation_and_failures ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55BB587D0>
+tmp_path = WindowsPath('C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-251/test_job_pipeline_isolation_an0')
+
+    def test_job_pipeline_isolation_and_failures(monkeypatch,tmp_path):
+        monkeypatch.delenv('CHROMA_HOST',raising=False)
+        monkeypatch.setenv('CHROMA_PATH',str(tmp_path/'chroma'));store.cache_clear()
+        monkeypatch.setenv('ENABLE_CENTRAL_BRAIN','false')
+        async def available():return True
+        async def no_redis():raise ConnectionError('test transport unavailable')
+        monkeypatch.setattr(llm,'is_available',available);monkeypatch.setattr(openrouter,'is_available',available)
+        monkeypatch.setattr(queue,'connection',no_redis)
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            def user():return c.post('/api/v1/auth/register',json={'name':'Intelligence QA','email':uuid4().hex+'@example.com','password':'qa-secure-pass'}).json()
+>           u,v=user(),user();sid=u['student']['studentId'];h={'Authorization':'Bearer '+u['token']};other={'Authorization':'Bearer '+v['token']}
+                                  ^^^^^^^^^^^^
+E           KeyError: 'student'
+
+app\tests\test_intelligence.py:92: KeyError
+____________ test_five_target_objectives_complete_notes_and_cache _____________
+
+    def test_five_target_objectives_complete_notes_and_cache():
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            r=c.post('/api/v1/auth/register',json={'name':'Learning QA','email':f'learning-{uuid4().hex}@example.com','password':'qa-secure-pass'})
+>           assert r.status_code==201
+E           assert 422 == 201
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_learning_hub.py:20: AssertionError
+___________ test_incomplete_curriculum_never_publishes_complete_pdf ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55C3B7D10>
+tmp_path = WindowsPath('C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-251/test_incomplete_curriculum_nev0')
+
+    def test_incomplete_curriculum_never_publishes_complete_pdf(monkeypatch,tmp_path):
+        from app.routers import learning_hub
+        monkeypatch.setattr(learning_hub,'ASSETS',tmp_path)
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            r=c.post('/api/v1/auth/register',json={'name':'Missing Notes QA','email':f'missing-{uuid4().hex}@example.com','password':'qa-secure-pass'}).json()
+>           auth={'Authorization':'Bearer '+r['token']}
+                                            ^^^^^^^^^^
+E           KeyError: 'token'
+
+app\tests\test_learning_hub.py:75: KeyError
+__________________ test_live_mastery_status_and_video_cache ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55BDDC550>
+
+    def test_live_mastery_status_and_video_cache(monkeypatch):
+        from types import SimpleNamespace
+        from app.routers import learning_hub
+        from app.services import learning_videos
+        from datetime import datetime,timezone,timedelta
+        async def recalculate(*args,**kwargs):
+            assert kwargs['persist'] is False
+            return SimpleNamespace(readiness=67,competencies=[
+                {'id':'math-linear-algebra','mastery':90,'targetLevel':80,'state':'Verified'},
+                {'id':'prog-python-advanced','mastery':78,'targetLevel':90,'state':'In Progress'},
+                {'id':'math-prob-stats','mastery':45,'targetLevel':80,'state':'In Progress'},
+                {'id':'dl-transformers','mastery':20,'targetLevel':80,'state':'Prerequisite Gap','unmetPrerequisites':['dl-neural-networks']},
+            ],milestones=[{'skillId':'prog-python-advanced','masteryTarget':90,'order':1,'reason':'Python is the next roadmap step.'}])
+        async def no_network(ids):raise AssertionError('Fresh video cache must not fetch YouTube')
+        monkeypatch.setattr(learning_videos,'refresh',no_network)
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        db.learningVideos.update_many({},{'$set':{'lastCheckedAt':datetime.now(timezone.utc).isoformat()}})
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            registration=c.post('/api/v1/auth/register',json={'name':'Personalized QA','email':f'personalized-{uuid4().hex}@example.com','password':'qa-secure-pass'}).json()
+>           auth={'Authorization':'Bearer '+registration['token']}
+                                            ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'token'
+
+app\tests\test_learning_hub.py:100: KeyError
+______________ test_profile_fields_avatar_upload_and_persistence ______________
+
+    def test_profile_fields_avatar_upload_and_persistence():
+        assert settings.mongodb_db.endswith('_qa')
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           auth,sid=register(c);other,_=register(c)
+                     ^^^^^^^^^^^
+
+app\tests\test_profile_avatar.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55BC957B0>
+
+    def register(c):
+>       r=c.post('/api/v1/auth/register',json={'name':'Avatar QA','email':f'avatar-{uuid4().hex}@example.com','password':'qa-profile-password'});assert r.status_code==201
+                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_profile_avatar.py:11: AssertionError
+________________ test_profile_avatar_validation_and_ownership _________________
+
+    def test_profile_avatar_validation_and_ownership():
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+>           auth,_=register(c)
+                   ^^^^^^^^^^^
+
+app\tests\test_profile_avatar.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+c = <starlette.testclient.TestClient object at 0x000001E55BC97680>
+
+    def register(c):
+>       r=c.post('/api/v1/auth/register',json={'name':'Avatar QA','email':f'avatar-{uuid4().hex}@example.com','password':'qa-profile-password'});assert r.status_code==201
+                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 422 == 201
+E        +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_profile_avatar.py:11: AssertionError
+________________ test_demo_resume_lifecycle_and_dynamic_career ________________
+
+    def test_demo_resume_lifecycle_and_dynamic_career():
+        with TestClient(app) as client:
+            auth=client.post('/api/v1/auth/register',json={'name':'Resume QA','email':f'resume-{uuid4().hex}@example.com','password':'qa-resume-pass'})
+>           assert auth.status_code==201
+E           assert 422 == 201
+E            +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+
+app\tests\test_resume_flow.py:12: AssertionError
+____________________________ test_resume_workspace ____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E55DA5A740>
+
+    def test_resume_workspace(monkeypatch):
+        async def available():return True
+        async def plan(*args,**kwargs):return {'rewrites':{'profile:education':'Invented NASA internship 99%'},'text':'Invented Google employee 99%'}
+        monkeypatch.setattr(llm,'is_available',available)
+        monkeypatch.setattr(openrouter,'is_available',available)
+        monkeypatch.setattr(llm,'extract_json',plan)
+        assert settings.mongodb_db.endswith('_qa')
+        db=MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app,backend_options={'loop_factory':asyncio.SelectorEventLoop}) as c:
+            def register():return c.post('/api/v1/auth/register',json={'name':'Resume QA Student','email':uuid4().hex+'@example.com','password':'qa-secure-pass'}).json()
+>           user=register();sid=user['student']['studentId'];auth={'Authorization':'Bearer '+user['token']}
+                                ^^^^^^^^^^^^^^^
+E           KeyError: 'student'
+
+app\tests\test_resume_generator.py:27: KeyError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:40
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv\Lib\site-packages\fastapi\routing.py:233: 290 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+.venv\Lib\site-packages\starlette\_utils.py:39: 294 warnings
+app/tests/test_agent_graph.py: 3 warnings
+app/tests/test_assistant.py: 4 warnings
+app/tests/test_certificate_samples.py: 4 warnings
+app/tests/test_certificates.py: 6 warnings
+app/tests/test_coding.py: 3 warnings
+app/tests/test_copilot.py: 9 warnings
+app/tests/test_external_credentials.py: 3 warnings
+app/tests/test_governed_runtime.py: 3 warnings
+app/tests/test_integration.py: 4 warnings
+app/tests/test_intelligence.py: 4 warnings
+app/tests/test_learning_hub.py: 9 warnings
+app/tests/test_profile_avatar.py: 6 warnings
+app/tests/test_resume_flow.py: 3 warnings
+app/tests/test_resume_generator.py: 3 warnings
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED app/tests/test_agent_graph.py::test_graph_proof_isolation_sse_and_approvals
+FAILED app/tests/test_assistant.py::test_assistant_auth_history_routing_and_failure
+FAILED app/tests/test_certificates.py::test_certificate_journey - AssertionEr...
+FAILED app/tests/test_certificates.py::test_required_modules_and_unconfigured_payment
+FAILED app/tests/test_coding.py::test_coding_journey - KeyError: 'student'
+FAILED app/tests/test_copilot.py::test_copilot_context_memory_replanning_and_actions
+FAILED app/tests/test_copilot.py::test_controlled_resume_assessment_certificate_flow
+FAILED app/tests/test_copilot.py::test_provider_failure_preserves_completed_action
+FAILED app/tests/test_external_credentials.py::test_external_credentials_persistence_permissions_and_review
+FAILED app/tests/test_governed_runtime.py::test_approval_ownership_rejection_execution_and_confinement
+FAILED app/tests/test_integration.py::test_connected_journey - AssertionError...
+FAILED app/tests/test_intelligence.py::test_job_pipeline_isolation_and_failures
+FAILED app/tests/test_learning_hub.py::test_five_target_objectives_complete_notes_and_cache
+FAILED app/tests/test_learning_hub.py::test_incomplete_curriculum_never_publishes_complete_pdf
+FAILED app/tests/test_learning_hub.py::test_live_mastery_status_and_video_cache
+FAILED app/tests/test_profile_avatar.py::test_profile_fields_avatar_upload_and_persistence
+FAILED app/tests/test_profile_avatar.py::test_profile_avatar_validation_and_ownership
+FAILED app/tests/test_resume_flow.py::test_demo_resume_lifecycle_and_dynamic_career
+FAILED app/tests/test_resume_generator.py::test_resume_workspace - KeyError: ...
+19 failed, 39 passed, 649 warnings in 23.50s

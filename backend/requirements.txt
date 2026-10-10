@@ -1,0 +1,31 @@
+# Backend runtime dependencies (all free / open source).
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+motor==3.6.0
+pymongo==4.9.2
+pydantic==2.10.4
+email-validator==2.2.0
+python-multipart==0.0.20
+PyJWT==2.10.1
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.1
+httpx==0.28.1
+pypdf==5.1.0
+
+python-dotenv
+scikit-learn==1.7.2
+pytest==8.4.2
+faiss-cpu==1.12.0
+
+reportlab==4.4.10
+qrcode==8.2
+
+pymupdf==1.28.2
+
+Pillow==12.3.0
+
+# Background intelligence and student-scoped semantic retrieval
+arq==0.28.0
+chromadb==1.5.9
+langchain-text-splitters==0.3.8
+python-docx==1.2.0

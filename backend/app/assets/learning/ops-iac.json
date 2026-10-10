@@ -1,0 +1,88 @@
+{
+  "introduction": "Infrastructure as Code (IaC) is the practice of managing and provisioning computing resources—servers, networks, storage—through machine‑readable definition files rather than manual configuration. By treating infrastructure the same way software code is treated, teams gain repeatability, version control, automated testing, and reviewable recovery plans. IaC shines when environments must be reproduced across development, staging, and production, when scaling resources on demand, or when compliance requires an auditable change trail. It also reduces human error because the same declarative description is applied each time, and it enables collaboration between developers and operations (DevOps) by using familiar tools such as Git, CI pipelines, and code review processes. Understanding the core ideas of declarative state and systematic change review equips beginners to build reliable, maintainable cloud or on‑premise stacks before moving to advanced topics like policy as code or multi‑cloud orchestration.",
+  "foundations": "At its heart, IaC separates *what* the desired infrastructure should look like from *how* to achieve it. In a declarative model, the user writes a specification that describes the target state—e.g., a virtual machine with 4 CPU, 8 GB RAM, a specific OS image, and a firewall rule allowing port 22. The IaC engine (Terraform, CloudFormation, Ansible in declarative mode) computes the difference between the current state and the desired state and issues the minimal set of actions to converge. This contrasts with an imperative approach where the script lists each step explicitly (create VM, then attach network, then configure OS). Declarative state brings idempotence: a stable configuration should converge to no further changes when the actual environment and provider behavior also remain stable. Change review complements this by treating every modification to the infrastructure definition as a code change: it is committed to a version control system, reviewed by peers, and merged through a pull request. Automated checks—syntax validation, policy linting, plan preview—run before the change is applied, ensuring that only vetted alterations affect live resources. Together, these concepts create a feedback loop: developers write a desired state, reviewers verify intent, the engine enforces it, and the resulting environment is observable and reproducible. The workflow relies on a state store (often a remote backend) that tracks managed resource identities and attributes. Refresh compares actual resources with state and desired configuration. State may contain secrets and needs protected storage and locking. Reverting code is not guaranteed to restore deleted data or safely reverse every infrastructure change. Understanding these mechanisms—state representation, diff calculation, and review pipelines—forms the foundation for building robust IaC pipelines.",
+  "concepts": [
+    {
+      "title": "Declarative state",
+      "explanation": "Declarative state expresses the final configuration of infrastructure without prescribing the steps to reach it. The IaC tool reads the declaration, compares it to the stored state, and generates a plan that lists create, update, or delete actions. This model simplifies reasoning because the user only needs to think about the target, not the procedural details. It also enables idempotent runs: re‑applying the same file produces no changes if the environment already matches. However, declarative systems can hide complex ordering dependencies; for example, a database instance may need a subnet to exist first, and the engine must infer that ordering. Trade‑offs include less fine‑grained control compared to imperative scripts, and occasional need for explicit dependencies (using \"depends_on\" or similar) to avoid race conditions.",
+      "example": "Illustrative Terraform fragment (requires separately configured provider, variables and networking):\nresource \"aws_instance\" \"web\" {\n  ami = var.approved_ami_id\n  instance_type = var.instance_type\n  subnet_id = var.private_subnet_id\n  vpc_security_group_ids = [aws_security_group.web.id]\n}\nresource \"aws_security_group\" \"web\" {\n  name = \"web-sg\"\n  vpc_id = var.vpc_id\n  ingress {\n    from_port = 443\n    to_port = 443\n    protocol = \"tcp\"\n    cidr_blocks = [var.trusted_client_cidr]\n  }\n}\nThe instance references the security-group ID, creating a dependency edge. The AMI must be valid in the chosen region; a copied sample AMI ID is not portable. This fragment does not allocate a static IP or a full working environment. Review network access and expected replacements in a plan before applying any real infrastructure change."
+    },
+    {
+      "title": "Change review",
+      "explanation": "Change review treats every modification to IaC files as a software change. The definition lives in a Git repository; developers open a pull request (PR) that shows a diff of the desired state. Reviewers examine the diff for correctness, security, cost, and compliance. Automated checks can run a \"plan\" command to preview the exact actions the IaC engine would take, catching accidental deletions or privilege escalations before they happen. The review process adds a human gate that enforces organizational policies and spreads knowledge across the team. A downside is added latency: a change must wait for approval, which can be mitigated with fast CI pipelines and clear ownership. Additionally, reviewers must understand the underlying cloud semantics to spot subtle issues, so training is essential.",
+      "example": "A developer wants to increase the instance type of a production server from t2.micro to t2.large. They modify the Terraform file:\n\n- instance_type = \"t2.micro\"\n+ instance_type = \"t2.large\"\n\nThey open a PR. The CI runs \"terraform plan\" and outputs:\n\nPlan: 1 to change, 0 to add, 0 to destroy.\n\n- aws_instance.web will be updated in-place\n    instance_type: \"t2.micro\" => \"t2.large\"\n\nReviewers verify that the larger instance fits budget, that the AMI supports the new size, and that the change will not cause downtime. After approval, the merge triggers the apply step, safely updating the live resource."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import json, subprocess, os\n\ndef tf_plan(tf_dir):\n    # Run terraform init and plan, capture output\n    subprocess.run([\"terraform\", \"init\", \"-backend=false\"], cwd=tf_dir,\n                   stdout=subprocess.DEVNULL, check=True)\n    result = subprocess.run([\"terraform\", \"plan\", \"-no-color\"], cwd=tf_dir,\n                            capture_output=True, text=True, check=True)\n    return result.stdout\n\n# Directory contains main.tf with a single aws_s3_bucket resource\nprint(tf_plan(\"./example\"))",
+      "explanation": "The Python snippet demonstrates how a CI job can invoke Terraform to produce a plan without affecting real infrastructure. The function runs \"terraform init\" with a local backend (so no remote state is touched) and then captures the human‑readable plan output. The printed plan shows exactly which resources would be created, modified, or destroyed, allowing the CI system to fail the build if unexpected deletions appear. This approach is language‑agnostic; any IaC tool that offers a CLI plan command can be wrapped similarly. Limitations include the need for the Terraform binary in the runner image and the fact that the plan only reflects the state at the time of execution—drift that occurs later will not be caught until the next run."
+    },
+    {
+      "title": "Applied example",
+      "code": "pseudocode:\n\n# CI pipeline step\ncheckout repo\nrun static lint (tflint)\nplan = terraform plan -out=plan.out\nif plan contains \"destroy\" and not approved:\n    abort\npost comment with plan to PR\non merge:\n    terraform apply plan.out",
+      "explanation": "This pseudocode outlines a typical IaC change‑review pipeline. After checking out the repository, a linter validates syntax and policy compliance. The plan is saved to a file so that the exact actions can be reproduced later, guaranteeing that the apply step uses the same plan that was reviewed. A guard clause aborts the pipeline if the plan includes resource destruction unless an explicit approval flag is set, preventing accidental data loss. The plan output is posted back to the pull request, giving reviewers a clear view of the impact. Finally, when the PR merges, the stored plan is applied, ensuring that the infrastructure changes match the reviewed intent. This pattern enforces declarative state, immutable plans, and rigorous change review."
+    }
+  ],
+  "flow": [
+    "Write desired infrastructure in a declarative file (e.g., Terraform HCL).",
+    "Commit the file to a version‑control branch and open a pull request.",
+    "CI pipeline runs a linter and executes \"terraform plan\" to generate a preview.",
+    "Reviewers examine the diff and the plan output, approving only safe changes.",
+    "After approval, the PR merges; the pipeline runs \"terraform apply\" with the saved plan.",
+    "The IaC engine updates the remote state store, reflecting the new actual state.",
+    "Monitoring alerts on drift; if drift detected, a new plan is generated to reconcile."
+  ],
+  "interview": [
+    {
+      "question": "What is the difference between declarative and imperative IaC, and when would you choose each?",
+      "answer": "Declarative IaC describes the target state of resources; the engine computes the diff and applies minimal actions to converge. It offers idempotence, easier reasoning, and better integration with version control. Imperative IaC scripts each step explicitly (create, configure, start), giving fine‑grained control but requiring the author to manage ordering and idempotency manually. Choose declarative for most cloud provisioning where reproducibility and review are priorities. Use imperative when you need complex, conditional logic that the declarative language cannot express, such as custom bootstrapping scripts that must run in a specific sequence."
+    },
+    {
+      "question": "How does a change‑review process improve IaC safety, and what automated checks would you include?",
+      "answer": "Change review adds a human gate that validates intent, security, cost, and compliance before any real resources are altered. Automated checks should include syntax linting (e.g., tflint), policy validation (OPA or Sentinel), a \"terraform plan\" preview that is posted to the PR, and a guard that blocks plans containing unexpected destroys. Optionally, run unit tests on modules with mock providers. Together these checks catch errors early, enforce standards, and provide an auditable trail of who approved which change."
+    },
+    {
+      "question": "Explain how drift detection works in an IaC workflow and why it matters.",
+      "answer": "Drift occurs when the actual infrastructure diverges from the recorded state, often due to manual changes or external processes. IaC tools detect drift by comparing the live environment against the stored state file during a \"plan\" operation. If differences are found, the plan will show unexpected modifications, prompting a corrective apply or a manual investigation. Detecting drift matters because it preserves the guarantee that the declared configuration fully defines the environment, preventing hidden configuration errors, security gaps, and compliance violations."
+    },
+    {
+      "question": "Describe a design trade‑off between storing state locally versus in a remote backend.",
+      "answer": "Local state files are simple and require no extra services, making them suitable for small, single‑developer projects. However, they do not support collaboration, lock contention, or disaster recovery; two users may overwrite each other's changes, leading to inconsistent environments. Remote backends (e.g., S3 with DynamoDB locking) enable multiple team members to work concurrently, provide encryption at rest, and allow state versioning for rollback. The trade‑off is added operational complexity and cost of managing the backend service. For production‑grade IaC, a remote backend is generally preferred despite the overhead."
+    }
+  ],
+  "summary": "Infrastructure as Code transforms manual provisioning into a repeatable, versioned, and reviewable process. Declarative state lets engineers describe the desired end‑state, while the IaC engine handles ordering, idempotence, and minimal changes. Change review embeds peer scrutiny, automated plan previews, and policy enforcement, turning infrastructure modifications into auditable code changes. A robust workflow stores state remotely, runs linting and drift detection, and applies only vetted plans, thereby reducing human error, improving compliance, and enabling rapid, reliable scaling. Mastery of these fundamentals prepares practitioners for advanced topics such as policy as code, multi‑cloud orchestration, and automated testing of infrastructure modules.",
+  "practice": [
+    {
+      "question": "Given the following Terraform snippet, what actions will \"terraform plan\" report?\n\nresource \"aws_instance\" \"app\" {\n  ami           = \"ami-12345\"\n  instance_type = \"t2.micro\"\n  tags = { Name = \"app\" }\n}\n\n# State currently has an instance with the same name but instance_type \"t2.small\".",
+      "answer": "Terraform will detect a difference in the \"instance_type\" attribute. The plan will show:\n\n- aws_instance.app will be updated in-place\n    instance_type: \"t2.small\" => \"t2.micro\"\nNo resources will be added or destroyed. Only an in‑place update is required."
+    },
+    {
+      "question": "Write a Python function that runs \"terraform fmt\" on a directory and returns True if formatting succeeded, False otherwise.",
+      "answer": "def tf_fmt_success(path):\n    import subprocess, os\n    try:\n        result = subprocess.run([\"terraform\", \"fmt\", \"-check\", path],\n                                capture_output=True, text=True, check=True)\n        return True\n    except subprocess.CalledProcessError:\n        return False\n\nThe function invokes \"terraform fmt -check\" which exits with a non‑zero status if any file is not properly formatted. The try/except captures that status and returns a boolean indicating success."
+    },
+    {
+      "question": "A team stores Terraform state in a local file \"terraform.tfstate\". Two engineers simultaneously run \"terraform apply\" on different branches that both modify the same security group. What problem can arise and how would you prevent it?",
+      "answer": "Both engineers will read the same local state, compute separate plans, and each apply their changes. The second apply may overwrite the first, causing lost updates (race condition). To prevent this, move the state to a remote backend that supports locking, such as an S3 bucket with DynamoDB lock table. The lock ensures only one apply runs at a time, preserving all modifications."
+    },
+    {
+      "question": "Design a simple CI pipeline (list steps) that enforces change review for IaC using GitHub Actions and Terraform. Include at least one automated check.",
+      "answer": "1. Trigger on pull_request event.\n2. Checkout repository.\n3. Install Terraform and run \"terraform fmt -check\" (format lint).\n4. Run \"tflint\" to enforce style and policy.\n5. Execute \"terraform init -backend=false\".\n6. Run \"terraform plan -no-color\" and capture output.\n7. If the plan contains any \"Destroy\" actions, fail the job unless a \"allow-destroy\" label is present.\n8. Post the plan output as a comment on the PR.\n9. On merge, a separate workflow runs \"terraform init\" with remote backend and \"terraform apply\" using the saved plan file.\nThis pipeline guarantees that every change is formatted, linted, reviewed via the plan, and only applied after merge."
+    },
+    {
+      "question": "Calculate the squared approximation error when a desired security group rule allows ports 80‑82 but the applied rule only allows port 80. Use a binary vector representation for ports 80,81,82 where 1 means allowed. Compute error = ||desired - actual||^2.",
+      "answer": "Desired vector = [1,1,1]; Actual vector = [1,0,0]. Difference = [0,1,1]. Euclidean norm squared = 0^2 + 1^2 + 1^2 = 2. So the squared approximation error is 2."
+    },
+    {
+      "question": "Explain a trade‑off between using a single monolithic IaC repository versus multiple micro‑repositories for each service.",
+      "answer": "A monolithic repo simplifies global changes (e.g., updating a VPC CIDR) because all definitions are in one place; it also ensures a single source of truth for shared resources. However, it can become large, cause longer CI times, and increase merge conflicts when many teams work concurrently. Micro‑repositories isolate services, allowing independent versioning and faster pipelines, but they introduce coordination challenges for shared infrastructure and require a mechanism (e.g., a central networking repo) to keep cross‑service dependencies consistent. The choice depends on organization size, team autonomy, and the degree of shared resources."
+    }
+  ],
+  "id": "ops-iac",
+  "title": "Infrastructure as Code",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-10-01",
+  "wordCount": 2284
+}

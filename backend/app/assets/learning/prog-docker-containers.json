@@ -1,0 +1,93 @@
+{
+  "introduction": "Docker has become the de facto tool for packaging applications into lightweight, portable units called containers. By isolating the runtime environment, Docker lets developers run the same code on a laptop, a test server, or a cloud instance without worrying about missing libraries or mismatched system settings. Containerization shines when you need reproducible builds, rapid scaling, or clean separation between services. For data‑science and deep‑learning workloads, the ability to embed GPU drivers and CUDA libraries inside a container makes it possible to move heavy compute jobs across machines while preserving performance. This chapter introduces the core ideas of Docker and containerization, then builds up to the three advanced topics required for the competency: Multi‑Stage GPU builds, CUDA base containers, and Docker Compose. By the end, a beginner will be able to write a Dockerfile that produces a minimal GPU‑ready image, understand how to layer CUDA dependencies, and orchestrate multiple services with Compose.",
+  "foundations": "Docker works by creating a layered filesystem where each instruction in a Dockerfile adds a new read‑only layer on top of the previous one. At runtime, Docker combines these layers with a thin writable layer, forming a complete root filesystem for the container. The isolation is provided by Linux kernel features: namespaces (process, network, mount, etc.) give each container its own view of the system, while cgroups limit CPU, memory, and I/O usage. Images are identified by a name and tag (e.g., myapp:1.0) and stored in a registry such as Docker Hub. When you run a container, Docker creates a new process tree whose PID 1 lives inside the container's PID namespace, ensuring that signals and process tables are scoped. For GPU workloads, the NVIDIA Container Toolkit adds a device plugin that exposes the host's GPU devices inside the container, and it also mounts the necessary driver files. Understanding these building blocks—layers, namespaces, cgroups, and the role of the toolkit—allows you to reason about why a multi‑stage build can shrink an image, how a CUDA base image supplies the correct driver version, and how Docker Compose can launch a web service together with a GPU‑accelerated worker without manual networking steps.",
+  "concepts": [
+    {
+      "title": "Multi-Stage GPU Builds",
+      "explanation": "A multi‑stage build splits the Dockerfile into separate stages, each with its own base image. The first stage typically uses a heavyweight image that contains compilers, build tools, and the full CUDA toolkit needed to compile GPU code. After the binary is built, a second stage starts from a minimal runtime image (often nvidia/cuda:xx-runtime) and copies only the compiled binaries and required libraries. This approach reduces the final image size dramatically, which speeds up distribution and reduces attack surface. The trade‑off is a slightly more complex Dockerfile and the need to ensure that the runtime stage includes all shared libraries the binary depends on; missing a library will cause runtime failures.",
+      "example": "Consider a simple CUDA program that adds two vectors. In stage one we use nvidia/cuda:12.2-devel as the base, copy the source, and run nvcc to produce a binary called vecadd. In stage two we switch to nvidia/cuda:12.2-runtime, copy the vecadd binary, and set the entrypoint. The final image contains only the runtime libraries and the binary, resulting in an image under 200 MB compared to the 2 GB size of the full development image."
+    },
+    {
+      "title": "CUDA Base Containers",
+      "explanation": "CUDA base containers are official images published by NVIDIA that bundle a specific version of the CUDA driver, runtime, and optional cuDNN or TensorRT libraries. They are versioned by the CUDA toolkit release (e.g., 12.2) and by the OS distribution (e.g., ubuntu22.04). Using a CUDA base image guarantees binary compatibility between the container's CUDA libraries and the host's GPU driver, because the NVIDIA Container Toolkit checks that the host driver is at least as new as the container's runtime. The main trade‑off is that you must align your host driver version with the container's CUDA version; otherwise the container will refuse to start. Selecting a runtime‑only image reduces size, while a devel image includes compilers for on‑the‑fly builds.",
+      "example": "A data‑science team wants to run PyTorch with CUDA 12.2. They start FROM nvidia/cuda:12.2-runtime-ubuntu22.04, then pip install torch==2.2.0+cu122. The container inherits the correct libcuda.so and cudnn libraries, and the host's driver (>=525) satisfies the runtime check. If the host had an older driver, the container would emit an error like \"CUDA driver version is insufficient for CUDA runtime version\"."
+    },
+    {
+      "title": "Docker Compose",
+      "explanation": "Docker Compose is a declarative YAML format that defines multiple services, their images, networking, volumes, and environment variables. It allows you to spin up an entire application stack with a single command (docker-compose up). For containerized GPU workloads, Compose can specify the runtime: nvidia for each service that needs GPU access. Compose also handles service dependencies, so a web API can wait for a GPU‑enabled worker to be ready before accepting requests. The downside is that Compose adds another layer of configuration; errors in the YAML (such as mismatched indentation) can cause the whole stack to fail to start, and debugging requires understanding both Compose and the underlying Docker commands.",
+      "example": "A simple Compose file defines two services: 'api' built from ./api using a Python base image, and 'worker' built from ./worker using a multi‑stage GPU build. Both services declare runtime: nvidia and expose ports 8000 and 8080 respectively. When docker-compose up is run, Docker creates a private network, attaches both containers, and mounts a shared volume for model files, enabling the API to send inference jobs to the worker seamlessly."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "FROM nvidia/cuda:12.2-devel-ubuntu22.04 AS build\nWORKDIR /app\nCOPY vecadd.cu .\nRUN nvcc -o vecadd vecadd.cu\n\nFROM nvidia/cuda:12.2-runtime-ubuntu22.04\nCOPY --from=build /app/vecadd /usr/local/bin/vecadd\nENTRYPOINT [\"vecadd\"]",
+      "explanation": "The Dockerfile above demonstrates a two‑stage GPU build. The first stage uses the devel image to compile vecadd.cu, producing an executable that links against the CUDA driver. The second stage starts from a lightweight runtime image and copies only the executable. When you build this Dockerfile (docker build -t vecadd:latest .) the resulting image is roughly 180 MB, far smaller than the 2.1 GB devel image. Running the container (docker run --gpus all vecadd:latest) executes the vector addition on the host GPU. The limitation is that any additional shared libraries required by vecadd must be present in the runtime image; otherwise the container will fail with \"error while loading shared libraries\"."
+    },
+    {
+      "title": "Applied example",
+      "code": "services:\n  api:\n    build: ./api\n    ports:\n      - \"8000:8000\"\n    runtime: nvidia\n    environment:\n      - MODEL_PATH=/models/resnet.pt\n    volumes:\n      - model_data:/models\n  worker:\n    build: ./worker\n    runtime: nvidia\n    depends_on:\n      - api\n    volumes:\n      - model_data:/models\nvolumes:\n  model_data:",
+      "explanation": "This Docker Compose snippet defines two services that share a named volume called model_data. The 'api' service runs a Flask server exposing port 8000, while the 'worker' service runs a GPU‑enabled inference loop. Both services request the NVIDIA runtime, ensuring they have access to the host's GPUs. The depends_on clause guarantees that Docker starts the API before the worker, but it does not enforce health checks; for production you would add a healthcheck to verify the API is ready before the worker begins processing. This composition lets developers develop and test the full stack locally with a single command, and the same file can be used in CI pipelines or on a cloud host with GPU nodes."
+    }
+  ],
+  "flow": [
+    "Write a simple CUDA program and verify it runs on the host GPU.",
+    "Create a Dockerfile using a CUDA devel base, copy the source, and compile with nvcc.",
+    "Add a second stage that switches to a CUDA runtime base and copies the compiled binary.",
+    "Build the multi‑stage image and test it with docker run --gpus all to ensure GPU access.",
+    "Wrap the image in a Docker Compose service, adding any additional services needed.",
+    "Use docker-compose up to launch the full stack and verify inter‑service communication.",
+    "Iterate by adding environment variables, volumes, or healthchecks to improve robustness."
+  ],
+  "interview": [
+    {
+      "question": "What is the purpose of a multi‑stage Docker build for GPU applications?",
+      "answer": "A multi‑stage build separates the compilation environment from the runtime environment. The first stage uses a heavy CUDA devel image to compile GPU code, while the second stage uses a minimal CUDA runtime image to run the compiled binary. This reduces the final image size, lowers attack surface, and speeds up deployment, but requires careful copying of all dependent libraries."
+    },
+    {
+      "question": "How does the NVIDIA Container Toolkit enable GPU access inside a container?",
+      "answer": "The toolkit installs a runtime hook that, when the container is started with --gpus or runtime: nvidia, mounts the host's /dev/nvidia* devices and the driver files into the container's namespace. It also sets LD_LIBRARY_PATH so that the container sees the host's libcuda.so, ensuring binary compatibility between the container's CUDA runtime and the host driver."
+    },
+    {
+      "question": "Explain the difference between a CUDA base image tagged 'runtime' and one tagged 'devel'.",
+      "answer": "A 'runtime' image contains only the CUDA driver libraries needed to run pre‑compiled binaries; it is small and suitable for production. A 'devel' image includes the full CUDA toolkit, compilers, and headers, allowing you to compile code inside the container. Using 'devel' for building and 'runtime' for execution yields smaller, more secure images."
+    },
+    {
+      "question": "What are common pitfalls when using Docker Compose with GPU services?",
+      "answer": "Common issues include forgetting to set runtime: nvidia for each GPU‑using service, leading to \"no CUDA devices found\" errors; mismatched driver versions between host and container causing runtime version errors; and neglecting healthchecks, so dependent services start before the GPU service is ready, causing request failures."
+    }
+  ],
+  "summary": "Docker abstracts the operating system into layered images, providing isolation via namespaces and resource limits via cgroups. For GPU workloads, the NVIDIA Container Toolkit bridges host GPUs into containers, while CUDA base images supply the correct driver libraries. Multi‑stage builds let you compile with a heavyweight devel image and ship a lean runtime image, dramatically shrinking size and improving security. Docker Compose orchestrates multiple containers, handling networking, volumes, and service dependencies, and can be configured to request GPU resources for any service. Mastering these concepts enables you to create reproducible, portable, and efficient GPU‑accelerated applications that run consistently from a developer laptop to a cloud GPU node.",
+  "practice": [
+    {
+      "question": "Write a Dockerfile that builds a CUDA program from source and produces a runtime‑only image. Use CUDA 11.8 and a simple hello.cu that prints \"Hello GPU\".",
+      "answer": "FROM nvidia/cuda:11.8-devel-ubuntu20.04 AS build\nWORKDIR /src\nCOPY hello.cu .\nRUN nvcc -o hello hello.cu\n\nFROM nvidia/cuda:11.8-runtime-ubuntu20.04\nCOPY --from=build /src/hello /usr/local/bin/hello\nENTRYPOINT [\"hello\"]\n\n# Build with: docker build -t hello-gpu .\n# Run with: docker run --gpus all hello-gpu\n# The program will output \"Hello GPU\" from the device."
+    },
+    {
+      "question": "Given a host with NVIDIA driver version 525, which of the following base images will run: nvidia/cuda:12.1-runtime, nvidia/cuda:12.2-runtime, nvidia/cuda:11.8-runtime? Explain.",
+      "answer": "The host driver 525 supports CUDA runtime up to 12.1. Therefore nvidia/cuda:12.1-runtime will run, nvidia/cuda:12.2-runtime will fail with a version mismatch error, and nvidia/cuda:11.8-runtime will also run because older runtimes are compatible with newer drivers."
+    },
+    {
+      "question": "In a Compose file, you have a service 'web' that depends on a GPU‑enabled service 'worker'. How would you ensure 'web' only starts after 'worker' reports healthy?",
+      "answer": "Add a healthcheck to the 'worker' service that runs a small command like 'nvidia-smi' and returns 0 when successful. Then set depends_on with condition: service_healthy. Example:\n\nworker:\n  build: ./worker\n  runtime: nvidia\n  healthcheck:\n    test: [\"CMD\", \"nvidia-smi\"]\n    interval: 5s\n    retries: 3\nweb:\n  build: ./web\n  depends_on:\n    worker:\n      condition: service_healthy"
+    },
+    {
+      "question": "What trade‑offs would you consider when choosing between a single‑stage Dockerfile that uses nvidia/cuda:12.2-devel and a multi‑stage build that ends with nvidia/cuda:12.2-runtime?",
+      "answer": "A single‑stage image is simpler to write and guarantees all build‑time dependencies are present at runtime, reducing the risk of missing libraries. However, it is large (often >2 GB) and includes compilers that are unnecessary in production, increasing attack surface. A multi‑stage build produces a much smaller image (~200 MB), faster to pull and start, and is more secure, but requires careful identification of runtime dependencies and adds complexity to the Dockerfile."
+    },
+    {
+      "question": "Implement a Python script that runs inside a CUDA runtime container and prints the number of visible GPUs using PyTorch. Provide the code and expected output.",
+      "answer": "import torch\nprint('GPUs visible:', torch.cuda.device_count())\n# Expected output on a machine with 2 GPUs: GPUs visible: 2\n# Run with: docker run --gpus all my-pytorch-image python script.py"
+    },
+    {
+      "question": "Design a containerized pipeline for training a model on GPU and serving it via a REST API. List the services, their base images, and how they communicate.",
+      "answer": "Services:\n1. trainer: FROM nvidia/cuda:12.2-devel-ubuntu22.04, installs PyTorch, runs training script, writes model to a shared volume /models.\n2. api: FROM python:3.11-slim, installs Flask and torch, mounts /models, loads the trained model on startup, serves /predict endpoint.\nCommunication: Both services share a named Docker volume 'model_data'. The trainer writes model.pt to /models; the API reads it. No network calls needed between them. Use Docker Compose to start both; trainer runs once, then exits, while api stays up serving requests."
+    }
+  ],
+  "id": "prog-docker-containers",
+  "title": "Docker & Containerization",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2120
+}

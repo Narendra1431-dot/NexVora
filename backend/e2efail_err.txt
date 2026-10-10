@@ -1,0 +1,13 @@
+2026-10-10 17:30:54,766 INFO plcip.db: Connected to MongoDB database 'career_intelligence_qa' via pymongo-async
+2026-10-10 17:30:56,537 INFO httpx: HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 17:30:56,570 INFO plcip.main: API ready (prefix /api)
+2026-10-10 17:30:58,082 INFO plcip.audit: {"requestId": "e731a1a06dc699d834ae837d", "stateVersion": 1, "event": "competency_recalculated", "studentId": "stu-b038578f25c5027721e0006a"}
+2026-10-10 17:30:59,236 INFO plcip.auth: Registered new student stu-b038578f25c5027721e0006a
+2026-10-10 17:30:59,253 INFO plcip.audit: {"requestId": "e731a1a06dc699d834ae837d", "stateVersion": 1, "event": "request_completed", "status": 201, "method": "POST", "route": "/api/v1/auth/register", "latency": 2656.5, "error": null}
+2026-10-10 17:30:59,264 INFO httpx: HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+2026-10-10 17:31:00,984 INFO plcip.audit: {"requestId": "f27e0e7e3bba4bdc12436819", "studentId": "stu-b038578f25c5027721e0006a", "stateVersion": 1, "event": "request_completed", "status": 202, "method": "POST", "route": "/api/v1/agent/runs/run", "latency": 1710.05, "error": null}
+2026-10-10 17:31:00,990 INFO httpx: HTTP Request: POST http://testserver/api/v1/agent/runs/run "HTTP/1.1 202 Accepted"
+2026-10-10 17:31:01,044 INFO plcip.audit: {"requestId": "5a7773d4c40b1a5066079f74", "studentId": "stu-b038578f25c5027721e0006a", "event": "request_completed", "status": 200, "method": "GET", "route": "/api/v1/agent/runs/run/{run_id}", "latency": 45.94, "error": null}
+2026-10-10 17:31:01,048 INFO httpx: HTTP Request: GET http://testserver/api/v1/agent/runs/run/agt-6ed0144690b98c41e1ed4a0e "HTTP/1.1 200 OK"
+2026-10-10 17:31:01,928 INFO plcip.audit: {"requestId": "e265b449fc5b7316fd0c265b", "studentId": "stu-b038578f25c5027721e0006a", "event": "request_completed", "status": 200, "method": "GET", "route": "/api/v1/agent/runs/run/{run_id}", "latency": 49.11, "error": null}
+2026-10-10 17:31:01,933 INFO httpx: HTTP Request: GET http://testserver/api/v1/agent/runs/run/agt-6ed0144690b98c41e1ed4a0e "HTTP/1.1 200 OK"

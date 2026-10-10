@@ -1,0 +1,93 @@
+{
+  "introduction": "Unsupervised learning and dimensionality reduction are core techniques for extracting structure from data without explicit labels. They help visualize high‑dimensional datasets, compress information, and prepare features for downstream tasks. When data has many variables, distances become noisy and algorithms can suffer; reducing dimensions to the most informative axes reveals clusters, trends, and anomalies. This chapter introduces three foundational methods—Principal Component Analysis (PCA), K‑Means and DBSCAN clustering, and the manifold‑learning visualizers t‑SNE and UMAP. You will learn the mathematics that underpins each algorithm, see step‑by‑step numeric examples, and practice coding them in Python. By the end you will know when to apply each technique, how to interpret results, and how to avoid common pitfalls such as over‑compression, sensitivity to scale, and stochastic variability.",
+  "foundations": "All three methods start from a data matrix X of shape (n_samples, n_features). The first step is always to centre the data by subtracting the column means; many algorithms also require scaling to unit variance so that each feature contributes equally to distance calculations. PCA seeks orthogonal directions (principal components) that maximise variance. It solves the eigenvalue problem of the covariance matrix C = (1/(n-1)) X^T X, yielding eigenvectors (directions) and eigenvalues (explained variance). Selecting the top k eigenvectors forms a projection matrix W_k, and the reduced data Z = X W_k retains the most variance while discarding noise. K‑Means partitions points into k clusters by iteratively assigning each point to the nearest centroid and recomputing centroids as the mean of assigned points; the objective is to minimise the sum of squared Euclidean distances (inertia). DBSCAN, by contrast, defines clusters as dense regions separated by low‑density gaps. It uses two parameters: eps (neighbourhood radius) and minPts (minimum points to form a dense region). Points are labelled core, border, or noise, and clusters grow by density‑reachability. t‑SNE and UMAP are non‑linear techniques that preserve local neighbourhood structure. t‑SNE converts high‑dimensional pairwise distances into conditional probabilities, then finds a low‑dimensional embedding that matches these probabilities using gradient descent. UMAP builds a fuzzy topological graph from the data and optimises a low‑dimensional layout that preserves both local and global structure. Both require careful tuning of perplexity (t‑SNE) or n_neighbors/min_dist (UMAP) and are stochastic, so multiple runs may differ. Understanding these foundations—centering, scaling, distance metrics, eigen decomposition, and density concepts—prepares you to apply each method correctly and interpret its output.",
+  "concepts": [
+    {
+      "title": "PCA Decomposition",
+      "explanation": "PCA transforms correlated variables into a set of linearly uncorrelated components ordered by variance. The covariance matrix captures pairwise linear relationships; its eigenvectors point in directions of maximal spread, while eigenvalues quantify how much variance each direction explains. By selecting the top k eigenvectors, we construct a projection that retains the majority of information while reducing dimensionality. Trade‑offs include loss of interpretability—components are linear combinations of original features—and the assumption of linearity; non‑linear structures are not captured. PCA is deterministic, fast for moderate sizes, and works well when variance aligns with signal, but it can be misled by outliers, which inflate variance along spurious directions.",
+      "example": "Consider a 3‑point dataset with two features: X = [[2,0],[0,2],[2,2]]. Centering gives [[1,-1],[-1,1],[1,1]]. Covariance C = (1/2) * [[(1^2+(-1)^2+1^2), (1*(-1)+(-1)*1+1*1)], [(same), ((-1)^2+1^2+1^2)]] = [[1.5,0.5],[0.5,1.5]]. Eigenvalues are 2.0 and 1.0; eigenvectors are [1,1]/sqrt2 and [1,-1]/sqrt2. Keeping the top component yields W = [0.707,0.707]. Projected values Z = X_centered * W = [0, -1.414, 1.414]. The first component captures most variance (2/3 of total)."
+    },
+    {
+      "title": "K-Means & DBSCAN",
+      "explanation": "K‑Means clusters by minimising within‑cluster sum of squares. It requires the number of clusters k a priori and assumes roughly spherical, equally sized clusters. The algorithm converges to a local optimum; different initial centroids can lead to different solutions, so multiple restarts are common. DBSCAN, in contrast, discovers clusters of arbitrary shape based on density. It does not need a preset number of clusters, but it needs eps and minPts. Points in low‑density regions become noise, which is useful for outlier detection. However, DBSCAN struggles when clusters have varying densities, as a single eps cannot capture both. Both rely on Euclidean distance unless a different metric is supplied.",
+      "example": "Take points: A(0,0), B(1,0), C(0,1), D(5,5), E(6,5), F(5,6). For K‑Means with k=2, initial centroids at A and D lead to assignments: cluster1 = {A,B,C}, centroid1 = (0.33,0.33); cluster2 = {D,E,F}, centroid2 = (5.33,5.33). Inertia = sum of squared distances = (0.33^2+0.33^2)+(0.67^2+0.33^2)+(0.33^2+0.67^2)+(0.33^2+0.33^2)+(0.67^2+0.33^2)+(0.33^2+0.67^2)=2.0. For DBSCAN with eps=1.5, minPts=2, points A‑C are dense and form one cluster, D‑F form another; no noise points appear."
+    },
+    {
+      "title": "t-SNE & UMAP",
+      "explanation": "Both methods aim to embed high‑dimensional data into 2‑ or 3‑dimensional space for visualization while preserving neighbourhood relationships. t‑SNE converts pairwise distances into conditional probabilities using a Gaussian kernel in the high‑dimensional space and a Student‑t kernel in the low‑dimensional space. It then minimises the Kullback‑Leibler divergence between the two distributions via gradient descent. The perplexity parameter roughly controls the number of effective neighbours; too low yields many small clusters, too high merges distinct groups. UMAP builds a fuzzy simplicial set by estimating a local connectivity graph with a chosen number of neighbours, then optimises a low‑dimensional layout using stochastic gradient descent on a cross‑entropy loss. UMAP tends to preserve more global structure and runs faster than t‑SNE, but both are stochastic, so results vary across runs. Careful seeding and parameter tuning are essential for reproducible visual insights.",
+      "example": "Suppose we have four 3‑D points: p1=(0,0,0), p2=(0,1,0), p3=(5,5,5), p4=(5,6,5). Pairwise Euclidean distances: d12=1, d34=1, d13≈8.66, d14≈8.66, d23≈8.66, d24≈8.66. With t‑SNE perplexity=2, the algorithm will assign high probability to the close pairs (p1‑p2, p3‑p4) and low probability to all others. After optimisation, the 2‑D embedding might place p1 and p2 near each other at (0,0) and (0,1), and p3 and p4 near each other at (5,5) and (5,6), preserving the two clusters while separating them."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\nX = np.array([[2,0],[0,2],[2,2]])\nXc = X - X.mean(axis=0)\nC = np.cov(Xc, rowvar=False)\nvals, vecs = np.linalg.eig(C)\nW = vecs[:, np.argsort(vals)[-1]]\nZ = Xc @ W\nprint('Projected:', Z)",
+      "explanation": "The code follows the PCA steps described earlier: centering, computing the covariance matrix, eigen‑decomposition, selecting the eigenvector with the largest eigenvalue, and projecting the data. The printed projected values are [0., -1.41421356, 1.41421356], matching the manual calculation. Because the dataset is tiny and perfectly aligned, the first component captures two‑thirds of the total variance. The limitation is that PCA assumes linear relationships; if the points lay on a curved manifold, this projection would distort the structure."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for DBSCAN clustering\n# Input: data matrix X, eps, minPts\n# Output: cluster labels\nfor each point p in X:\n    N = neighbours(p, eps)\n    if |N| >= minPts:\n        mark p as core\n    else:\n        mark p as noise\ncluster_id = 0\nfor each core point p not yet assigned:\n    cluster_id += 1\n    expand_cluster(p, cluster_id)\n\nfunction expand_cluster(p, cid):\n    assign p to cid\n    for each q in neighbours(p, eps):\n        if q is noise: assign q to cid\n        if q not assigned:\n            assign q to cid\n            if q is core: expand_cluster(q, cid)",
+      "explanation": "The pseudocode captures the essence of DBSCAN: identify core points based on neighbourhood density, then grow clusters by recursively adding density‑reachable points. Unlike K‑Means, no centroid is computed, and the algorithm naturally labels outliers as noise. The main pitfalls are choosing eps too small (many points become noise) or too large (distinct clusters merge). Additionally, the algorithm's runtime can be O(n^2) without spatial indexing structures such as KD‑trees."
+    }
+  ],
+  "flow": [
+    "1. Load raw data and inspect shape; handle missing values.",
+    "2. Center each feature by subtracting its mean; optionally scale to unit variance.",
+    "3. Choose a dimensionality reduction method: PCA for linear variance, t‑SNE/UMAP for non‑linear structure.",
+    "4. Apply the method, obtain reduced coordinates, and evaluate explained variance (PCA) or visual separation (t‑SNE/UMAP).",
+    "5. If clustering is needed, decide between K‑Means (spherical clusters, known k) or DBSCAN (arbitrary shape, unknown k).",
+    "6. Run the clustering algorithm on the reduced data; compute silhouette score or inertia to assess quality.",
+    "7. Visualise results: scatter plot of reduced dimensions coloured by cluster label; interpret patterns and identify outliers."
+  ],
+  "interview": [
+    {
+      "question": "Explain how PCA determines the number of components to retain.",
+      "answer": "PCA computes eigenvalues of the covariance matrix, each representing variance along its eigenvector. By sorting eigenvalues descending, we can calculate the cumulative explained variance ratio. The number of components is chosen when the cumulative ratio exceeds a threshold (e.g., 90%). This ensures that most of the data's variability is preserved while discarding noise. The choice balances compression against information loss; in practice we also examine scree plots for elbow points."
+    },
+    {
+      "question": "What are the main differences between K‑Means and DBSCAN regarding cluster shape and noise handling?",
+      "answer": "K‑Means assumes clusters are convex, roughly spherical, and of similar size because it minimises Euclidean distance to a centroid. It forces every point into a cluster, so outliers are assigned to the nearest centroid. DBSCAN defines clusters as dense regions separated by low‑density gaps; it can discover arbitrarily shaped clusters and explicitly marks points that do not belong to any dense region as noise. Consequently, DBSCAN is more robust to outliers but struggles when clusters have varying densities."
+    },
+    {
+      "question": "Why is t‑SNE considered stochastic, and how can you obtain reproducible visualisations?",
+      "answer": "t‑SNE optimises a non‑convex loss using gradient descent starting from random initial positions. Different random seeds lead to different local minima, producing varied embeddings. To obtain reproducible results, set the random_state (or seed) parameter, use the same perplexity and learning rate, and run the algorithm multiple times to verify stability. Even with a fixed seed, the method may still be sensitive to data preprocessing."
+    },
+    {
+      "question": "Describe a scenario where using PCA before K‑Means improves clustering performance.",
+      "answer": "When the original feature space is high‑dimensional and contains correlated or noisy dimensions, Euclidean distances become less meaningful (the curse of dimensionality). Applying PCA reduces dimensionality to the most informative axes, decorrelates features, and removes noise. K‑Means then operates on a compact, variance‑rich space, leading to tighter clusters, lower inertia, and more stable centroids. For example, clustering image patches with 100‑pixel features benefits from reducing to 10 principal components before K‑Means."
+    }
+  ],
+  "summary": "Unsupervised learning provides tools to discover hidden structure without labels. PCA offers a deterministic, linear compression that preserves maximal variance and is ideal for noise reduction and preprocessing. K‑Means and DBSCAN give complementary clustering strategies: K‑Means excels with spherical, equally sized groups and requires a preset k, while DBSCAN discovers arbitrarily shaped clusters and isolates outliers without needing k. t‑SNE and UMAP are powerful visualisation techniques that maintain local neighbourhoods; t‑SNE emphasises local detail at the cost of global layout, whereas UMAP balances both and runs faster. Proper data centering, scaling, and parameter tuning are essential across all methods. By following a systematic workflow—cleaning, scaling, reducing, clustering, and visualising—practitioners can extract meaningful patterns, detect anomalies, and prepare features for downstream supervised tasks.",
+  "practice": [
+    {
+      "question": "Given X = [[4,2],[2,4],[3,3]], compute the first principal component manually and report the projected values.",
+      "answer": "Center X: mean = [3,3]; Xc = [[1,-1],[-1,1],[0,0]]. Covariance C = (1/2) * [[(1^2+(-1)^2+0^2), (1*(-1)+(-1)*1+0*0)], same] = [[1, -1],[ -1,1]]. Eigenvalues = 2 and 0; eigenvector for λ=2 is [1,-1]/sqrt2. Projection matrix W = [0.707,-0.707]. Projected Z = Xc @ W = [ (1*0.707 + -1*-0.707)=1.414, (-1*0.707 + 1*-0.707)=-1.414, (0) =0 ]. So Z = [1.414, -1.414, 0]."
+    },
+    {
+      "question": "Run K‑Means with k=2 on points (0,0), (1,0), (0,1), (5,5), (6,5), (5,6). Show one iteration of assignment and centroid update.",
+      "answer": "Initial centroids: c1=(0,0), c2=(5,5). Assignment: points A(0,0),B(1,0),C(0,1) are closer to c1; D(5,5),E(6,5),F(5,6) closer to c2. New centroids: c1 = mean of A,B,C = ((0+1+0)/3, (0+0+1)/3) = (0.33,0.33). c2 = mean of D,E,F = ((5+6+5)/3, (5+5+6)/3) = (5.33,5.33). Inertia after this iteration = sum of squared distances = 2.0 (as computed earlier)."
+    },
+    {
+      "question": "Using DBSCAN with eps=1.5 and minPts=2 on the same six points, identify core, border, and noise points.",
+      "answer": "Neighbourhoods (radius 1.5): A has B and C within distance 1, so |N|=3 → core. B has A and C within distance 1, core. C has A and B, core. D has E and F within distance 1, core. E has D and F, core. F has D and E, core. No points are border or noise because every point meets minPts. Thus two clusters: {A,B,C} and {D,E,F}."
+    },
+    {
+      "question": "Explain how changing the perplexity parameter in t‑SNE from 5 to 50 would affect the embedding of a dataset with 500 points.",
+      "answer": "Perplexity roughly sets the effective number of neighbours each point considers. With perplexity=5, the algorithm focuses on very local structure, often producing many small, tightly packed clusters and possibly fragmenting larger groups. Raising perplexity to 50 expands the neighbourhood, encouraging the embedding to respect broader relationships; clusters may merge, and the global layout becomes smoother. However, too high a perplexity can blur distinct small clusters, making them indistinguishable. For 500 points, a perplexity between 30 and 50 is typical, balancing local detail and global coherence."
+    },
+    {
+      "question": "Design a pipeline that uses PCA to reduce dimensionality before applying DBSCAN on a high‑dimensional text embedding (e.g., 300‑D). List the steps and justify each choice.",
+      "answer": "1. Load the 300‑D embeddings and optionally remove zero‑variance dimensions. 2. Standardise each dimension to zero mean and unit variance to ensure Euclidean distances are meaningful. 3. Apply PCA and retain enough components to explain ~95% of variance (often ~50 components). This removes noise and reduces computational cost for DBSCAN, whose neighbour queries scale with dimensionality. 4. Choose eps based on the average distance in the reduced space (e.g., using a k‑distance plot) and set minPts to a small integer like 5. 5. Run DBSCAN on the PCA‑reduced data to discover dense clusters of semantically similar documents while labeling outliers. 6. Evaluate cluster quality with silhouette score and inspect representative documents. The PCA step decorrelates features and mitigates the curse of dimensionality, improving DBSCAN's density estimation."
+    },
+    {
+      "question": "Compare the trade‑offs between using t‑SNE and UMAP for visualising a dataset of 10,000 gene expression profiles.",
+      "answer": "t‑SNE excels at preserving very local neighbourhoods, often revealing fine‑grained sub‑clusters, but it is computationally intensive (O(N^2)) and requires careful tuning of perplexity; results can vary between runs. UMAP scales better (approximately O(N log N)), runs faster on 10,000 points, and tends to preserve both local and some global structure, making it easier to see overall relationships between major cell types. However, UMAP may slightly blur the tightest clusters compared to t‑SNE. For exploratory analysis where speed and reproducibility matter, UMAP is preferred; for detailed sub‑population discovery, t‑SNE may be advantageous despite higher cost."
+    }
+  ],
+  "id": "ml-unsupervised",
+  "title": "Unsupervised & Dimensionality",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2401
+}

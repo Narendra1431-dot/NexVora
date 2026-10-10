@@ -1,0 +1,64 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: career_intelligence
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+      MONGODB_DB: career_intelligence
+      JWT_SECRET: ${JWT_SECRET:-local-compose-secret-change-me}
+      JWT_TTL_MINUTES: ${JWT_TTL_MINUTES:-720}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-4o}
+      EMBED_MODEL: ${EMBED_MODEL:-sentence-transformers/all-MiniLM-L6-v2}
+      EMBED_DIM: ${EMBED_DIM:-384}
+      RAG_TOP_K: ${RAG_TOP_K:-5}
+      MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-8388608}
+      ALLOWED_UPLOAD_TYPES: ${ALLOWED_UPLOAD_TYPES:-application/pdf,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-120}
+      SENSITIVE_RATE_LIMIT_PER_MINUTE: ${SENSITIVE_RATE_LIMIT_PER_MINUTE:-20}
+      TRUST_PROXY_HEADERS: ${TRUST_PROXY_HEADERS:-false}
+      DEMO_EMAIL: ${DEMO_EMAIL:-alex.rivera@cs.university.edu}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo1234}
+      SEED_ON_STARTUP: ${SEED_ON_STARTUP:-true}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./backend/app:/app/backend/app:ro
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000/api}
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+
+volumes:
+  mongodb_data:

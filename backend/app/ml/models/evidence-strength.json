@@ -1,0 +1,49 @@
+{
+  "modelVersion": "evidence-strength-synthetic-1",
+  "data": "SYNTHETIC DEMO DATA; advisory only; not validated on learner outcomes",
+  "seed": 42,
+  "train": 1440,
+  "validation": 480,
+  "test": 480,
+  "features": [
+    "score",
+    "quality",
+    "provenancePresent",
+    "careerRelevant",
+    "recency"
+  ],
+  "task": "classification",
+  "classes": [
+    0,
+    1,
+    2
+  ],
+  "coefficients": [
+    [
+      -14.024329808519733,
+      -9.186825521353216,
+      -11.968505309218802,
+      -7.410433373330772,
+      -4.617606969668579
+    ],
+    [
+      -0.04386682966257706,
+      -0.03367634999379118,
+      -0.10360432432450557,
+      -0.061421419263099006,
+      0.020309397573864157
+    ],
+    [
+      14.068196638182364,
+      9.220501871346961,
+      12.072109633543327,
+      7.471854792593876,
+      4.597297572094704
+    ]
+  ],
+  "intercept": [
+    22.87442252606781,
+    4.079303580622149,
+    -26.953726106689647
+  ]
+}

@@ -1,0 +1,40 @@
+/* All artwork is transparent SVG geometry; one uninterrupted viewport background. */
+#splash-screen {position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden;z-index:1000;display:grid;place-items:center;background:#021027;opacity:1;transition:opacity 600ms ease-in-out;}
+#splash-screen .logo-container {width:clamp(520px,55vw,800px);max-width:92vw;background:none;border:0;box-shadow:none;transform:scale(1);transition:transform 600ms ease-in-out;}
+.nexvora-splash-art {display:block;width:100%;height:auto;overflow:visible;}
+#splash-screen.splash-exit {opacity:0;}
+#splash-screen.splash-exit .logo-container {transform:scale(.96);}
+.nexvora-login-layer {opacity:1;transform:none;transition:opacity 600ms ease-in-out,transform 600ms ease-in-out;}
+.nexvora-login-layer--waiting {opacity:0;transform:translateY(8px);}
+#splash-screen .energy-dot {fill:#83ffff;filter:drop-shadow(0 0 7px #00dfea);transform-origin:500px 245px;animation:nvs-dot 1.1s ease-in-out both;}
+#splash-screen .orbit-ring {fill:none;stroke:#26dbe3;stroke-width:1;transform-origin:500px 245px;animation:nvs-orbit 1.5s ease-out .3s both;}
+#splash-screen .ring-2 {animation-delay:.5s;}
+#splash-screen .particle {fill:#70ffff;animation:nvs-particle 2s ease-in-out .6s both;}
+#splash-screen .particle-1,#splash-screen .particle-3 {animation-delay:.9s;}
+#splash-screen .outer-arc {stroke-dasharray:100;stroke-dashoffset:100;animation:nvs-draw 1.2s ease-in-out .9s forwards;filter:drop-shadow(0 0 3px #00d4e622);}
+#splash-screen .inner-arc {animation:nvs-appear .7s ease-out 1.2s both;}
+#splash-screen .inner-star {transform-origin:500px 239px;animation:nvs-form .7s ease-out 1.5s both;}
+#splash-screen .small-star {transform-origin:589px 140px;animation:nvs-form .5s ease-out 1.9s both;}
+#splash-screen .arrow {animation:nvs-arrow .9s ease-in-out 2.2s both;}
+#splash-screen .wordmark {font-family:Inter,system-ui,sans-serif;font-size:125px;font-weight:800;letter-spacing:-7px;}
+#splash-screen .nex {fill:#f8fbff;animation:nvs-left .8s ease-out 3s both;}
+#splash-screen .vora {animation:nvs-right .8s ease-out 3s both;}
+#splash-screen .tagline-container {fill:#f0f5ff;font-family:Inter,system-ui,sans-serif;font-size:21px;font-weight:500;letter-spacing:4px;animation:nvs-tagline .7s ease-out 3.5s both;}
+#splash-screen .glow-sweep {pointer-events:none;animation:nvs-sweep .7s ease-in-out 4.2s both;}
+@keyframes nvs-dot {0%{opacity:0;transform:scale(.3)}25%{opacity:1;transform:scale(1)}65%{opacity:1;transform:scale(3)}100%{opacity:0;transform:scale(8)}}
+@keyframes nvs-orbit {0%{opacity:0;transform:scale(.03)}35%{opacity:.6}100%{opacity:0;transform:scale(1.15)}}
+@keyframes nvs-particle {0%,100%{opacity:0;transform:translateY(0)}40%{opacity:.6}100%{transform:translateY(-15px)}}
+@keyframes nvs-draw {to{stroke-dashoffset:0}}
+@keyframes nvs-appear {from{opacity:0}to{opacity:1}}
+@keyframes nvs-form {from{opacity:0;transform:scale(.05)}to{opacity:1;transform:scale(1)}}
+@keyframes nvs-arrow {from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@keyframes nvs-left {from{opacity:0;transform:translateX(-45px)}to{opacity:1;transform:translateX(0)}}
+@keyframes nvs-right {from{opacity:0;transform:translateX(45px)}to{opacity:1;transform:translateX(0)}}
+@keyframes nvs-tagline {from{opacity:0;letter-spacing:7px}to{opacity:1;letter-spacing:4px}}
+@keyframes nvs-sweep {0%{opacity:0;transform:translateX(-400px)}40%{opacity:.7}100%{opacity:0;transform:translateX(600px)}}
+@media(max-width:1024px){#splash-screen .logo-container{width:clamp(280px,75vw,740px);}}
+@media(max-width:600px){#splash-screen .logo-container{width:90vw;}}
+@media(orientation:landscape) and (max-height:500px){#splash-screen .logo-container{width:min(88vw,125dvh);}}
+#splash-screen.is-reduced .nexvora-splash-art * {animation:none;opacity:1;stroke-dashoffset:0;}
+#splash-screen.is-reduced .nv-energy,#splash-screen.is-reduced .particles-container,#splash-screen.is-reduced .glow-sweep {display:none;}
+@media(prefers-reduced-motion:reduce){#splash-screen.splash-exit .logo-container,.nexvora-login-layer{transform:none;}.nexvora-login-layer{transition-property:opacity;}}

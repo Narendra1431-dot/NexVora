@@ -1,0 +1,22 @@
+INFO:     Started server process [67064]
+INFO:     Waiting for application startup.
+2026-10-10 13:43:33,239 INFO plcip.db: Connected to MongoDB database 'career_intelligence' via pymongo-async
+2026-10-10 13:43:34,161 INFO plcip.seed: Seeded: {'skills': 34, 'careers': 10, 'assessments': 13, 'resources': 13, 'projects': 4, 'demo_student': 1}
+2026-10-10 13:43:58,053 INFO plcip.rag: Local sentence-transformers model unavailable (ImportError); using hashing embedder.
+2026-10-10 13:44:06,474 INFO faiss.loader: Loading faiss with AVX512 support.
+2026-10-10 13:44:06,558 INFO faiss.loader: Could not load library with AVX512 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx512'")
+2026-10-10 13:44:06,625 INFO faiss.loader: Loading faiss with AVX2 support.
+2026-10-10 13:44:06,734 INFO faiss.loader: Could not load library with AVX2 support due to:
+ImportError("cannot import name '_swigfaiss_avx2' from partially initialized module 'faiss' (most likely due to a circular import) (F:\\Download\\NSRIT HACKTHON\\backend\\.venv\\Lib\\site-packages\\faiss\\__init__.py)")
+2026-10-10 13:44:06,783 INFO faiss.loader: Loading faiss.
+2026-10-10 13:44:06,817 INFO plcip.rag: RAG index built: 337 chunks using hashing-blake2b
+2026-10-10 13:44:08,084 INFO httpx: HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-10-10 13:44:08,196 INFO plcip.main: API ready (prefix /api)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-10-10 13:49:10,587 INFO plcip.audit: {"requestId": "f182e46176a1d9a9c583ea54", "event": "request_completed", "status": 404, "method": "GET", "route": "unmatched", "latency": 2.95, "error": null}
+2026-10-10 13:49:25,120 INFO plcip.audit: {"requestId": "f9e03c1ccc7525cc8f81534a", "event": "request_completed", "status": 404, "method": "GET", "route": "unmatched", "latency": 5.83, "error": null}
+2026-10-10 13:49:27,832 INFO plcip.audit: {"requestId": "c043df9093f61677dabb81e0", "event": "request_completed", "status": 200, "method": "GET", "route": "/health", "latency": 573.88, "error": null}
+2026-10-10 13:49:30,456 INFO plcip.audit: {"requestId": "20e14595db4c358f4af11628", "event": "request_completed", "status": 200, "method": "GET", "route": "/api/health", "latency": 455.3, "error": null}
+2026-10-10 13:52:23,286 INFO plcip.audit: {"requestId": "bf3c8080ba9d5670bfc78b0f", "event": "request_completed", "status": 404, "method": "GET", "route": "unmatched", "latency": 4.1, "error": null}

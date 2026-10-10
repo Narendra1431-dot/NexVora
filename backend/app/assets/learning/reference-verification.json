@@ -1,0 +1,240 @@
+[
+  {
+    "topic": "math-linear-algebra",
+    "url": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/",
+    "finalUrl": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "math-multivariate-calculus",
+    "url": "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/",
+    "finalUrl": "https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "math-prob-stats",
+    "url": "https://seeing-theory.brown.edu/",
+    "finalUrl": "https://seeing-theory.brown.edu/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "math-optimization",
+    "url": "https://web.stanford.edu/~boyd/cvxbook/",
+    "finalUrl": "https://web.stanford.edu/~boyd/cvxbook/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "prog-python-advanced",
+    "url": "https://docs.python.org/3/tutorial/",
+    "finalUrl": "https://docs.python.org/3/tutorial/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "prog-data-structures",
+    "url": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/",
+    "finalUrl": "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "prog-docker-containers",
+    "url": "https://docs.docker.com/get-started/",
+    "finalUrl": "https://docs.docker.com/get-started/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "prog-testing-cicd",
+    "url": "https://docs.pytest.org/en/stable/",
+    "finalUrl": "https://docs.pytest.org/en/stable/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "prog-rest-apis",
+    "url": "https://fastapi.tiangolo.com/tutorial/",
+    "finalUrl": "https://fastapi.tiangolo.com/tutorial/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "data-numpy-pandas",
+    "url": "https://pandas.pydata.org/docs/user_guide/index.html",
+    "finalUrl": "https://pandas.pydata.org/docs/user_guide/index.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "data-sql-querying",
+    "url": "https://www.postgresql.org/docs/current/tutorial.html",
+    "finalUrl": "https://www.postgresql.org/docs/current/tutorial.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "data-vector-databases",
+    "url": "https://www.ibm.com/think/topics/vector-database",
+    "finalUrl": "https://www.ibm.com/think/topics/vector-database",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "data-feature-store",
+    "url": "https://docs.feast.dev/",
+    "finalUrl": "https://docs.feast.dev/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ml-supervised",
+    "url": "https://scikit-learn.org/stable/supervised_learning.html",
+    "finalUrl": "https://scikit-learn.org/stable/supervised_learning.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ml-unsupervised",
+    "url": "https://scikit-learn.org/stable/unsupervised_learning.html",
+    "finalUrl": "https://scikit-learn.org/stable/unsupervised_learning.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ml-model-evaluation",
+    "url": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+    "finalUrl": "https://scikit-learn.org/stable/modules/model_evaluation.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ml-experiment-tracking",
+    "url": "https://mlflow.org/docs/latest/ml/",
+    "finalUrl": "https://mlflow.org/docs/latest/ml/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-neural-networks",
+    "url": "https://www.deeplearningbook.org/",
+    "finalUrl": "https://www.deeplearningbook.org/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-pytorch",
+    "url": "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+    "finalUrl": "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-transformers",
+    "url": "https://huggingface.co/learn/llm-course/chapter1/1",
+    "finalUrl": "https://huggingface.co/learn/llm-course/chapter1/1",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-rag-systems",
+    "url": "https://www.ibm.com/think/topics/retrieval-augmented-generation",
+    "finalUrl": "https://www.ibm.com/think/topics/retrieval-augmented-generation",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-llm-finetuning",
+    "url": "https://huggingface.co/docs/peft/index",
+    "finalUrl": "https://huggingface.co/docs/peft/index",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-prompt-engineering",
+    "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    "finalUrl": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "dl-computer-vision",
+    "url": "https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html",
+    "finalUrl": "https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "mlops-model-serving",
+    "url": "https://docs.vllm.ai/en/latest/",
+    "finalUrl": "https://docs.vllm.ai/en/latest/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "mlops-production-pipeline",
+    "url": "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+    "finalUrl": "https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "mlops-monitoring",
+    "url": "https://www.evidentlyai.com/ml-in-production/data-drift",
+    "finalUrl": "https://www.evidentlyai.com/ml-in-production/data-drift",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "web-html-css",
+    "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+    "finalUrl": "https://developer.mozilla.org/en-US/docs/Learn_web_development",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "web-typescript",
+    "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+    "finalUrl": "https://www.typescriptlang.org/docs/handbook/intro.html",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "web-react",
+    "url": "https://react.dev/learn",
+    "finalUrl": "https://react.dev/learn",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "cloud-networking",
+    "url": "https://cloud.google.com/learn/what-is-a-computer-network",
+    "finalUrl": "https://cloud.google.com/learn/what-is-a-computer-network",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "security-threats",
+    "url": "https://owasp.org/www-community/Threat_Modeling",
+    "finalUrl": "https://community.owasp.org/Threat_Modeling",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ops-linux",
+    "url": "https://www.kernel.org/doc/html/latest/admin-guide/",
+    "finalUrl": "https://www.kernel.org/doc/html/latest/admin-guide/",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  },
+  {
+    "topic": "ops-iac",
+    "url": "https://developer.hashicorp.com/terraform/tutorials",
+    "finalUrl": "https://developer.hashicorp.com/terraform/tutorials",
+    "status": 200,
+    "lastVerifiedAt": "2026-09-30"
+  }
+]

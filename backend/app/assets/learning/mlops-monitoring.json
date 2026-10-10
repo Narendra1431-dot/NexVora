@@ -1,0 +1,93 @@
+{
+  "concepts": [
+    {
+      "example": "Consider a credit scoring model. In January, the average applicant income is 50,000. In February, a new economic policy shifts the average to 60,000. The relationship between income and default probability remains identical. This is data drift. The model's predictions are still valid for the new distribution, but the input distribution has changed. If we do not detect this, we might miss that the model is now operating on a different population. Conversely, if the bank changes its lending criteria, the relationship between income and default changes. This is concept drift. The model's predictions become invalid even if the input distribution stays the same. Distinguishing these is crucial for remediation.",
+      "explanation": "Data drift refers to changes in the input feature distribution P(X) over time. Concept drift refers to changes in the conditional probability P(Y|X). Data drift can be detected by comparing feature distributions between training and production data. Concept drift requires monitoring model performance or using proxy metrics. Data drift does not necessarily imply model degradation, but it often precedes it. Concept drift directly impacts model accuracy. Understanding the distinction helps in choosing the right monitoring strategy and remediation approach.",
+      "title": "Data vs Concept Drift"
+    },
+    {
+      "example": "Suppose a model has a p95 latency of 100ms and an SLO of 120ms. If the p95 latency exceeds 120ms for 5 minutes, an alert is triggered. This alert indicates that the model is not meeting its performance requirements. The team can then investigate the cause, such as increased traffic, resource contention, or model complexity. If the alert is not triggered, the model is considered to be performing within its SLO. This approach ensures that the model is not only accurate but also fast enough for the application.",
+      "explanation": "Latency SLO alerting involves setting a service level objective for model inference time. If the model's latency exceeds the SLO, an alert is triggered. This is crucial for real-time applications where latency is a key performance metric. Latency SLOs are often defined as percentiles, such as p95 or p99, to account for variability. Alerting on latency helps in identifying performance bottlenecks and ensuring that the model is serving requests within acceptable time limits.",
+      "title": "Latency SLO Alerting"
+    },
+    {
+      "example": "A new model version is deployed in shadow mode. It receives the same input data as the production model but does not serve any predictions. The outputs of the shadow model are compared with the production model's outputs. If the shadow model's outputs are significantly different, it indicates that the new model may not be ready for production. This approach allows the team to evaluate the new model in a real-world environment without risking the production system.",
+      "explanation": "Shadow deployments involve running a new model version in parallel with the production model without serving any predictions. The shadow model receives the same input data as the production model, and its outputs are logged for analysis. This allows the team to evaluate the new model's performance in a real-world environment without impacting the production system. Shadow deployments are useful for detecting issues that may not be apparent in offline testing, such as data drift or integration problems.",
+      "title": "Shadow Deployments"
+    }
+  ],
+  "examples": [
+    {
+      "code": "import numpy as np\nfrom scipy.stats import ks_2samp\n\nrng = np.random.default_rng(7)\ntrain_data = rng.normal(0, 1, 1000)\nprod_data = rng.normal(0.5, 1, 1000)\n\nstat, p_value = ks_2samp(train_data, prod_data)\nprint(f\"KS Statistic: {stat:.4f}\")\nprint(f\"P-value: {p_value:.4f}\")",
+      "explanation": "This code uses the Kolmogorov-Smirnov test to detect data drift between training and production data. The KS statistic measures the maximum difference between the cumulative distribution functions of the two samples. A high KS statistic indicates a significant difference between the distributions. Under the null hypothesis and test assumptions, the p-value is the probability of a statistic at least as extreme as observed. It is not the probability that the null hypothesis is true. A low p-value (e.g., < 0.05) suggests that the difference is statistically significant. In this example, the production data has a mean of 0.5, while the training data has a mean of 0.0, leading to a significant KS statistic.",
+      "title": "Worked example"
+    },
+    {
+      "code": "import time\nimport numpy as np\n\ndef predict(x):\n    time.sleep(0.1)  # Simulate 100ms latency\n    return x * 2\n\nlatencies = []\nfor _ in range(100):\n    start = time.perf_counter()\n    predict(1)\n    latencies.append(time.perf_counter() - start)\n\np95 = np.percentile(latencies, 95)\nprint(f\"P95 Latency: {p95*1000:.2f} ms\")",
+      "explanation": "This code simulates a model with a fixed latency of 100ms and calculates the p95 latency. The p95 latency is the 95th percentile of the latency distribution, meaning that 95% of requests are served within this time. In this example, the p95 latency is approximately 100ms. If the SLO is set to 120ms, the model is within its SLO. If the SLO is set to 90ms, the model is not within its SLO. This example demonstrates how to calculate and interpret latency percentiles for SLO monitoring.",
+      "title": "Applied example"
+    }
+  ],
+  "flow": [
+    "Collect input features and model predictions from production logs.",
+    "Compute feature distributions for a recent time window.",
+    "Compare feature distributions with the training data distribution using statistical tests.",
+    "Calculate model performance metrics (e.g., accuracy, AUC) on a labeled subset of production data.",
+    "Compare model performance metrics with the training data performance.",
+    "Trigger alerts if data drift or performance degradation exceeds predefined thresholds.",
+    "Investigate the root cause of the alert and take corrective actions."
+  ],
+  "foundations": "Model monitoring is the process of continuously tracking the performance and behavior of machine learning models in production. Drift detection is a key component of model monitoring, focusing on identifying changes in the data distribution or the relationship between features and labels over time. Data drift occurs when the distribution of input features changes, while concept drift occurs when the relationship between features and labels changes. Latency SLO alerting ensures that the model meets performance requirements in terms of inference time. Shadow deployments allow new model versions to be evaluated in a real-world environment without impacting the production system. These concepts are essential for maintaining the reliability and accuracy of machine learning models in production.",
+  "interview": [
+    {
+      "answer": "Data drift refers to changes in the input feature distribution P(X) over time. Concept drift refers to changes in the conditional probability P(Y|X). Data drift can be detected by comparing feature distributions between training and production data. Concept drift requires monitoring model performance or using proxy metrics. Data drift does not necessarily imply model degradation, but it often precedes it. Concept drift directly impacts model accuracy. Understanding the distinction helps in choosing the right monitoring strategy and remediation approach.",
+      "question": "What is the difference between data drift and concept drift?"
+    },
+    {
+      "answer": "Latency SLO alerting involves setting a service level objective for model inference time. If the model's latency exceeds the SLO, an alert is triggered. This is crucial for real-time applications where latency is a key performance metric. Latency SLOs are often defined as percentiles, such as p95 or p99, to account for variability. Alerting on latency helps in identifying performance bottlenecks and ensuring that the model is serving requests within acceptable time limits.",
+      "question": "How do you monitor model latency in production?"
+    },
+    {
+      "answer": "Shadow deployments involve running a new model version in parallel with the production model without serving any predictions. The shadow model receives the same input data as the production model, and its outputs are logged for analysis. This allows the team to evaluate the new model's performance in a real-world environment without impacting the production system. Shadow deployments are useful for detecting issues that may not be apparent in offline testing, such as data drift or integration problems.",
+      "question": "What is a shadow deployment and how is it used in model monitoring?"
+    },
+    {
+      "answer": "The Kolmogorov-Smirnov test is a non-parametric test that compares two samples to determine if they come from the same distribution. It measures the maximum difference between the cumulative distribution functions of the two samples. A high KS statistic indicates a significant difference between the distributions. The p-value indicates the probability of observing such a difference by chance. A low p-value (e.g., < 0.05) suggests that the difference is statistically significant. This test is useful for detecting data drift in continuous features.",
+      "question": "How do you detect data drift in continuous features?"
+    }
+  ],
+  "introduction": "Model monitoring and drift detection are critical components of machine learning operations (MLOps) that ensure the continued performance and reliability of models in production. As data distributions and relationships between features and labels change over time, models can degrade in performance, leading to inaccurate predictions and potential business losses. This chapter covers the foundations of model monitoring, including data drift, concept drift, latency SLO alerting, and shadow deployments. We will explore how to detect and respond to these issues, ensuring that models remain accurate and performant in dynamic production environments.",
+  "practice": [
+    {
+      "answer": "To detect data drift, we can use the Kolmogorov-Smirnov test. First, we collect a sample of input features from the training data and a sample from the production data. Then, we compute the KS statistic and p-value. If the p-value is less than a predefined threshold (e.g., 0.05), we conclude that there is significant data drift. For example, if the KS statistic is 0.3 and the p-value is 0.01, we detect data drift.",
+      "question": "How would you detect data drift in a continuous feature using the Kolmogorov-Smirnov test?"
+    },
+    {
+      "answer": "To calculate the p95 latency, we first collect a sample of latency measurements from the model's inference times. Then, we sort the measurements and find the value at the 95th percentile. For example, if we have 100 latency measurements, the p95 latency is the 95th value in the sorted list. If the p95 latency exceeds the SLO, we trigger an alert.",
+      "question": "How would you calculate the p95 latency of a model?"
+    },
+    {
+      "answer": "To design a monitoring system, we need to consider the following: 1) Data collection: Collect input features, model predictions, and latency measurements from production logs. 2) Drift detection: Use statistical tests to detect data drift and concept drift. 3) Performance monitoring: Calculate model performance metrics on a labeled subset of production data. 4) Alerting: Trigger alerts if drift or performance degradation exceeds predefined thresholds. 5) Remediation: Investigate the root cause of the alert and take corrective actions.",
+      "question": "Design a monitoring system for a real-time recommendation model."
+    },
+    {
+      "answer": "To evaluate a new model version using shadow deployment, we first deploy the new model in shadow mode. It receives the same input data as the production model but does not serve any predictions. We log the outputs of the shadow model and compare them with the production model's outputs. If the shadow model's outputs are significantly different, we investigate the cause. If the shadow model performs well, we can promote it to production.",
+      "question": "How would you evaluate a new model version using shadow deployment?"
+    },
+    {
+      "answer": "To handle concept drift, we can use online learning or periodic retraining. Online learning updates the model incrementally as new data arrives, allowing it to adapt to changes in the data distribution. Periodic retraining involves retraining the model on a recent window of data, ensuring that it captures the latest patterns. Both approaches require careful monitoring to ensure that the model does not overfit to recent data.",
+      "question": "How would you handle concept drift in a time-series forecasting model?"
+    },
+    {
+      "answer": "To set up latency SLO alerting, we first define the SLO, such as p95 latency < 120ms. Then, we collect latency measurements from the model's inference times. We calculate the p95 latency over a sliding window of time. If the p95 latency exceeds the SLO for a predefined duration (e.g., 5 minutes), we trigger an alert. This ensures that the model is serving requests within acceptable time limits.",
+      "question": "How would you set up latency SLO alerting for a model?"
+    }
+  ],
+  "summary": "Model monitoring and drift detection are essential for maintaining the performance and reliability of machine learning models in production. Data drift and concept drift can lead to model degradation, while latency SLOs ensure that models meet performance requirements. Shadow deployments allow new model versions to be evaluated in a real-world environment without impacting the production system. By continuously monitoring model performance and detecting drift, we can ensure that models remain accurate and performant in dynamic production environments.",
+  "id": "mlops-monitoring",
+  "title": "Model Monitoring & Drift Detection",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 1987
+}

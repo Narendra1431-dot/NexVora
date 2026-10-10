@@ -1,0 +1,2 @@
+STATUS=FAILED error={'code': 'http_429', 'message': 'Workflow could not complete. Completed steps remain available for inspection.'} result_present=False
+FAILURE PATH OK: genuine FAILED, error recorded, no fabricated result

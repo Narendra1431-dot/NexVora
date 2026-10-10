@@ -1,0 +1,995 @@
+[
+  {
+    "file": ".gitignore",
+    "lines": 39,
+    "sha256": "517aeeb051eff68bfed7fdb436e0dbaf97dff2e2da3a24284cbc17bb94a6e3cc"
+  },
+  {
+    "file": "LICENSE",
+    "lines": 21,
+    "sha256": "7ff11d1b8821e45462c91af6117319a6b2393dc7728ee7e1061a42dc77f8df30"
+  },
+  {
+    "file": "README.md",
+    "lines": 148,
+    "sha256": "bf77fc9e85f6bef0f288faecdc3386bc85615ba2c51a8f2d82835399d4f2381e"
+  },
+  {
+    "file": "client\\.eslintrc.json",
+    "lines": 3,
+    "sha256": "bac4378e77bf3142b9d096d6b978021fca3fa78d581bef96e7acef844d737d16"
+  },
+  {
+    "file": "client\\.gitignore",
+    "lines": 16,
+    "sha256": "c76fc1f32607ddaf3c202d3745487da3825d5cec7390a4281cc96c647412eb67"
+  },
+  {
+    "file": "client\\jsconfig.json",
+    "lines": 8,
+    "sha256": "427893e2f9fb008191f613ab969db7d5aac3a08b2f442bb3d0441ad3b9e40f9f"
+  },
+  {
+    "file": "client\\next.config.mjs",
+    "lines": 6,
+    "sha256": "73f18ea67787ab9d40bedbf6600bc6f822dfc31347374a54677d67a36567b20b"
+  },
+  {
+    "file": "client\\package.json",
+    "lines": 28,
+    "sha256": "ba2b4143db112266e66f6e841c4fb9b468b76b924e74e254461fac37a94299f4"
+  },
+  {
+    "file": "client\\postcss.config.mjs",
+    "lines": 7,
+    "sha256": "c0ae61c01ba5ed3e5372fbf665f2b5b7b1fe335ab7943f31786b69064d54c406"
+  },
+  {
+    "file": "client\\tailwind.config.js",
+    "lines": 29,
+    "sha256": "d9960154cd878e378f651bdbc840acd5f1a06e6a4061b0af5a2b8e16e1c161e6"
+  },
+  {
+    "file": "runtime\\Dockerfile",
+    "lines": 18,
+    "sha256": "5609e662c7013d12692cf542e48711fda21e9062336118a181dfd203335325a8"
+  },
+  {
+    "file": "runtime\\driver.mjs",
+    "lines": 227,
+    "sha256": "dd147c8d045caccc5303a951d3cbc9df977d2e647b03c57df3e926debed6edf6"
+  },
+  {
+    "file": "runtime\\package.json",
+    "lines": 8,
+    "sha256": "39c90b163e74d0dd3e68159b8d1df1fa2b3594a866e499d6956667d6046ede08"
+  },
+  {
+    "file": "server\\requirements.txt",
+    "lines": 8,
+    "sha256": "feaa5cbcfd332720a25ba32c37f0611d099e0a8ecafe54a0c7977d0ea9c9eb7d"
+  },
+  {
+    "file": "server\\run.py",
+    "lines": 10,
+    "sha256": "48b234d505f2b46f05351d4f77f46fd7dd57db205fc01595d666ac49917e9c70",
+    "symbols": []
+  },
+  {
+    "file": "client\\app\\globals.css",
+    "lines": 87,
+    "sha256": "eb95780c0ef2cba2a7a88c536abb81002a39f13c2c9b790e941c5a64ebd4fbe5"
+  },
+  {
+    "file": "client\\app\\layout.js",
+    "lines": 21,
+    "sha256": "65a0469e996964cc63e7e523bdb144cfd160e451c98d958d14f0e77caef0e8f7"
+  },
+  {
+    "file": "client\\app\\not-found.js",
+    "lines": 21,
+    "sha256": "d6745e2819e3dc2434b9d697be889d9365332fd917a04176566e231e564324b9"
+  },
+  {
+    "file": "client\\app\\page.js",
+    "lines": 76,
+    "sha256": "e2c56c2f12fe1286baa396e5fd1ca453a191b03dee4e4a5ab461f3656971b0ef"
+  },
+  {
+    "file": "client\\components\\ApprovalCard.jsx",
+    "lines": 87,
+    "sha256": "da561059caee213f4217a85daae52fec411c71d9c0907b4c392b0e58674ff2ca"
+  },
+  {
+    "file": "client\\components\\AppSettingsDrawer.jsx",
+    "lines": 232,
+    "sha256": "b1d51408c9efdeca094cee7762f2a60f6bf60a8381aa93c7484216e9e435eded"
+  },
+  {
+    "file": "client\\components\\AuditPanel.jsx",
+    "lines": 118,
+    "sha256": "4103d9930274d5b54318567f01f5f94436b852939bab3e9cd418b3a5400bc010"
+  },
+  {
+    "file": "client\\components\\AuthenticationGate.jsx",
+    "lines": 72,
+    "sha256": "24d2ba969c2af4c72baf5868376f703d87cfd56b2ad60425537c31355e84ec57"
+  },
+  {
+    "file": "client\\components\\ChatWindow.jsx",
+    "lines": 415,
+    "sha256": "2301f3ad9e8fb11e9eb4292c20b110a6bf076212c78cbf3a47bfdad54874a996"
+  },
+  {
+    "file": "client\\components\\ComputerPanel.jsx",
+    "lines": 321,
+    "sha256": "4cdd211e8a2fd177ea77698f84a8996bff8bf8e68405ef01421c474eb6639ab0"
+  },
+  {
+    "file": "client\\components\\Dashboard.jsx",
+    "lines": 154,
+    "sha256": "250c5b550a6c2200650e3ca93a8a76ff29d792ee5ca1a5d5cae54bca91b8ee27"
+  },
+  {
+    "file": "client\\components\\Marketplace.jsx",
+    "lines": 334,
+    "sha256": "9373dabb42a46d214a762f9e8bd43afaf025e4f5314253bf5c3a4a7a203887a4"
+  },
+  {
+    "file": "client\\components\\MascotAvatar.jsx",
+    "lines": 78,
+    "sha256": "eb813c20a9b28ce5f759ee3765640c480d0ec82906fbed072faa948b72e29d10"
+  },
+  {
+    "file": "client\\components\\MessageItem.jsx",
+    "lines": 99,
+    "sha256": "73102ada72b68f684ee87132d1b03449c879287deb4881f8bcbd7a2f55dd3493"
+  },
+  {
+    "file": "client\\components\\ModelPicker.jsx",
+    "lines": 270,
+    "sha256": "0671e1be6501bd4b772ef7d5ee9764c2c9b56fabbdbfdd0f876e24d4ecf5a63f"
+  },
+  {
+    "file": "client\\components\\SettingsModal.jsx",
+    "lines": 176,
+    "sha256": "275002e4aecbf5f4b8a99f58d1f090c61b479c23cf8d907baaff1d73aa0b233c"
+  },
+  {
+    "file": "client\\components\\Sidebar.jsx",
+    "lines": 246,
+    "sha256": "c9ae267505c2fd99f34fe6badde1c6b64c9363cd365c9a0a9c0489431eda49d5"
+  },
+  {
+    "file": "client\\lib\\api.js",
+    "lines": 368,
+    "sha256": "b47978e47c4f9d201130ce49fb5ebb6217ba38c20eec8af734ec1712b2d56ee6"
+  },
+  {
+    "file": "client\\app\\app\\layout.js",
+    "lines": 9,
+    "sha256": "63d5ba4fd01e500b3104ad55e7690ca73b89893779a6618983cf9b417dac1a5a"
+  },
+  {
+    "file": "client\\app\\app\\page.js",
+    "lines": 7,
+    "sha256": "2471e3d1117105b6e18a631ae9393cd5c811719c378a366265594374b2e3a5b6"
+  },
+  {
+    "file": "client\\app\\alternatives\\[competitor]\\page.js",
+    "lines": 152,
+    "sha256": "23d9a389555d85f1911ae0a11bcbf94f92d7913e16cc5b112f7df4c8f39f1865"
+  },
+  {
+    "file": "server\\app\\config.py",
+    "lines": 73,
+    "sha256": "485e79a1677aba208bba76ed27c4f6a054e6392b2e7a9802939cbc644cff918f",
+    "symbols": [
+      "Settings",
+      "__init__"
+    ]
+  },
+  {
+    "file": "server\\app\\main.py",
+    "lines": 86,
+    "sha256": "133b6c70e2dcd45197f91110cb0b6bfeb57bfcdf02f027e1a56dfcbfbd5d64f4",
+    "symbols": [
+      "require_authentication",
+      "health_check"
+    ]
+  },
+  {
+    "file": "server\\app\\__init__.py",
+    "lines": 1,
+    "sha256": "5d234a9a66a4555868fb9a6735e18b9b58ea23e06cc4d0cbc1fcb968b352b39d",
+    "symbols": []
+  },
+  {
+    "file": "server\\tests\\test_action_gateway.py",
+    "lines": 302,
+    "sha256": "f2c168cfa31c2eb82f7c4e765cda613f70456af143482b96af955e08c2a5c34a",
+    "symbols": [
+      "RecordingAudit",
+      "ImmediateApprovalBroker",
+      "ActionGatewayTests",
+      "__init__",
+      "add_audit_event",
+      "__init__",
+      "open",
+      "wait",
+      "setUp",
+      "tearDown",
+      "open_async_action",
+      "test_cancelled_execution_cannot_replay_an_approved_action",
+      "test_queued_execution_cannot_replay_after_cancellation",
+      "test_concurrent_execution_runs_an_approved_action_only_once",
+      "test_unapproved_execution_does_not_consume_request",
+      "test_failed_execution_cannot_be_replayed",
+      "test_workspace_action_has_contract_and_redacted_lifecycle",
+      "test_unregistered_action_is_denied_by_default",
+      "test_registered_provider_action_uses_same_gateway",
+      "test_registered_computer_action_uses_same_gateway",
+      "executor",
+      "executor",
+      "executor",
+      "executor"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_auth.py",
+    "lines": 74,
+    "sha256": "50ccea18b474547b7cdcd3e3448e559f01699cb8fbf86048e62dbdb5f4c21426",
+    "symbols": [
+      "AuthServiceTests",
+      "AuthMiddlewareTests",
+      "test_local_token_is_generated_once_with_restricted_permissions",
+      "test_configured_token_does_not_create_a_local_token_file",
+      "test_loopback_cannot_bootstrap_and_token_login_issues_distinct_session",
+      "test_unauthorized_responses_include_cors_headers"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_auth_security.py",
+    "lines": 148,
+    "sha256": "e178579a067a08d7cf8be8d786656841d939c7f427fc849cb710fc8d7318cae7",
+    "symbols": [
+      "AuthenticationBoundaryTests",
+      "asyncSetUp",
+      "asyncTearDown",
+      "login",
+      "test_loopback_proxy_and_container_hostnames_cannot_bootstrap",
+      "test_login_issues_distinct_httponly_session_and_rejects_master_cookie",
+      "test_logout_revokes_replayed_cookie_but_preserves_other_sessions",
+      "test_session_expiry_is_enforced_on_server_and_restart_invalidates_sessions",
+      "test_bearer_credential_still_works_for_direct_clients",
+      "test_wrong_and_unicode_credentials_return_401_without_session",
+      "test_untrusted_origins_cannot_login_or_change_authenticated_state",
+      "test_allowed_frontend_can_read_401_and_then_login",
+      "test_simple_request_without_content_type_cannot_change_settings",
+      "test_session_refresh_does_not_mint_sessions_and_relogin_revokes_old_cookie",
+      "test_secure_cookie_is_enabled_by_https_or_explicit_configuration"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_bots.py",
+    "lines": 48,
+    "sha256": "4b29d3997c800554a5efa89bd25e1a151224563cd6ea317e03abea4863a463a3",
+    "symbols": [
+      "BotValidationApiTests",
+      "asyncSetUp",
+      "asyncTearDown",
+      "test_invalid_create_and_update_do_not_persist"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_bot_deletion.py",
+    "lines": 104,
+    "sha256": "7865277b2a2a40c5f76835c1d3adefbd44a440ad2f53917cbd6f6c44fca6a997",
+    "symbols": [
+      "BotDeletionTests",
+      "asyncSetUp",
+      "asyncTearDown",
+      "test_deletion_preserves_creates_and_edits_during_cleanup",
+      "test_overlapping_deletions_do_not_resurrect_a_deleted_bot",
+      "test_cleanup_failure_preserves_bot_records",
+      "test_missing_bot_does_not_call_cleanup",
+      "cleanup",
+      "cleanup"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_computer_provider.py",
+    "lines": 270,
+    "sha256": "38c4992f96702dd015941ba74598ed7697cca2c2a2357b7cc83ad60cef50bfc2",
+    "symbols": [
+      "RecordingAudit",
+      "ImmediateApprovalBroker",
+      "FakeComputerProviderTests",
+      "ComputerGatewayTests",
+      "ComputerRouterTests",
+      "__init__",
+      "add_audit_event",
+      "__init__",
+      "open",
+      "wait",
+      "test_lifecycle_and_provider_operations_are_deterministic",
+      "test_operations_require_an_active_computer",
+      "setUp",
+      "tearDown",
+      "test_lifecycle_and_approval_gated_operations_use_gateway",
+      "test_cancelled_terminal_request_cannot_be_executed_again",
+      "test_authenticated_lifecycle_screen_and_approval_routes",
+      "terminal_execute"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_connector_actions.py",
+    "lines": 217,
+    "sha256": "a4bc1a1d33fcc5cd213bc69a55b3dd28dbd37d56f74ca39fb6b61f681506c6fb",
+    "symbols": [
+      "EmptyStorage",
+      "RecordingAudit",
+      "AllowingApprovalBroker",
+      "FakeComposioService",
+      "ConnectorActionTests",
+      "get_settings",
+      "__init__",
+      "add_audit_event",
+      "open",
+      "wait",
+      "call_tool",
+      "test_parser_accepts_explicit_github_issue_lookup",
+      "test_parser_rejects_unknown_connector_or_shape",
+      "test_parser_builds_approval_safe_create_issue_request",
+      "test_composio_adapter_normalizes_read_only_results",
+      "test_composio_adapter_requires_server_side_configuration",
+      "test_composio_adapter_normalizes_created_issue",
+      "test_async_connector_executor_can_use_gateway_contract",
+      "test_write_connector_action_requires_approval_and_hides_body",
+      "execute",
+      "execute"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_docker_computer_provider.py",
+    "lines": 178,
+    "sha256": "4bd37b91fa43e90177dcac320a3514718a0adff351646647854767d64f19d712",
+    "symbols": [
+      "FakeDockerCommand",
+      "DockerComputerProviderTests",
+      "__init__",
+      "__call__",
+      "setUp",
+      "tearDown",
+      "test_start_builds_a_restricted_per_bot_container",
+      "test_restart_recovers_and_controls_existing_container",
+      "test_browser_terminal_files_input_and_screenshot_use_scoped_runtime",
+      "test_docker_failure_is_reported_and_marks_runtime_unhealthy",
+      "ready",
+      "ready",
+      "ready",
+      "request",
+      "failing_docker"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_provider_settings.py",
+    "lines": 93,
+    "sha256": "c97af346b9c863279afb459cef6381d50640e229c2f9b70eaf8a82ff241ab634",
+    "symbols": [
+      "ProviderSettingsApiTests",
+      "asyncSetUp",
+      "asyncTearDown",
+      "test_provider_form_round_trip_and_blank_credentials_preserve_secrets",
+      "test_remove_headers_is_explicit_and_does_not_clear_api_key",
+      "test_partial_settings_update_preserves_omitted_values",
+      "test_invalid_form_data_is_rejected_before_persistence"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_record_ids.py",
+    "lines": 99,
+    "sha256": "faf65755b348f8705359bd79f10c85b75ea11a38e8e74bda9fb9db60a7a83160",
+    "symbols": [
+      "RecordIdentityTests",
+      "asyncSetUp",
+      "asyncTearDown",
+      "matching_prefix_uuids",
+      "test_user_messages_with_matching_uuid_prefixes_preserve_both_threads",
+      "test_assistant_reply_does_not_replace_user_with_matching_uuid_prefix",
+      "test_bots_with_matching_uuid_prefixes_remain_independently_editable",
+      "stream"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_remote_computer_provider.py",
+    "lines": 119,
+    "sha256": "8a9e488391c418b59e7bbb069085b0912a6a918e5d6fd21b9f4cc85742e68173",
+    "symbols": [
+      "StubRemoteComputerProvider",
+      "RemoteComputerProviderTests",
+      "__init__",
+      "_request",
+      "test_remote_lifecycle_and_operations_use_the_provider_contract",
+      "test_remote_provider_requires_an_endpoint_and_key"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_responses_provider.py",
+    "lines": 151,
+    "sha256": "a188af50b05a1c0e19a9167834803a1d6f9219ff7b08d55d3cd7f55492f0050f",
+    "symbols": [
+      "ResponsesProviderTests",
+      "ProviderSettingsTests",
+      "ChatStreamTests",
+      "run_provider",
+      "sse",
+      "test_stream_preserves_model_history_images_and_headers",
+      "test_http_error_does_not_expose_upstream_secrets",
+      "test_failed_incomplete_and_truncated_streams_do_not_succeed",
+      "test_prediction_protocol_still_works",
+      "test_secrets_are_encrypted_and_partial_ui_save_preserves_protocol",
+      "test_plain_chat_reaches_provider_and_preserves_completion_status",
+      "handler",
+      "fake_stream"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_search_actions.py",
+    "lines": 248,
+    "sha256": "f1d00e9149db7069612ed6ede5ba358160b411f439ad951328a3fc89d561916a",
+    "symbols": [
+      "EmptyStorage",
+      "KeyStorage",
+      "RecordingAudit",
+      "AllowingApprovalBroker",
+      "FakeYoucomService",
+      "KeylessYoucomService",
+      "KeyedYoucomService",
+      "SearchParserTests",
+      "YoucomServiceTests",
+      "SearchActionTests",
+      "get_settings",
+      "get_settings",
+      "__init__",
+      "add_audit_event",
+      "open",
+      "wait",
+      "call_tool",
+      "get_api_key",
+      "get_api_key",
+      "test_parser_accepts_explicit_web_search",
+      "test_parser_ignores_non_commands_and_lookalikes",
+      "test_parser_rejects_missing_or_overlong_query",
+      "test_sse_parser_takes_last_result_and_decodes_tool_output",
+      "test_sse_parser_raises_on_tool_level_error",
+      "test_sse_parser_raises_on_empty_response",
+      "test_keyless_profile_used_without_key",
+      "test_authenticated_endpoint_used_with_key",
+      "test_storage_key_is_preferred_over_environment",
+      "test_search_normalizes_read_only_results",
+      "test_search_validates_query_and_count",
+      "test_async_search_executor_can_use_gateway_contract",
+      "execute"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_storage_service.py",
+    "lines": 187,
+    "sha256": "9731bc91293b7ab2feef9579272857da851681d16b5889d5598861dad877fe9c",
+    "symbols": [
+      "StorageServiceTests",
+      "setUp",
+      "tearDown",
+      "test_state_and_encrypted_settings_survive_reopen",
+      "test_legacy_json_is_imported_and_plaintext_keys_are_scrubbed",
+      "test_settings_routes_never_return_provider_credentials",
+      "test_schema_one_is_upgraded_with_owner_columns",
+      "_write_json",
+      "_database_bytes"
+    ]
+  },
+  {
+    "file": "server\\tests\\test_workspace_service.py",
+    "lines": 70,
+    "sha256": "36037422f18326122e154d44f2d5ae66f3a5159effe35b3499d5fb4a535a8bd5",
+    "symbols": [
+      "WorkspaceServiceTests",
+      "ApiRouteTests",
+      "ApprovalBrokerTests",
+      "setUp",
+      "tearDown",
+      "test_read_write_and_list",
+      "test_paths_cannot_escape_workspace",
+      "test_invalid_command_is_rejected",
+      "test_audit_route_is_registered",
+      "test_allow_resolves_pending_request"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\approvals.py",
+    "lines": 20,
+    "sha256": "8c6c6f17f4568a30539a01f29d4cab23826e386d2e160166ecbcafb189a3bbf5",
+    "symbols": [
+      "respond_approval"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\audit.py",
+    "lines": 11,
+    "sha256": "1c71b0d97dd06086908a3b83b222e4421216e4f80abe006425ef78b38b8ab03b",
+    "symbols": [
+      "get_audit_events"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\auth.py",
+    "lines": 62,
+    "sha256": "2c3f9de09c324cd7571d733a2e3848a0ffb5dab24b92e59aabffe074a47cbf0c",
+    "symbols": [
+      "LoginRequest",
+      "_authentication_error",
+      "_session_payload",
+      "auth_status",
+      "establish_session",
+      "login",
+      "logout"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\bots.py",
+    "lines": 78,
+    "sha256": "e4e5835841c151b5b07b527407579ac57dffb72d0cda8e3cebabca8097cfa945",
+    "symbols": [
+      "get_bots",
+      "create_bot",
+      "update_bot",
+      "delete_bot"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\chat.py",
+    "lines": 256,
+    "sha256": "f7b3281b503e068b50aadea6b74765419fb08391c4aa11ff97e59897f1c7b6a0",
+    "symbols": [
+      "get_history",
+      "send_message",
+      "stream_turn",
+      "event_generator"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\computers.py",
+    "lines": 178,
+    "sha256": "440729a32cd6392c925a639cccd74ddf6e4497f9fee2e5cda5227bc158b44930",
+    "symbols": [
+      "ComputerActionRequest",
+      "_ensure_bot",
+      "_preview",
+      "_run_action",
+      "computer_status",
+      "create_computer",
+      "start_computer",
+      "pause_computer",
+      "stop_computer",
+      "reset_computer",
+      "health_computer",
+      "screenshot_computer",
+      "run_computer_action",
+      "execute_approved_computer_action"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\connectors.py",
+    "lines": 177,
+    "sha256": "0dbc9b73c900b184064a7aa47934b804307388449b52900e8235f54e84902b5c",
+    "symbols": [
+      "_now",
+      "_composio_tool",
+      "catalog",
+      "connection_status",
+      "authorize",
+      "disconnect"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\models.py",
+    "lines": 60,
+    "sha256": "4f1632f558d3fa1337171e3a44ccfad876d577d822ebb1cc0ee143249b9090d4",
+    "symbols": [
+      "list_models"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\settings.py",
+    "lines": 16,
+    "sha256": "008365475e3a9cdfc7b2a0a30e071e3b0fb01420c63ecd8b82abd61e5305e98a",
+    "symbols": [
+      "get_settings",
+      "save_settings"
+    ]
+  },
+  {
+    "file": "server\\app\\routers\\upload.py",
+    "lines": 59,
+    "sha256": "4ab95a94c893bc8c46602f31944a72906100c3efac3060f1a6fec7ce7033510b",
+    "symbols": [
+      "upload_image_file"
+    ]
+  },
+  {
+    "file": "server\\app\\schemas\\contracts.py",
+    "lines": 127,
+    "sha256": "175f9e84289b5428f8efd0651051b0db1b4a0438938599564d03133b00753677",
+    "symbols": [
+      "Bot",
+      "Message",
+      "TurnRequest",
+      "ApprovalDecision",
+      "ActionRequest",
+      "ActionResult",
+      "ModelInfo",
+      "AppSettingsSchema",
+      "validate_provider_url",
+      "validate_provider_headers",
+      "normalize_model_ids",
+      "validate_default_model"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\action_gateway.py",
+    "lines": 431,
+    "sha256": "4da65006f618c5698055109b606234205bc06a4d65983c83ba62f91855705b07",
+    "symbols": [
+      "_now",
+      "_request_id",
+      "redact_sensitive",
+      "_split_action_name",
+      "ActionDefinition",
+      "ActionInvocation",
+      "ActionPolicyError",
+      "ActionGatewayError",
+      "ActionGateway",
+      "summary",
+      "arguments_for_display",
+      "__init__",
+      "__init__",
+      "register_action",
+      "_normalize",
+      "_policy_check",
+      "_audit_action",
+      "open",
+      "wait_for_decision",
+      "get_pending_request",
+      "_execute_workspace",
+      "_result_summary",
+      "execute",
+      "_execute_once"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\approval_broker.py",
+    "lines": 103,
+    "sha256": "32c76fa617abb2fd9c575535dd1e2a0430e84b8dde5bf63cbad47c079741e374",
+    "symbols": [
+      "_now",
+      "PendingApproval",
+      "ApprovalBroker",
+      "__init__",
+      "open",
+      "wait",
+      "resolve"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\auth_service.py",
+    "lines": 108,
+    "sha256": "041cae917679c91fd2ae9ad1a9d57c3eead404bd57b9dadf0cad0cb5247b12c4",
+    "symbols": [
+      "AuthService",
+      "__init__",
+      "user",
+      "_load_or_create_token",
+      "authenticate_token",
+      "authenticate_session",
+      "authenticate_request",
+      "can_bootstrap",
+      "set_session_cookie",
+      "revoke_session",
+      "clear_session_cookie"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\composio_service.py",
+    "lines": 219,
+    "sha256": "7b419a8ebb411ab4b891964e53b9341181c9b24385ac44c70f10ce8336ace867",
+    "symbols": [
+      "ConnectorServiceError",
+      "parse_mcp_response",
+      "ComposioService",
+      "__init__",
+      "get_api_key",
+      "call_tool",
+      "_validate_github_part",
+      "list_github_issues",
+      "create_github_issue"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\computer_actions.py",
+    "lines": 225,
+    "sha256": "bf70405c81152af29e197214cc08748ca12295111260b4f179c5bde63e361cb8",
+    "symbols": [
+      "_status_for",
+      "register_computer_actions",
+      "create",
+      "start",
+      "stop",
+      "pause",
+      "reset",
+      "health",
+      "screenshot",
+      "browser_navigate",
+      "terminal_execute",
+      "files_list",
+      "send_input",
+      "cleanup"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\computer_provider.py",
+    "lines": 374,
+    "sha256": "133f6fd13bfb2717b4b305d1aed2439f6af5e60e29942d1248bd32f0ee292277",
+    "symbols": [
+      "_now",
+      "_computer_id",
+      "computer_id_for_bot",
+      "ComputerStatus",
+      "ComputerProviderError",
+      "ComputerProvider",
+      "FakeComputerProvider",
+      "build_computer_provider",
+      "to_dict",
+      "describe",
+      "get_or_create",
+      "create",
+      "start",
+      "stop",
+      "pause",
+      "reset",
+      "health",
+      "browser_navigate",
+      "terminal_execute",
+      "files_list",
+      "screenshot",
+      "send_input",
+      "cleanup",
+      "__init__",
+      "get_or_create",
+      "describe",
+      "_get",
+      "_touch",
+      "_require_active",
+      "create",
+      "start",
+      "stop",
+      "pause",
+      "reset",
+      "health",
+      "browser_navigate",
+      "terminal_execute",
+      "files_list",
+      "screenshot",
+      "send_input",
+      "cleanup"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\connector_actions.py",
+    "lines": 151,
+    "sha256": "ee28780892518112a7e98accd78ae22d3751ba6f622aa428a2c18848f4fdb84f",
+    "symbols": [
+      "ConnectorCommandError",
+      "_validate_repository",
+      "parse_connector_command",
+      "execute_github_list_issues",
+      "execute_github_create_issue"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\database.py",
+    "lines": 172,
+    "sha256": "f79fde12d1289830b716d2888d3a52c4ab8ecca61a0b0b1c978d9b7112118567",
+    "symbols": [
+      "_now",
+      "Database",
+      "__init__",
+      "connect",
+      "_migrate",
+      "_add_owner_columns",
+      "get_meta",
+      "set_meta"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\docker_computer_provider.py",
+    "lines": 508,
+    "sha256": "717d707c6435dbe63e4b88be3cdecc4ec871be267c8a34362bb0ad434e9bac67",
+    "symbols": [
+      "_now",
+      "_RuntimeRecord",
+      "DockerComputerProvider",
+      "__init__",
+      "_new_status",
+      "_touch",
+      "describe",
+      "reconcile",
+      "get_or_create",
+      "_record_for",
+      "_active_record",
+      "_run_docker",
+      "_docker",
+      "_recover_container",
+      "_container_name",
+      "_launch",
+      "_remove_container",
+      "_request",
+      "_wait_until_ready",
+      "create",
+      "start",
+      "stop",
+      "pause",
+      "reset",
+      "health",
+      "browser_navigate",
+      "terminal_execute",
+      "files_list",
+      "screenshot",
+      "send_input",
+      "cleanup"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\endpoint_mapping.json",
+    "lines": 618,
+    "sha256": "604d8473a6ba7f2031a55e31094193ef02ded083cca95e8d28d4904f671c33ad"
+  },
+  {
+    "file": "server\\app\\services\\provider_service.py",
+    "lines": 263,
+    "sha256": "03103b4ca173ec1f4ab5dcca5d06b763936cbe313eabf990bf068e54520f816f",
+    "symbols": [
+      "ModelProviderService",
+      "__init__",
+      "stream_chat_completion",
+      "_stream_responses"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\remote_computer_provider.py",
+    "lines": 475,
+    "sha256": "9800eac9eb0373aa76f7fb054f474f97e2a9274da14335cc59064621579b9d90",
+    "symbols": [
+      "_now",
+      "_RemoteRecord",
+      "RemoteComputerProvider",
+      "__init__",
+      "_new_status",
+      "_touch",
+      "_state",
+      "_health",
+      "_payload",
+      "_apply_status",
+      "describe",
+      "get_or_create",
+      "_record_for",
+      "_active_record",
+      "_headers",
+      "_url",
+      "_request",
+      "_remote_path",
+      "_set_remote_id",
+      "_ensure_remote",
+      "create",
+      "start",
+      "_lifecycle",
+      "stop",
+      "pause",
+      "reset",
+      "health",
+      "browser_navigate",
+      "terminal_execute",
+      "files_list",
+      "screenshot",
+      "send_input",
+      "cleanup"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\search_actions.py",
+    "lines": 67,
+    "sha256": "76e116bef95113eafd2082fd5bae7ce73d1ea57cfa57be934efc86f1af74916c",
+    "symbols": [
+      "SearchCommandError",
+      "parse_search_command",
+      "execute_web_search"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\secret_store.py",
+    "lines": 44,
+    "sha256": "794f6da641685b64657069b07a52f269139f37b8b019458ef4c48cc9f8acab7d",
+    "symbols": [
+      "SecretStoreError",
+      "SecretStore",
+      "__init__",
+      "encrypt",
+      "decrypt"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\storage_service.py",
+    "lines": 453,
+    "sha256": "82b1c5fa2c3886432d7f41c4a8e865e58cd38c1a6eb2ec918b1b22bdafca439a",
+    "symbols": [
+      "_now",
+      "StorageService",
+      "__init__",
+      "_default_settings",
+      "_write_json",
+      "_read_json",
+      "_count",
+      "_decode_payload",
+      "_migrate_legacy_json",
+      "_ensure_defaults",
+      "get_bots",
+      "save_bots",
+      "delete_bot",
+      "get_messages",
+      "add_message",
+      "save_messages",
+      "get_settings",
+      "get_public_settings",
+      "save_settings",
+      "get_approvals",
+      "add_approval",
+      "update_approval",
+      "get_audit_events",
+      "add_audit_event"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\workspace_service.py",
+    "lines": 146,
+    "sha256": "55b85a868bda214c8b22a021d37c772487018e11617710d2f5d19dc1734e450c",
+    "symbols": [
+      "WorkspaceToolError",
+      "WorkspaceToolCall",
+      "parse_workspace_command",
+      "WorkspaceService",
+      "arguments_for_display",
+      "summary",
+      "__init__",
+      "_resolve",
+      "execute",
+      "_list",
+      "_read",
+      "_write"
+    ]
+  },
+  {
+    "file": "server\\app\\services\\youcom_service.py",
+    "lines": 180,
+    "sha256": "fe1e76f91fb25473ae5d33f1f2b01d4b812703b7a58ee155cfd58029550535c1",
+    "symbols": [
+      "SearchServiceError",
+      "parse_mcp_response",
+      "YoucomService",
+      "__init__",
+      "get_api_key",
+      "get_endpoint",
+      "call_tool",
+      "search_web"
+    ]
+  }
+]

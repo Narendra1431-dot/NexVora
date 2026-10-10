@@ -1,0 +1,121 @@
+conftest.py: MONGODB_DB=career_intelligence_qa
+conftest.py: settings.mongodb_db=career_intelligence_qa
+conftest.py: settings.seed_on_startup=False
+conftest.py: DISABLE_RAG_INDEX=true
+============================= test session starts =============================
+platform win32 -- Python 3.14.6, pytest-9.1.1, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: F:\Download\NSRIT HACKTHON\backend
+configfile: pytest.ini
+plugins: anyio-4.14.2, asyncio-0.21.1, cov-7.1.0, env-1.7.1, xdist-3.8.0, Faker-40.36.0, langsmith-0.10.15
+asyncio: mode=Mode.STRICT
+collecting ... collected 1 item
+
+app/tests/test_coding.py::test_coding_journey FAILED
+
+================================== FAILURES ===================================
+_____________________________ test_coding_journey _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B462750770>
+
+    def test_coding_journey(monkeypatch):
+        from app.main import app
+        from app.config import settings
+        from app.services import llm, openrouter
+        from app.coding import missions, catalog, runner
+    
+        async def available():
+            return True
+        monkeypatch.setattr(llm, 'is_available', available)
+        monkeypatch.setattr(openrouter, 'is_available', available)
+        received = []
+        async def fake_runner(code, language, tests):
+            received.append(tests)
+            return [dict(status='Accepted' if code == 'correct' else 'Wrong Answer', input=t['input'], output=t.get('output', '') if code == 'correct' else 'bad', expected=t.get('output'), executionTime=1, memory=100, error='') for t in tests]
+        monkeypatch.setattr(runner, 'execute', fake_runner)
+        monkeypatch.setattr(runner, 'configured', lambda: True)
+        assert settings.mongodb_db.endswith('_qa')
+        db = MongoClient(settings.mongodb_uri)[settings.mongodb_db]
+        with TestClient(app, backend_options={'loop_factory': asyncio.SelectorEventLoop}) as c:
+            def register():
+                return c.post('/api/v1/auth/register', json={'name': 'Coding QA', 'email': uuid4().hex + '@example.com', 'password': 'qa-secure-pass'}).json()
+            u = register()
+            sid = u['student']['studentId']
+            h = {'Authorization': 'Bearer ' + u['token']}
+            base = '/api/v1/coding'
+            assert c.get(base + '/stats').status_code == 401
+            problems = c.get(base + '/problems', headers=h).json()
+            assert len(problems) >= 13 and all('hiddenTests' not in p for p in problems)
+            assert 'hiddenTests' not in c.get(base + '/problems/array-sum', headers=h).json()
+            code = {'problemId': 'array-sum', 'language': 'python', 'code': 'correct'}
+            r = c.post(base + '/run', headers=h, json=code)
+            assert r.status_code == 200, r.text
+            assert c.get(base + '/stats', headers=h).json()['codingXP'] == 0
+            fail = c.post(base + '/submit', headers=h, json={**code, 'code': 'wrong'}).json()
+            assert fail['xpAwarded'] == 0 and not fail['completed']
+            good = c.post(base + '/submit', headers=h, json={**code, 'requestId': 'one'})
+            assert good.status_code == 200, good.text
+            accepted = good.json()
+            assert accepted['xpAwarded'] == 50 and accepted['stats']['codingXP'] == 50
+            assert len(received[-1]) > len(problems[0]['publicTests'])
+            assert len(accepted['results']) == 1
+            assert c.post(base + '/submit', headers=h, json={**code, 'requestId': 'one'}).json() == accepted
+            assert c.post(base + '/submit', headers=h, json={**code, 'code': 'changed', 'requestId': 'one'}).status_code == 409
+            with ThreadPoolExecutor(max_workers=3) as pool:
+                rs = list(pool.map(lambda _: c.post(base + '/submit', headers=h, json=code).json(), range(3)))
+            assert all(r['xpAwarded'] == 0 for r in rs)
+            assert db['xpTransactions'].count_documents({'studentId': sid, 'sourceId': 'array-sum', 'sourceType': 'practice'}) == 1
+            assert c.get(base + '/stats', headers=h).json()['codingXP'] == 50
+            draft = {'problemId': 'array-sum', 'language': 'python', 'code': 'print(42)', 'fontSize': 18, 'clientUpdatedAt': 100}
+            assert c.put(base + '/draft', headers=h, json=draft).status_code == 200
+            assert c.put(base + '/draft', headers=h, json={**draft, 'code': 'old', 'clientUpdatedAt': 99}).status_code == 200
+            assert c.get(base + '/draft?problemId=array-sum&language=python', headers=h).json()['code'] == 'print(42)'
+            other = register()
+            oh = {'Authorization': 'Bearer ' + other['token']}
+            assert c.get(base + '/draft?problemId=array-sum&language=python', headers=oh).json() == {}
+            assert c.post(base + '/problems/array-sum/bookmark', headers=h, json={'bookmarked': True}).status_code == 200
+            mission = {'level': 1, 'code': 'for i in range(3):\n    moveRight()\nfor i in range(3):\n    moveDown()', 'mode': 'run'}
+            r = c.post(base + '/games/robot/submit', headers=h, json=mission).json()
+            assert r['accepted'] and r['xpAwarded'] == 0
+            assert c.post(base + '/games/robot/submit', headers=h, json={**mission, 'level': 2}).status_code == 403
+            completed = c.post(base + '/games/robot/submit', headers=h, json={**mission, 'mode': 'submit'})
+            assert completed.status_code == 200, completed.text
+            assert completed.json()['xpAwarded'] == 50
+            assert c.post(base + '/games/robot/submit', headers=h, json={**mission, 'mode': 'submit'}).json()['xpAwarded'] == 0
+            assert c.post(base + '/games/robot/submit', headers=h, json={**mission, 'level': 2}).status_code == 200
+            s = c.get(base + '/stats', headers=h).json()
+            assert s['currentStreak'] == 1 and s['codingXP'] == 100
+            leader = c.get(base + '/leaderboard', headers=h).json()
+>           assert any(r['isCurrent'] and r['codingXP'] == 100 for r in leader)
+E           assert False
+E            +  where False = any(<generator object test_coding_journey.<locals>.<genexpr> at 0x000001B4645B9A40>)
+
+app\tests\test_coding.py:96: AssertionError
+============================== warnings summary ===============================
+C:\Users\LENOVO\AppData\Roaming\Python\Python314\site-packages\pytest_asyncio\plugin.py:156: 76 warnings
+  C:\Users\LENOVO\AppData\Roaming\Python\Python314\site-packages\pytest_asyncio\plugin.py:156: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj)
+
+app/tests/test_coding.py: 290 warnings
+  C:\Users\LENOVO\AppData\Roaming\Python\Python314\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+app/tests/test_coding.py: 299 warnings
+  C:\Users\LENOVO\AppData\Roaming\Python\Python314\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+app/tests/test_coding.py::test_coding_journey
+  C:\Users\LENOVO\AppData\Roaming\Python\Python314\site-packages\pydantic\v1\typing.py:77: DeprecationWarning: ForwardRef._evaluate is a private API and is retained for compatibility, but will be removed in Python 3.16. Use ForwardRef.evaluate() or typing.evaluate_forward_ref() instead.
+    return cast(Any, type_)._evaluate(globalns, localns, type_params=(), recursive_guard=set())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED app/tests/test_coding.py::test_coding_journey - assert False
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+====================== 1 failed, 672 warnings in 37.99s =======================

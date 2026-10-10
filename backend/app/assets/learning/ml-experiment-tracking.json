@@ -1,0 +1,101 @@
+{
+  "introduction": "Experiment tracking and reproducibility are the backbone of reliable machine learning practice. When a data scientist iterates on models, hyper‑parameters, and data preprocessing steps, the ability to recall exactly which code, configuration, and data produced a given result is essential for debugging, collaboration, and scientific validation. Without systematic tracking, results become anecdotal, and any claim of improvement is difficult to verify. This chapter introduces the core ideas behind experiment tracking, explains how to capture runs, manage configuration sweeps, and preserve artifact lineage, and shows how these practices enable reproducible research and robust production pipelines. The material is designed for beginners who have already learned model evaluation and now need to formalize their experimentation workflow.",
+  "foundations": "At its core, experiment tracking records a set of immutable facts for each model training run: the code version (often a git commit hash), the hyper‑parameter values, the training data snapshot, and any derived artifacts such as trained model files, logs, and evaluation metrics. These facts are stored in a structured store—commonly a relational database or a specialized service—so that they can be queried later. Reproducibility builds on this by ensuring that the same inputs (code, data, environment) can be re‑executed to obtain identical outputs, typically by versioning data and using containerized environments. A configuration sweep extends a single run into a systematic exploration of a hyper‑parameter space; the sweep manager launches many runs, each with a distinct configuration, while preserving the lineage that ties each run back to the sweep definition. Artifact lineage tracks the provenance of files: a model artifact knows which dataset version and preprocessing script produced it, and downstream experiments can reference that model as an input artifact. Together, these mechanisms form a directed acyclic graph (DAG) of experiments, enabling analysts to trace any result back to its origins, compare alternatives, and share complete reproducible packages with teammates or reviewers.",
+  "concepts": [
+    {
+      "title": "Weights & Biases Runs",
+      "explanation": "A run is a single execution of a training script that logs metrics, parameters, and artifacts to a backend service. Each run receives a unique identifier and stores a snapshot of the environment, including the git commit, Python package versions, and hardware details. The trade‑off is between granularity and storage cost: logging every batch metric yields fine‑grained insight but can quickly fill storage, whereas logging only epoch‑level metrics reduces overhead but may hide transient issues. Runs also support tagging and grouping, which help organize experiments by project or hypothesis. By treating runs as immutable records, you can safely compare results across time without accidental overwrites.",
+      "example": "Suppose you train a logistic regression on the Iris dataset with learning rate 0.01 and batch size 32. When the script starts, it calls wandb.init(project=\"iris-demo\", config={\"lr\":0.01,\"batch\":32}). Throughout training, it logs wandb.log({\"epoch\":e,\"loss\":loss_val}). After training, it saves the model file model.pkl and calls wandb.save(\"model.pkl\"). The run now contains the exact hyper‑parameters, loss curve, and the model artifact, all linked to the git commit that produced the code. Later you can retrieve this run by its ID and reproduce the exact environment."
+    },
+    {
+      "title": "Config Sweeps",
+      "explanation": "A sweep defines a search space over hyper‑parameters and a strategy (grid, random, Bayesian) for sampling configurations. The sweep manager launches multiple runs, each with a distinct config, and records the relationship between the sweep and its child runs. The main benefit is systematic coverage of the parameter space, which reduces bias from manual trial‑and‑error. However, sweeps can generate many runs, so you must set reasonable limits on total trials and monitor resource usage. Sweeps also enable automatic early stopping based on intermediate metrics, saving compute when a configuration is clearly underperforming.",
+      "example": "You define a sweep YAML with parameters lr: [0.001,0.01,0.1] and batch: [16,32]. Using wandb.sweep(sweep_config) creates a sweep ID. Then you launch agents: wandb agent <sweep_id>. Each agent pulls a config, runs the training script, and logs a run. After the sweep finishes, the dashboard shows a table of all runs, their hyper‑parameters, and final accuracy, allowing you to pick the best combination."
+    },
+    {
+      "title": "Artifact Lineage",
+      "explanation": "Artifacts are versioned files (datasets, models, preprocessing scripts) that can be linked together to form a provenance graph. When you log an artifact, you specify its type (dataset, model) and a unique name; the system computes a content hash to guarantee immutability. Downstream runs can declare dependencies on specific artifact versions, ensuring they always consume the exact same input. The trade‑off is the overhead of managing artifact versions and storage; small projects may find this cumbersome, but the benefit is that any change to data or code automatically creates a new artifact, preventing accidental reuse of stale files.",
+      "example": "After preprocessing the raw CSV, you create a dataset artifact named \"iris_v1\" and call wandb.log_artifact(dataset_artifact). Later, when training, you add \"artifact\": \"iris_v1:latest\" to the run config. The training run logs a model artifact \"logreg_v1\" that records its dependency on \"iris_v1\". If you later update the preprocessing script, a new dataset artifact \"iris_v2\" is created; any new training run that uses \"iris_v2\" will have a distinct lineage, making it easy to compare models trained on different data versions."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import wandb, numpy as np\nfrom sklearn.linear_model import LogisticRegression\nX=np.array([[5,3],[2,1],[3,4],[1,0]])\ny=np.array([1,0,1,0])\nwandb.init(project='demo',config={'lr':0.01,'batch':2})\nmodel=LogisticRegression(C=1/0.01,solver='lbfgs')\nmodel.fit(X,y)\nwandb.log({'accuracy':model.score(X,y)})\nimport joblib; joblib.dump(model,'model.pkl')\nwandb.save('model.pkl')",
+      "explanation": "The code creates a tiny dataset, starts a Weights & Biases run, and logs a single hyper‑parameter (learning rate) and the resulting accuracy. The model is saved to disk and uploaded as an artifact. Because the dataset is hard‑coded, the run is fully reproducible: any other machine executing the same script with the same wandb.init call will produce identical metrics and the same model file hash. Limitations include the lack of data versioning (the dataset is embedded in code) and the absence of a sweep; this example demonstrates a single run only."
+    },
+    {
+      "title": "Applied example",
+      "code": "def train(config):\n    import wandb, joblib\n    from sklearn.datasets import load_iris\n    from sklearn.ensemble import RandomForestClassifier\n    data=load_iris()\n    X,y=data.data,data.target\n    model=RandomForestClassifier(n_estimators=config['n_estimators'],\n                                 max_depth=config['max_depth'],\n                                 random_state=42)\n    model.fit(X,y)\n    wandb.log({'accuracy':model.score(X,y)})\n    joblib.dump(model,f\"rf_{config['n_estimators']}.pkl\")\n    wandb.save(f\"rf_{config['n_estimators']}.pkl\")\n# Sweep config (pseudo‑YAML)\nsweep={\"method\":\"grid\",\"parameters\":{\\\n    \"n_estimators\":{\"values\":[10,50]},\\\n    \"max_depth\":{\"values\":[3,5]}}}\n# In practice you would call wandb.agent(sweep_id, function=train)",
+      "explanation": "This pseudocode defines a training function that receives a configuration dictionary supplied by a sweep manager. The function loads the Iris dataset, trains a RandomForest with the given hyper‑parameters, logs accuracy, and saves the model artifact. The sweep definition enumerates a 2x2 grid, resulting in four runs. Each run will be linked to the sweep, and the lineage graph will show that all four models depend on the same dataset version but differ in n_estimators and max_depth. This structure enables systematic comparison and easy retrieval of the best model."
+    }
+  ],
+  "flow": [
+    "1. Initialize a run with wandb.init, passing a config dictionary that captures all hyper‑parameters.",
+    "2. Log metrics during training using wandb.log; choose epoch‑level granularity for balance.",
+    "3. Save any output files (model weights, plots) with wandb.save to register them as artifacts.",
+    "4. If performing a sweep, define a sweep configuration (search space and strategy) and launch agents to generate runs automatically.",
+    "5. For each dataset or preprocessing step, create a dataset artifact and log it with wandb.log_artifact, ensuring a content hash is stored.",
+    "6. Declare artifact dependencies in subsequent runs so the system records lineage edges.",
+    "7. After experiments, use the dashboard or API to query runs, compare metrics, and retrieve the exact code and data versions needed for reproduction."
+  ],
+  "interview": [
+    {
+      "question": "Why is immutable logging of runs important for reproducibility?",
+      "answer": "Immutable logging ensures that once a run is recorded, its parameters, metrics, and artifacts cannot be altered. This guarantees that any later inspection reflects the exact state of the experiment at execution time, preventing accidental overwrites that would corrupt the provenance chain. It also enables trustworthy comparisons across runs because each record is a fixed point of reference."
+    },
+    {
+      "question": "How does a sweep differ from manually launching multiple runs?",
+      "answer": "A sweep automates the generation of configurations, enforces a systematic search strategy, and records the parent‑child relationship between the sweep definition and each run. Manual launches lack this metadata, making it harder to trace which hyper‑parameter combinations were tried and to apply early‑stopping policies uniformly."
+    },
+    {
+      "question": "Explain artifact lineage and its role in model versioning.",
+      "answer": "Artifact lineage records the provenance of each file by linking it to the exact dataset, code, and environment that produced it. When a model artifact is created, it stores references to the dataset artifact and preprocessing script versions used. This graph allows you to reconstruct the full pipeline that generated a model, facilitating audits, debugging, and safe deployment of the correct model version."
+    },
+    {
+      "question": "What are the trade‑offs when logging metrics at batch versus epoch granularity?",
+      "answer": "Batch‑level logging provides fine‑grained insight into training dynamics, helping detect issues like exploding gradients early, but it generates large volumes of data, increasing storage costs and potentially slowing down training due to I/O overhead. Epoch‑level logging reduces overhead and storage but may miss transient problems that only appear for a few batches."
+    },
+    {
+      "question": "How would you ensure reproducibility when your data lives in a mutable external storage system?",
+      "answer": "You would create a dataset artifact that captures a snapshot of the data at a specific point in time, typically by copying the relevant files into a versioned storage bucket and computing a content hash. The artifact is then logged to the tracking system, and downstream runs declare a dependency on that exact artifact version, guaranteeing they always read the same data regardless of later changes in the external source."
+    },
+    {
+      "question": "Describe a scenario where you would prefer a random sweep over a grid sweep.",
+      "answer": "When the hyper‑parameter space is large and some dimensions have diminishing returns, a random sweep can explore more diverse configurations with fewer total trials. It avoids the combinatorial explosion of a full grid, allowing you to allocate limited compute budget to a broader search, which is especially useful for continuous parameters like learning rate."
+    }
+  ],
+  "summary": "Experiment tracking transforms ad‑hoc model training into a disciplined engineering process. By recording immutable runs, managing systematic sweeps, and preserving artifact lineage, data scientists gain full visibility into the provenance of every result. This visibility enables reproducibility, facilitates collaboration, and supports rigorous scientific reporting. The key principles are: capture code version, hyper‑parameters, and environment; log metrics at an appropriate granularity; version datasets and models as artifacts; and connect all pieces in a directed graph. When these practices are consistently applied, teams can reliably reproduce past experiments, compare alternatives, and safely promote the best models to production.",
+  "practice": [
+    {
+      "question": "You train a linear model with learning rate 0.05 and batch size 16. The run logs loss values [0.9, 0.7, 0.5] for three epochs. Write the wandb code to log these metrics and save the model file model.npy.",
+      "answer": "import wandb, numpy as np\nwandb.init(project='practice',config={'lr':0.05,'batch':16})\nlosses=[0.9,0.7,0.5]\nfor epoch,loss in enumerate(losses,1):\n    wandb.log({'epoch':epoch,'loss':loss})\nmodel=np.array([0.2,0.8])\nnp.save('model.npy',model)\nwandb.save('model.npy')\n# This code creates a run, logs three epoch losses, saves a dummy model array, and registers it as an artifact."
+    },
+    {
+      "question": "Define a sweep that searches over n_estimators in {20,40,60} and max_depth in {4,6}. Use a random method with 4 total trials. Show the sweep dictionary.",
+      "answer": "sweep_config={\n    'method':'random',\n    'metric':{'name':'accuracy','goal':'maximize'},\n    'parameters':{\n        'n_estimators':{'values':[20,40,60]},\n        'max_depth':{'values':[4,6]}\n    },\n    'early_terminate':{'type':'none'},\n    'total_trials':4\n}\n# This dictionary can be passed to wandb.sweep to create the sweep."
+    },
+    {
+      "question": "A dataset artifact \"sales_v1\" has a content hash abc123. You create a model artifact \"xgboost_v1\" that depends on this dataset. Explain how you would declare this dependency in code and why it matters.",
+      "answer": "First log the dataset artifact:\nimport wandb\nartifact=wandb.Artifact('sales_v1','dataset')\nartifact.add_file('sales.csv')\nwandb.log_artifact(artifact)\nThen, in the training script, retrieve it:\nrun=wandb.init()\nartifact=run.use_artifact('sales_v1:latest')\nartifact_dir=artifact.download()\n# After training, create model artifact and add a reference:\nmodel_art=wandb.Artifact('xgboost_v1','model')\nmodel_art.add_file('model.bin')\nmodel_art.add_reference(artifact)  # records dependency\nwandb.log_artifact(model_art)\nDeclaring the dependency records that the model was built from the exact version of the sales data, enabling future runs to reproduce the model or to audit which data version produced a given performance."
+    },
+    {
+      "question": "Design trade‑off: you have limited storage for artifacts but need to keep many model versions. What strategy would you adopt?",
+      "answer": "I would enable artifact retention policies that keep only the top‑k models based on a validation metric, while archiving older low‑performing versions to cheaper cold storage. Additionally, I would store model checkpoints as compressed binary formats (e.g., ONNX) to reduce size, and use a naming convention that includes the performance score, making it easy to prune. This balances the need for reproducibility of the best models with storage constraints."
+    },
+    {
+      "question": "Given three runs with accuracies 0.82, 0.85, 0.78 and learning rates 0.01, 0.001, 0.01 respectively, which run should be selected if you prioritize higher accuracy but also want the smallest learning rate when accuracies tie?",
+      "answer": "Run 2 has the highest accuracy (0.85), so it is selected regardless of learning rate. If accuracies were tied, we would choose the run with learning rate 0.001."
+    },
+    {
+      "question": "Compute the squared approximation error for a model that predicts [2,4,6] while true values are [3,5,7]. Show the calculation.",
+      "answer": "Error vector = [2-3, 4-5, 6-7] = [-1,-1,-1]\nSquared error = sum((-1)^2 for each) = 1+1+1 = 3.\nThus the squared approximation error is 3."
+    }
+  ],
+  "id": "ml-experiment-tracking",
+  "title": "Experiment Tracking & Reproducibility",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2128
+}

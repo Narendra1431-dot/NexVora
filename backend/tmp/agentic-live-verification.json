@@ -1,0 +1,25 @@
+{
+  "jobId": "job-c6c47c3c47f81e4980c08105",
+  "status": "Completed",
+  "progress": 100,
+  "error": null,
+  "crossProcessRetrieval": true,
+  "answerHttpStatus": 200,
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "citations": 1,
+  "sourceMatched": true,
+  "health": {
+    "supervisor": "healthy",
+    "openDotsRuntime": "adapted_gateway_enabled",
+    "openRouter": "unavailable",
+    "actionGateway": "healthy",
+    "approvalBroker": "healthy",
+    "audit": "healthy",
+    "rag": "healthy",
+    "mongodb": "healthy",
+    "worker": "healthy",
+    "computer": "disabled",
+    "meta": "disabled"
+  }
+}

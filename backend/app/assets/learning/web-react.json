@@ -1,0 +1,88 @@
+{
+  "introduction": "React is a declarative JavaScript library for building user interfaces that update efficiently as data changes. It lets developers describe what the UI should look like for a given state, and React takes care of reconciling the differences in the DOM. This approach reduces bugs caused by manual DOM manipulation, improves performance through a virtual DOM, and encourages component reuse. Beginners should first understand how React represents UI as a tree of components, how state drives rendering, and why accessibility must be baked into components from the start. Mastery of these foundations enables you to build interactive, inclusive web apps that scale from a single button to complex dashboards.",
+  "foundations": "A React component is a reusable function or class that returns a description of UI in JSX, a syntax that looks like HTML but compiles to JavaScript function calls. When a component renders, React creates a virtual representation of the DOM called the virtual DOM. On subsequent renders, React diffs the new virtual DOM against the previous one, computes the minimal set of changes, and patches the real DOM. This process, called reconciliation, makes updates fast because only the changed nodes are touched. State is the internal data that a component owns; when state changes, React schedules a re‑render of that component and its descendants. State must be immutable: you never modify the existing state object, you create a new one and pass it to the setter function. This immutability lets React quickly detect changes by simple reference equality checks. Accessibility (a11y) is the practice of making UI usable for people with disabilities. In React, accessibility is achieved by using semantic HTML elements, ARIA attributes, and ensuring that interactive components are keyboard‑navigable and announce their purpose to assistive technologies. Ignoring a11y can break screen readers, prevent keyboard users from reaching controls, and lead to legal compliance issues. By integrating a11y concerns into component design—such as labeling form fields, managing focus, and providing role attributes—developers create inclusive experiences without extra retrofitting later.",
+  "concepts": [
+    {
+      "title": "Component state",
+      "explanation": "Component state holds mutable data that influences what a component renders. In function components, the useState hook returns a pair: the current state value and a setter function. The setter replaces the old state with a new value, triggering a re‑render. State updates are asynchronous and may be batched, so reading state immediately after calling the setter can give the old value. To compute new state based on the previous one, pass a function to the setter; React will supply the latest state. Trade‑offs include keeping state local versus lifting it up to a common ancestor. Local state simplifies component logic but can cause duplication if multiple components need the same data. Lifting state up promotes a single source of truth but can increase prop‑drilling, making the component hierarchy harder to follow. For large apps, state management libraries (Redux, Zustand) can centralize state, but they add complexity and boilerplate.",
+      "example": "Consider a counter component that increments a number when a button is clicked. The component calls const [count, setCount] = useState(0). The button's onClick handler executes setCount(prev => prev + 1). After three clicks, the rendered output shows \"Count: 3\". Because setCount receives a function, each increment uses the most recent count even if React batches the updates. If we instead wrote setCount(count + 1) three times in a row, the final count would be 1 because each call would capture the same stale count value."
+    },
+    {
+      "title": "Accessibility",
+      "explanation": "Accessibility ensures that all users, including those with visual, auditory, motor, or cognitive impairments, can interact with a web app. In React, accessibility starts with choosing the correct semantic HTML element: use <button> for actions, <nav> for navigation, <header> for page headings, etc. When custom components replace native elements, you must add ARIA roles (role=\"button\"), states (aria-pressed), and properties (aria-label) to convey meaning. Keyboard interaction is vital; every interactive element must be reachable via Tab and operable with Enter or Space. Managing focus programmatically (e.g., after a modal opens) helps screen‑reader users know where context has shifted. Trade‑offs arise when developers overuse ARIA to fix poorly structured markup; ARIA should augment, not replace, native semantics. Over‑labeling can cause screen readers to read redundant information, while missing labels make controls invisible to assistive tech.",
+      "example": "A custom toggle component renders a <div> that looks like a switch. To make it accessible, we add role=\"switch\", tabIndex=\"0\", aria-checked={isOn}, and an onKeyDown handler that toggles on Enter or Space. We also provide aria-label=\"Dark mode\" so screen readers announce the purpose. When the user clicks or presses a key, the component updates its internal state with useState, and the aria-checked attribute reflects the new state, allowing assistive technology to convey the change."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import React, { useState } from 'react'\n\nfunction Counter() {\n  const [count, setCount] = useState(0)\n  const inc = () => setCount(c => c + 1)\n  return (\n    <div>\n      <p>Count: {count}</p>\n      <button onClick={inc}>Add</button>\n    </div>\n  )\n}\nexport default Counter",
+      "explanation": "The Counter component demonstrates basic state handling. The useState hook initializes count to 0. The inc function uses the functional form of setCount, guaranteeing that each click adds one to the most recent count even if React batches updates. When the button is pressed, React schedules a re‑render; the new virtual DOM shows the updated count, and only the text node inside the <p> element changes in the real DOM. Limitations: this example uses local state only; if another component needed the count, we would have to lift the state up or use a global store, adding complexity."
+    },
+    {
+      "title": "Applied example",
+      "code": "// Pseudocode for an accessible modal\nfunction Modal({open, onClose, title, children}) {\n  const modalRef = React.useRef(null)\n  React.useEffect(() => {\n    if (open) {\n      const previouslyFocused = document.activeElement\n      modalRef.current.focus()\n      return () => previouslyFocused.focus()\n    }\n  }, [open])\n  if (!open) return null\n  return (\n    <div role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"modal-title\"\n         tabIndex=\"-1\" ref={modalRef}>\n      <h2 id=\"modal-title\">{title}</h2>\n      {children}\n      <button onClick={onClose}>Close</button>\n    </div>\n  )\n}",
+      "explanation": "This partial pseudocode illustrates dialog naming and focus entry/restoration only. role=\"dialog\", aria-modal and aria-labelledby provide semantics; they do not trap focus or prevent interaction with background elements. tabIndex=-1 makes the container programmatically focusable, not focus-trapped. A complete modal additionally needs Escape handling, focus containment, background inertness, unique heading IDs, safe restoration when the opener is removed, and keyboard/screen-reader testing. Prefer a well-tested dialog primitive or the native dialog element with appropriate integration. Do not treat this abbreviated example as a complete accessible modal."
+    }
+  ],
+  "flow": [
+    "Define component UI with JSX, using semantic HTML elements wherever possible.",
+    "Introduce local state via useState for any data that changes over time.",
+    "Create event handlers that call the state setter, using functional updates when needed.",
+    "Add accessibility attributes: proper roles, aria-*, and ensure keyboard operability.",
+    "Test the component by interacting with mouse and keyboard, verifying screen‑reader output.",
+    "If state is needed elsewhere, lift it to the nearest common ancestor or introduce a store.",
+    "Iterate: refactor for readability, add prop‑type validation, and document a11y decisions."
+  ],
+  "interview": [
+    {
+      "question": "How does React's virtual DOM improve performance compared to direct DOM manipulation?",
+      "answer": "React creates a lightweight virtual representation of the DOM after each render. When state changes, React diffs the new virtual tree against the previous one, computes the minimal set of changes, and patches only those nodes in the real DOM. This avoids costly layout thrashing caused by many direct DOM writes, reduces reflows, and batches updates. Because the diff algorithm works on JavaScript objects, it is faster than querying the browser's layout engine for each change."
+    },
+    {
+      "question": "Explain the difference between local component state and lifted state. When would you choose each?",
+      "answer": "Local state lives inside a single component via useState or this.state, making the component self‑contained and easy to reason about. Lifted state is moved up to a parent component and passed down as props, providing a single source of truth for multiple children. Choose local state for UI details that no other component needs (e.g., a dropdown's open flag). Lift state when several components must stay in sync (e.g., a form wizard where steps share data) or when you need to coordinate side effects across the tree."
+    },
+    {
+      "question": "What ARIA attributes would you add to a custom checkbox component and why?",
+      "answer": "A custom checkbox should have role=\"checkbox\" to tell assistive tech it behaves like a native checkbox. The aria-checked attribute reflects its state (true, false, or mixed). An accessible name is required, so either provide aria-label=\"Accept terms\" or associate a <label> via aria-labelledby pointing to a visible text element. Keyboard support must be added: the element should be focusable (tabIndex=\"0\") and toggle on Space or Enter. These attributes together make the component indistinguishable from a native <input type=\"checkbox\"> for screen readers."
+    },
+    {
+      "question": "Describe a pitfall when using the functional form of setState in a loop and how to avoid it.",
+      "answer": "When calling setState multiple times in a loop without the functional form, each call captures the same stale state value, leading to unexpected results (e.g., incrementing a counter three times may only add one). Using the functional updater—setCount(prev => prev + 1)—ensures each iteration receives the latest state, even if React batches the updates. Always prefer the functional form when the new state depends on the previous state."
+    }
+  ],
+  "summary": "React builds UI by describing a component tree in JSX and letting a virtual DOM handle efficient updates. State, managed with useState, drives re‑rendering; immutability and functional updates guarantee correct change detection. Accessibility is not an afterthought; semantic HTML, ARIA roles, and keyboard handling must be integrated into every component. Developers balance local versus lifted state to keep components simple while avoiding duplicated data. By following a disciplined flow—write semantic markup, add state, enhance with a11y, test, and then lift or centralize state—beginners can create interactive, inclusive applications that scale without performance penalties.",
+  "practice": [
+    {
+      "question": "Create a React function component named Toggle that shows \"ON\" or \"OFF\" based on a boolean state. Include a button that flips the state. Write the component and show the rendered output after two button clicks.",
+      "answer": "import React, { useState } from 'react'\n\nfunction Toggle() {\n  const [on, setOn] = useState(false)\n  const flip = () => setOn(prev => !prev)\n  return (\n    <div>\n      <p>{on ? 'ON' : 'OFF'}</p>\n      <button onClick={flip}>Toggle</button>\n    </div>\n  )\n}\n\n// After first click: <p>ON</p>\n// After second click: <p>OFF</p>\nThe component initializes on to false, rendering \"OFF\". Each click calls flip, which uses the functional updater to invert the previous value, guaranteeing correct toggling even if React batches the updates."
+    },
+    {
+      "question": "Write a small React component that renders an input field with an associated label for accessibility. The label text should be \"Username\" and the input should have an id that matches the label's htmlFor attribute.",
+      "answer": "import React from 'react'\n\nfunction UsernameInput() {\n  return (\n    <div>\n      <label htmlFor=\"user-id\">Username</label>\n      <input type=\"text\" id=\"user-id\" name=\"username\" />\n    </div>\n  )\n}\n\n// The label is correctly linked to the input via htmlFor/id, allowing screen readers to announce \"Username\" when the field receives focus."
+    },
+    {
+      "question": "Given a component that uses useState to store an array of numbers, explain why directly mutating the array (e.g., arr.push(5)) does not cause a re‑render. Show the correct way to add an element.",
+      "answer": "React decides whether to re‑render by comparing the reference of the state value before and after the setter call. Directly mutating the array keeps the same reference, so React sees no change and skips rendering. Correct approach: setNumbers(prev => [...prev, 5]); This creates a new array with a new reference, containing the old elements plus 5, causing React to schedule a re‑render."
+    },
+    {
+      "question": "Design a reusable Button component that accepts a prop \"variant\" with values \"primary\" or \"secondary\" and applies different background colors. Discuss the trade‑off between using CSS classes versus inline style objects.",
+      "answer": "function Button({variant, children, ...rest}) {\n  const style = {\n    backgroundColor: variant === 'primary' ? '#0066ff' : '#e0e0e0',\n    color: variant === 'primary' ? '#fff' : '#000',\n    border: 'none',\n    padding: '8px 12px',\n    cursor: 'pointer'\n  }\n  return <button style={style} {...rest}>{children}</button>\n}\n\nTrade‑off: Inline style objects keep the styling logic in JavaScript, making it easy to compute colors based on props without extra CSS files, but they cannot use pseudo‑classes (e.g., :hover) or media queries without additional libraries. CSS classes keep styling separate, allow full CSS features, and enable caching by the browser, but require managing class name strings and may need a mapping function to select the correct class based on the variant."
+    },
+    {
+      "question": "A modal component must trap focus within itself while open. Outline the steps and provide a short code snippet that moves focus to the first focusable element when the modal mounts.",
+      "answer": "Steps: 1) When the modal opens, store the element that had focus. 2) Use a ref on the modal container. 3) In a useEffect that runs on open, query the container for the first focusable element (e.g., button, input, [tabindex=\"0\"]). 4) Call .focus() on that element. 5) On unmount, restore focus to the previously stored element.\n\n// Snippet\nfunction Modal({open, onClose}) {\n  const modalRef = React.useRef(null);\n  const prevFocus = React.useRef(null);\n  React.useEffect(() => {\n    if (open) {\n      prevFocus.current = document.activeElement;\n      const first = modalRef.current.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])');\n      first && first.focus();\n      return () => prevFocus.current && prevFocus.current.focus();\n    }\n  }, [open]);\n  if (!open) return null;\n  return (\n    <div role=\"dialog\" aria-modal=\"true\" ref={modalRef}>\n      <button onClick={onClose}>Close</button>\n    </div>\n  );\n}"
+    },
+    {
+      "question": "Explain why adding aria-live=\"polite\" to a region that displays error messages can improve accessibility. Provide a brief example of its usage in JSX.",
+      "answer": "aria-live=\"polite\" tells assistive technologies that the content of the region may change and should be announced when the user is idle, without interrupting the current speech. This is ideal for error messages that appear after form validation because the user can finish hearing the previous content before the screen reader reads the new error. Example:\n\n<div aria-live=\"polite\">\n  {error && <p role=\"alert\">{error}</p>}\n</div>\n\nWhen error becomes a non‑empty string, the screen reader will read the message after completing any ongoing narration, ensuring the user is aware of the validation issue."
+    }
+  ],
+  "id": "web-react",
+  "title": "React",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-10-01",
+  "wordCount": 2318
+}

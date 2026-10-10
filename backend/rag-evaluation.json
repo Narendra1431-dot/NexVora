@@ -1,0 +1,62 @@
+{
+  "queries": 5,
+  "recallAt5": 1.0,
+  "MRR": 0.9,
+  "groundedness": "BLOCKED: live generation requires valid OpenRouter credentials",
+  "answerRelevance": "BLOCKED: generation unverified",
+  "citationCorrectness": "retrieval citations are constructed only from retrieved source metadata",
+  "results": [
+    {
+      "query": "scaled dot product attention softmax square root",
+      "expected": "kb-attention",
+      "rank": 2,
+      "retrieved": [
+        "kb-catalog-assessments-assess-transformers-mastery",
+        "kb-attention"
+      ]
+    },
+    {
+      "query": "rotary position embeddings RoPE rotations",
+      "expected": "kb-rope",
+      "rank": 1,
+      "retrieved": [
+        "kb-rope",
+        "kb-catalog-assessments-assess-transformers-mastery",
+        "kb-catalog-resources-res-hnsw-indexing"
+      ]
+    },
+    {
+      "query": "hybrid retrieval reciprocal rank fusion",
+      "expected": "kb-hybrid-rag",
+      "rank": 1,
+      "retrieved": [
+        "kb-hybrid-rag",
+        "kb-catalog-assessments-assess-rag-systems",
+        "kb-catalog-projects-proj-rag-hybrid",
+        "kb-catalog-resources-res-rag-advanced-patterns",
+        "kb-rag-eval"
+      ]
+    },
+    {
+      "query": "QLoRA low rank quantized fine tuning",
+      "expected": "kb-peft",
+      "rank": 1,
+      "retrieved": [
+        "kb-peft",
+        "kb-catalog-resources-res-qlora-paper-guide",
+        "kb-catalog-skills-dl-llm-finetuning",
+        "kb-vdb"
+      ]
+    },
+    {
+      "query": "validation leakage imbalanced calibration",
+      "expected": "kb-eval-general",
+      "rank": 1,
+      "retrieved": [
+        "kb-eval-general",
+        "kb-catalog-skills-ml-model-evaluation",
+        "kb-catalog-resources-res-eval-llm-judge"
+      ]
+    }
+  ]
+}

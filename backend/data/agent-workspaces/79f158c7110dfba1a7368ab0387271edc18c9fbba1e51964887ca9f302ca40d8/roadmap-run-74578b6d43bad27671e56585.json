@@ -1,0 +1,416 @@
+[
+  {
+    "id": "ms-01-prog-python-advanced",
+    "order": 1,
+    "title": "Master Python (Advanced)",
+    "skillId": "prog-python-advanced",
+    "skillName": "Python (Advanced)",
+    "domain": "Core Programming",
+    "state": "Active",
+    "reason": "In progress at 77% toward the 90% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "3 hours",
+    "masteryTarget": 90,
+    "currentMastery": 77,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified Python (Advanced) artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: AsyncIO",
+      "Work through: Metaclasses & Decorators",
+      "Work through: Memory Profiling & C-Extensions"
+    ],
+    "resourceIds": [
+      "res-python-typing"
+    ],
+    "assessmentId": "assess-python-baseline",
+    "projectId": null,
+    "importance": "Required",
+    "category": "Core"
+  },
+  {
+    "id": "ms-02-math-prob-stats",
+    "order": 2,
+    "title": "Master Probability & Statistics",
+    "skillId": "math-prob-stats",
+    "skillName": "Probability & Statistics",
+    "domain": "Math & Foundations",
+    "state": "Active",
+    "reason": "In progress at 74% toward the 85% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "3 hours",
+    "masteryTarget": 85,
+    "currentMastery": 74,
+    "completionCondition": "Reach the target mastery with at least one verifier artefact (assessment or rubric-verified project).",
+    "evidenceGenerated": "Verified Probability & Statistics artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Bayes Theorem",
+      "Work through: Maximum Likelihood Estimation (MLE)",
+      "Work through: Markov Chains"
+    ],
+    "resourceIds": [],
+    "assessmentId": null,
+    "projectId": null,
+    "importance": "Preferred",
+    "category": "Math & Foundations"
+  },
+  {
+    "id": "ms-03-prog-docker-containers",
+    "order": 3,
+    "title": "Master Docker & Containerization",
+    "skillId": "prog-docker-containers",
+    "skillName": "Docker & Containerization",
+    "domain": "Core Programming",
+    "state": "Active",
+    "reason": "In progress at 66% toward the 85% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "4 hours",
+    "masteryTarget": 85,
+    "currentMastery": 66,
+    "completionCondition": "Submit the linked project and pass the deterministic rubric threshold.",
+    "evidenceGenerated": "Verified Docker & Containerization artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Multi-Stage GPU Builds",
+      "Work through: CUDA Base Containers",
+      "Work through: Docker Compose"
+    ],
+    "resourceIds": [
+      "res-docker-gpu"
+    ],
+    "assessmentId": null,
+    "projectId": "proj-vllm-serving-bench",
+    "importance": "Preferred",
+    "category": "Core Programming"
+  },
+  {
+    "id": "ms-04-data-sql-querying",
+    "order": 4,
+    "title": "Master Advanced SQL & Data Modeling",
+    "skillId": "data-sql-querying",
+    "skillName": "Advanced SQL & Data Modeling",
+    "domain": "Data Systems",
+    "state": "Active",
+    "reason": "In progress at 73% toward the 85% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "3 hours",
+    "masteryTarget": 85,
+    "currentMastery": 73,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified Advanced SQL & Data Modeling artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Window Functions",
+      "Work through: Recursive CTEs",
+      "Work through: Query Execution Plans"
+    ],
+    "resourceIds": [
+      "res-pgvector-hybrid"
+    ],
+    "assessmentId": "assess-sql-baseline",
+    "projectId": "proj-enterprise-sql-warehouse",
+    "importance": "Preferred",
+    "category": "Data Systems"
+  },
+  {
+    "id": "ms-05-data-vector-databases",
+    "order": 5,
+    "title": "Remediate before Vector DBs & Embeddings Index",
+    "skillId": "data-vector-databases",
+    "skillName": "Vector DBs & Embeddings Index",
+    "domain": "Data Systems",
+    "state": "Blocked",
+    "reason": "Locked behind Advanced SQL & Data Modeling. Target is 75% and the current evidenced level is 40%.",
+    "prerequisites": [
+      "Advanced SQL & Data Modeling"
+    ],
+    "prerequisiteIds": [
+      "data-sql-querying"
+    ],
+    "blockedBy": [
+      "data-sql-querying"
+    ],
+    "estimatedDuration": "8 hours",
+    "masteryTarget": 75,
+    "currentMastery": 40,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified Vector DBs & Embeddings Index artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: HNSW vs IVF Indexing",
+      "Work through: Cosine vs Dot Product Metrics",
+      "Work through: Chroma & Milvus",
+      "Attach a verifier artefact to your existing claim (repository or rubric submission)"
+    ],
+    "resourceIds": [
+      "res-hnsw-indexing"
+    ],
+    "assessmentId": "assess-vector-databases",
+    "projectId": "proj-rag-hybrid",
+    "importance": "Required",
+    "category": "Data Systems"
+  },
+  {
+    "id": "ms-06-ml-model-evaluation",
+    "order": 6,
+    "title": "Prepare for Model Evaluation & Validation",
+    "skillId": "ml-model-evaluation",
+    "skillName": "Model Evaluation & Validation",
+    "domain": "Machine Learning",
+    "state": "Locked",
+    "reason": "Locked behind Probability & Statistics. Target is 80% and the current evidenced level is 73%.",
+    "prerequisites": [
+      "Probability & Statistics"
+    ],
+    "prerequisiteIds": [
+      "math-prob-stats"
+    ],
+    "blockedBy": [
+      "math-prob-stats"
+    ],
+    "estimatedDuration": "7 hours",
+    "masteryTarget": 80,
+    "currentMastery": 73,
+    "completionCondition": "Submit the linked project and pass the deterministic rubric threshold.",
+    "evidenceGenerated": "Verified Model Evaluation & Validation artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: ROC-AUC & Precision-Recall",
+      "Work through: Cross-Validation & Leakage",
+      "Work through: LLM Benchmark Metrics",
+      "Close the blocking prerequisite milestone before attempting this assessment"
+    ],
+    "resourceIds": [
+      "res-eval-llm-judge"
+    ],
+    "assessmentId": null,
+    "projectId": "proj-rag-hybrid",
+    "importance": "Required",
+    "category": "Validation"
+  },
+  {
+    "id": "ms-07-dl-neural-networks",
+    "order": 7,
+    "title": "Master Neural Network Architecture",
+    "skillId": "dl-neural-networks",
+    "skillName": "Neural Network Architecture",
+    "domain": "Deep Learning & NLP",
+    "state": "Active",
+    "reason": "In progress at 72% toward the 85% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "7 hours",
+    "masteryTarget": 85,
+    "currentMastery": 72,
+    "completionCondition": "Reach the target mastery with at least one verifier artefact (assessment or rubric-verified project).",
+    "evidenceGenerated": "Verified Neural Network Architecture artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Backpropagation through Time",
+      "Work through: Activation Functions",
+      "Work through: Layer & Batch Normalization"
+    ],
+    "resourceIds": [],
+    "assessmentId": null,
+    "projectId": null,
+    "importance": "Preferred",
+    "category": "Deep Learning & NLP"
+  },
+  {
+    "id": "ms-08-dl-pytorch",
+    "order": 8,
+    "title": "Maintain verified PyTorch Framework & Tensors",
+    "skillId": "dl-pytorch",
+    "skillName": "PyTorch Framework & Tensors",
+    "domain": "Deep Learning & NLP",
+    "state": "Completed",
+    "reason": "Verified at 93% against the 85% requirement for this target role.",
+    "prerequisites": [
+      "Neural Network Architecture"
+    ],
+    "prerequisiteIds": [
+      "dl-neural-networks"
+    ],
+    "blockedBy": [
+      "dl-neural-networks"
+    ],
+    "estimatedDuration": "8 hours",
+    "masteryTarget": 85,
+    "currentMastery": 93,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified PyTorch Framework & Tensors artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Autograd Engine",
+      "Work through: Custom Dataset & DataLoader",
+      "Work through: DistributedDataParallel (DDP)"
+    ],
+    "resourceIds": [
+      "res-pytorch-internals",
+      "res-pytorch-dataloader"
+    ],
+    "assessmentId": "assess-pytorch-adaptive",
+    "projectId": "proj-transformer-from-scratch",
+    "importance": "Required",
+    "category": "Deep Learning"
+  },
+  {
+    "id": "ms-09-dl-transformers",
+    "order": 9,
+    "title": "Master Transformer Architecture & Attention",
+    "skillId": "dl-transformers",
+    "skillName": "Transformer Architecture & Attention",
+    "domain": "Deep Learning & NLP",
+    "state": "Active",
+    "reason": "Direct gap: 0% evidenced against a 85% requirement.",
+    "prerequisites": [
+      "Foundational"
+    ],
+    "prerequisiteIds": [],
+    "blockedBy": [],
+    "estimatedDuration": "19 hours",
+    "masteryTarget": 85,
+    "currentMastery": 0,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified Transformer Architecture & Attention artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Scaled Dot-Product Attention",
+      "Work through: Multi-Head Attention",
+      "Work through: Rotary Positional Embeddings"
+    ],
+    "resourceIds": [
+      "res-karpathy-nanogpt",
+      "res-attention-paper-deepdive"
+    ],
+    "assessmentId": "assess-transformers-mastery",
+    "projectId": "proj-transformer-from-scratch",
+    "importance": "Required",
+    "category": "Deep Learning"
+  },
+  {
+    "id": "ms-10-mlops-model-serving",
+    "order": 10,
+    "title": "Remediate before Model Serving & Inference Optimization",
+    "skillId": "mlops-model-serving",
+    "skillName": "Model Serving & Inference Optimization",
+    "domain": "MLOps & Deployment",
+    "state": "Blocked",
+    "reason": "Locked behind Docker & Containerization. Target is 70% and the current evidenced level is 0%.",
+    "prerequisites": [
+      "Docker & Containerization"
+    ],
+    "prerequisiteIds": [
+      "prog-docker-containers"
+    ],
+    "blockedBy": [
+      "prog-docker-containers"
+    ],
+    "estimatedDuration": "18 hours",
+    "masteryTarget": 70,
+    "currentMastery": 0,
+    "completionCondition": "Submit the linked project and pass the deterministic rubric threshold.",
+    "evidenceGenerated": "Verified Model Serving & Inference Optimization artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: vLLM & TensorRT-LLM",
+      "Work through: Continuous Batching & PagedAttention",
+      "Work through: Triton Inference Server",
+      "Close the blocking prerequisite milestone before attempting this assessment"
+    ],
+    "resourceIds": [
+      "res-vllm-serving-guide"
+    ],
+    "assessmentId": null,
+    "projectId": "proj-vllm-serving-bench",
+    "importance": "Preferred",
+    "category": "MLOps"
+  },
+  {
+    "id": "ms-11-dl-rag-systems",
+    "order": 11,
+    "title": "Remediate before Retrieval Augmented Generation (RAG)",
+    "skillId": "dl-rag-systems",
+    "skillName": "Retrieval Augmented Generation (RAG)",
+    "domain": "Deep Learning & NLP",
+    "state": "Blocked",
+    "reason": "Locked behind Vector DBs & Embeddings Index, Transformer Architecture & Attention. Target is 80% and the current evidenced level is 43%.",
+    "prerequisites": [
+      "Vector DBs & Embeddings Index",
+      "Transformer Architecture & Attention"
+    ],
+    "prerequisiteIds": [
+      "data-vector-databases",
+      "dl-transformers"
+    ],
+    "blockedBy": [
+      "data-vector-databases",
+      "dl-transformers"
+    ],
+    "estimatedDuration": "16 hours",
+    "masteryTarget": 80,
+    "currentMastery": 43,
+    "completionCondition": "Pass the linked assessment at 80% or higher, or submit a rubric-verified project.",
+    "evidenceGenerated": "Verified Retrieval Augmented Generation (RAG) artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: Contextual Chunking",
+      "Work through: Cross-Encoder Re-ranking",
+      "Work through: Self-RAG & Agentic Loops",
+      "Attach a verifier artefact to your existing claim (repository or rubric submission)"
+    ],
+    "resourceIds": [
+      "res-rag-advanced-patterns"
+    ],
+    "assessmentId": "assess-rag-systems",
+    "projectId": "proj-rag-hybrid",
+    "importance": "Required",
+    "category": "Applications"
+  },
+  {
+    "id": "ms-12-dl-llm-finetuning",
+    "order": 12,
+    "title": "Remediate before LLM Fine-Tuning & Quantization",
+    "skillId": "dl-llm-finetuning",
+    "skillName": "LLM Fine-Tuning & Quantization",
+    "domain": "Deep Learning & NLP",
+    "state": "Blocked",
+    "reason": "Locked behind Transformer Architecture & Attention. Target is 75% and the current evidenced level is 0%.",
+    "prerequisites": [
+      "Transformer Architecture & Attention"
+    ],
+    "prerequisiteIds": [
+      "dl-transformers"
+    ],
+    "blockedBy": [
+      "dl-transformers"
+    ],
+    "estimatedDuration": "20 hours",
+    "masteryTarget": 75,
+    "currentMastery": 0,
+    "completionCondition": "Reach the target mastery with at least one verifier artefact (assessment or rubric-verified project).",
+    "evidenceGenerated": "Verified LLM Fine-Tuning & Quantization artefact in the evidence vault",
+    "practiceTasks": [
+      "Work through: QLoRA & PEFT",
+      "Work through: DPO vs PPO Alignment",
+      "Work through: AWQ & GGUF Quantization",
+      "Close the blocking prerequisite milestone before attempting this assessment"
+    ],
+    "resourceIds": [
+      "res-qlora-paper-guide"
+    ],
+    "assessmentId": null,
+    "projectId": null,
+    "importance": "Preferred",
+    "category": "Deep Learning"
+  }
+]

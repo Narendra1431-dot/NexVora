@@ -1,0 +1,24 @@
+{
+  "modelVersion": "learning-risk-synthetic-1",
+  "data": "SYNTHETIC DEMO DATA; advisory only; not validated on learner outcomes",
+  "seed": 42,
+  "train": 1440,
+  "validation": 480,
+  "test": 480,
+  "features": [
+    "mastery",
+    "gap",
+    "engagement",
+    "evidenceStrength",
+    "weeklyTimeFit"
+  ],
+  "task": "regression",
+  "coefficients": [
+    -0.19903866413625215,
+    0.35090565922092,
+    -0.24736931313276198,
+    -0.19957206330848115,
+    -0.1555386046833721
+  ],
+  "intercept": 0.6499741904658611
+}

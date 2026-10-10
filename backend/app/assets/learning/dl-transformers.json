@@ -1,0 +1,106 @@
+{
+  "introduction": "Transformers have become the dominant architecture for sequence modeling because they replace recurrent connections with attention mechanisms that can relate every token to every other token in a single pass. This chapter explains the core ideas behind the Transformer architecture and its attention sub‑components, showing how they enable parallel computation, long‑range dependencies, and flexible handling of variable‑length inputs. You will learn why scaled dot‑product attention is the mathematical engine, how multi‑head attention distributes representation power, what rotary positional embeddings provide as an alternative to learned position vectors, and how a key‑value (KV) cache makes inference efficient for autoregressive generation. The material is self‑contained, starts from linear algebra basics, and builds step by step toward practical implementation in PyTorch, preparing you for both research and interview scenarios.",
+  "foundations": "At the heart of a Transformer lies the attention function, which maps a set of queries Q, keys K, and values V to a weighted sum of values. The weights are computed as the similarity between queries and keys, typically using a dot product. Because the dot product grows with vector dimension, the original design scales it by 1/sqrt(d_k) to keep gradients stable; this is the scaled dot‑product attention. The result is a matrix of shape (seq_len, d_v) that can be processed in parallel across all positions. Multi‑head attention replicates this operation h times with independent linear projections, allowing each head to focus on different subspaces of the data. The outputs of all heads are concatenated and linearly transformed back to the model dimension. Positional information is required because attention itself is permutation‑invariant; rotary positional embeddings (RoPE) encode positions by rotating query and key vectors in a way that preserves inner‑product relationships. Finally, during generation the same keys and values are reused across time steps; storing them in a KV cache avoids recomputing the encoder side, reducing the per‑token cost from O(seq_len) to O(1) for the cached portion. Understanding these pieces requires familiarity with matrix multiplication, softmax normalization, and basic probability, all of which are reviewed in the examples that follow.",
+  "concepts": [
+    {
+      "title": "Scaled Dot-Product Attention",
+      "explanation": "Scaled dot‑product attention computes Attention(Q,K,V)=softmax(QK^T / sqrt(d_k)) V. The division by sqrt(d_k) prevents the softmax from having extremely large or small inputs when d_k is large, which would otherwise cause vanishing or exploding gradients. The softmax converts raw similarity scores into a probability distribution over the keys for each query, ensuring the weighted sum of values is a convex combination. This operation is fully differentiable, enabling end‑to‑end training via back‑propagation. Trade‑offs include the O(n^2) memory and compute cost for sequence length n, which can be mitigated by sparse or low‑rank approximations, but those change the exactness of the attention scores.",
+      "example": "Consider a toy sequence of three tokens with d_k=2. Let Q=[[1,0],[0,1],[1,1]], K=[[1,1],[0,1],[1,0]], V=[[2,0],[0,2],[1,1]]. Compute QK^T: [[1,1,1],[1,1,0],[2,1,1]]. Divide by sqrt(2)≈1.414, apply softmax row‑wise, then multiply by V. The resulting attention output is [[1.33,0.67],[0.73,1.27],[1.20,0.80]] (rounded). This shows how each output blends values according to similarity."
+    },
+    {
+      "title": "Multi-Head Attention",
+      "explanation": "Multi‑head attention runs several scaled dot‑product attentions in parallel, each with its own learned projection matrices W_Q^i, W_K^i, W_V^i (i=1..h). After computing each head's output, the h results of dimension d_h are concatenated to form a matrix of size (seq_len, h*d_h) and projected with W_O back to the model dimension d_model. This design lets the model attend to information from different representation subspaces simultaneously, improving expressiveness without increasing the total parameter count dramatically. The main trade‑off is increased compute due to h separate matrix multiplications, but the parallel nature of GPUs mitigates this. Choosing h and d_h such that h*d_h = d_model keeps the total parameter budget constant.",
+      "example": "Suppose d_model=4, h=2, so each head has d_h=2. Let input X be a 2‑token sequence: [[1,0,1,0],[0,1,0,1]]. Randomly pick projection matrices: W_Q^1=[[1,0,0,0],[0,1,0,0]], W_K^1=[[0,1,0,0],[0,0,1,0]], W_V^1=[[1,0,0,0],[0,0,1,0]]; similarly for head 2 with different values. Compute Q1=XW_Q^1, K1=XW_K^1, V1=XW_V^1, then apply scaled dot‑product attention to obtain O1. Do the same for head 2 to get O2. Concatenate O1 and O2 to get a 2×4 matrix and multiply by W_O=[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]] (identity) to obtain the final output identical to the concatenated matrix. This illustrates how each head processes a different slice of the input."
+    },
+    {
+      "title": "Rotary Positional Embeddings",
+      "explanation": "Rotary positional embeddings (RoPE) encode token positions by rotating query and key vectors in a 2‑D subspace for each pair of dimensions. For dimension pair (2i,2i+1) and position p, the rotation matrix R(p)= [[cos(theta_p), -sin(theta_p)],[sin(theta_p), cos(theta_p)]] with theta_p = p / 10000^{2i/d_model}. Multiplying Q and K by R(p) before the dot product makes the inner product depend on relative positions: Q_i·K_j becomes a function of (p_i - p_j). This preserves the attention mechanism's ability to compare content while injecting positional bias without adding extra parameters. The trade‑off is that RoPE works best when the model dimension is even and when the rotation frequencies are chosen to cover the expected sequence length; otherwise, positional resolution may be coarse.",
+      "example": "Take d_model=4, so we have two rotation pairs. For position p=1, theta_0=1/10000^{0}=0.0001 rad, theta_1=1/10000^{0.5}≈0.01 rad. For a query vector q=[1,0,0,1], split into pairs (1,0) and (0,1). Apply R(1) to each pair: first pair becomes [cos0.0001, sin0.0001]≈[0.999999995,0.0001]; second pair becomes [cos0.01, sin0.01]≈[0.99995,0.0099998]. The rotated query is approximately [0.999999995,0.0001,0.99995,0.0099998]. Doing the same for a key at position 2 yields a different rotation, and their dot product reflects the relative offset (2‑1=1)."
+    },
+    {
+      "title": "KV Cache",
+      "explanation": "During autoregressive generation, each new token requires recomputing attention over all previous tokens. The KV cache stores the key and value matrices for already processed tokens, so that at step t only the query for the new token is computed and multiplied with the cached K and V. This reduces the per‑step complexity from O(t*d_model) to O(d_model) for the cached part, while still allowing the model to attend to the full history. The cache must be updated with the new key/value after each step, and care must be taken to keep the cache aligned with the model's internal state (e.g., handling beam search where multiple hypotheses share prefixes). The main limitation is increased memory usage proportional to sequence length, but this is usually acceptable for generation lengths under a few thousand tokens.",
+      "example": "Assume a single‑head attention with d_k=d_v=2. After processing tokens 1 and 2, the cached K=[[1,0],[0,1]] and V=[[2,0],[0,2]]. For token 3, compute its query q3=[1,1]. The attention scores are q3·K^T = [1,1]·[[1,0],[0,1]]^T = [1,1]. After softmax, weights are [0.5,0.5]; the output is 0.5*V1 + 0.5*V2 = [1,1]. The cache now stores K3 and V3 for the next step."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import torch\n\n# tiny transformer block\nseq_len, d_model = 3, 4\nx = torch.arange(seq_len*d_model).float().view(seq_len, d_model)\nWq = torch.eye(d_model)[:,:2]\nWk = torch.eye(d_model)[:,:2]\nWv = torch.eye(d_model)[:,:2]\nQ = x @ Wq\nK = x @ Wk\nV = x @ Wv\nscores = Q @ K.t() / (2**0.5)\nweights = torch.softmax(scores, dim=-1)\nout = weights @ V\nprint('output:', out)\n",
+      "explanation": "The code builds a minimal transformer block with identity projections that simply select the first two dimensions of each token. The sequence consists of three tokens with values 0..11 reshaped to (3,4). After projecting, Q, K, and V are 3x2 matrices. The scaled dot‑product attention computes a 3x3 score matrix, normalizes it with softmax, and finally produces a 3x2 output. Because the projections are trivial, the output can be verified by hand: each output token is a weighted average of the first two dimensions of the input tokens. The example demonstrates the exact flow of data through attention without any approximations, and it highlights that the softmax ensures rows sum to one, which is essential for a proper convex combination."
+    },
+    {
+      "title": "Applied example",
+      "code": "def multi_head_attention(x, Wq, Wk, Wv, Wo, heads=2):\n    # x: (seq, d_model)\n    head_dim = Wq[0].shape[1]\n    outputs = []\n    for i in range(heads):\n        Q = x @ Wq[i]\n        K = x @ Wk[i]\n        V = x @ Wv[i]\n        scores = Q @ K.t() / (head_dim**0.5)\n        attn = torch.softmax(scores, dim=-1)\n        outputs.append(attn @ V)\n    concat = torch.cat(outputs, dim=-1)\n    return concat @ Wo\n",
+      "explanation": "The pseudocode implements multi‑head attention for a generic number of heads. Each head receives its own projection matrices (Wq[i], Wk[i], Wv[i]) and computes scaled dot‑product attention independently. The results are concatenated along the feature dimension and finally projected back to the model dimension with Wo. This structure mirrors the original Transformer design and can be directly translated into a PyTorch module. The function assumes all heads have the same head_dim, which simplifies scaling. In practice, one would also add dropout after the softmax and residual connections around the whole block; those are omitted here for clarity."
+    }
+  ],
+  "flow": [
+    "1. Embed input tokens into vectors of dimension d_model using an embedding layer.",
+    "2. Add positional information (e.g., rotary embeddings) to the token vectors.",
+    "3. Project the enriched vectors into queries, keys, and values with separate linear layers.",
+    "4. For each head, compute scaled dot‑product attention: QK^T / sqrt(d_k) followed by softmax.",
+    "5. Multiply the softmax weights by the value matrix to obtain head outputs.",
+    "6. Concatenate all head outputs and apply a final linear projection to restore d_model.",
+    "7. Apply a residual connection and layer normalization before passing to the next sub‑layer."
+  ],
+  "interview": [
+    {
+      "question": "Why does the Transformer use 1/sqrt(d_k) scaling in attention?",
+      "answer": "Without scaling, the dot product of two random vectors of dimension d_k has variance proportional to d_k, causing the softmax inputs to grow with dimension. Large values push the softmax into saturation, yielding near‑one‑hot distributions and vanishing gradients. Dividing by sqrt(d_k) normalizes the variance to roughly 1, keeping the softmax in a regime where gradients are informative and training remains stable."
+    },
+    {
+      "question": "Explain how multi‑head attention can represent different types of relationships simultaneously.",
+      "answer": "Each head learns its own projection matrices, effectively mapping the input into a distinct subspace. In one subspace a head might focus on syntactic patterns (e.g., subject‑verb agreement), while another captures semantic similarity (e.g., coreference). Because the attention scores are computed independently, each head can assign high weight to different token pairs, and the concatenation aggregates these diverse perspectives before the final linear mixing."
+    },
+    {
+      "question": "What are the advantages and limitations of rotary positional embeddings compared to learned absolute embeddings?",
+      "answer": "RoPE encodes positions by rotating query and key vectors, which makes the attention score a function of relative distance without extra parameters, improving extrapolation to longer sequences. It also integrates seamlessly with the dot product, preserving the inner‑product structure. However, RoPE requires an even model dimension and careful choice of rotation frequencies; if the frequencies are too low, positional resolution suffers, and if too high, the model may overfit to short‑range patterns."
+    },
+    {
+      "question": "How does a KV cache reduce inference latency in autoregressive models?",
+      "answer": "During generation, the keys and values for previously generated tokens remain unchanged. By storing them in a cache, the model avoids recomputing K and V at each step, only computing the new query and performing a matrix multiplication with the cached K and V. This changes the per‑token cost from O(t*d_model) to O(d_model) for the cached portion, yielding linear speed‑up with sequence length while increasing memory usage proportionally to the cached length."
+    },
+    {
+      "question": "Describe a scenario where increasing the number of attention heads could hurt performance.",
+      "answer": "If the model dimension is fixed, adding more heads reduces the dimension per head (d_h = d_model / h). Very small d_h limits the expressiveness of each head, making the dot‑product less discriminative and potentially causing under‑fitting. Moreover, more heads increase overhead from additional linear projections and softmax operations, which can outweigh the benefits when the data does not contain enough diverse patterns to exploit the extra subspaces."
+    },
+    {
+      "question": "What is the effect of applying layer normalization before versus after the attention sub‑layer?",
+      "answer": "Applying layer normalization before attention (pre‑norm) stabilizes the input to the attention, leading to smoother gradients and easier training of deep Transformers. Post‑norm, used in the original paper, normalizes the output of the sub‑layer, which can cause gradient explosion in very deep stacks. Empirically, pre‑norm often yields faster convergence and better robustness, though both variants can achieve similar final performance with proper tuning."
+    }
+  ],
+  "summary": "Transformer attention replaces recurrence with a content‑based weighting scheme that can be computed in parallel. Scaled dot‑product attention normalizes similarity scores, while multi‑head attention distributes the model's capacity across multiple representation subspaces. Rotary positional embeddings inject relative position information without extra parameters, and a KV cache makes autoregressive inference linear in sequence length rather than quadratic. Together these mechanisms give Transformers their flexibility, scalability, and efficiency, forming the foundation for modern language models, vision transformers, and many cross‑modal architectures. Understanding the linear algebra, normalization, and caching details equips you to implement, debug, and extend these models in research or production.",
+  "practice": [
+    {
+      "question": "Given Q=[[1,0],[0,1]], K=[[1,1],[1,0]], V=[[2,0],[0,2]], compute the scaled dot‑product attention output manually.",
+      "answer": "First compute QK^T: [[1*1+0*1, 1*1+0*0],[0*1+1*1, 0*1+1*0]] = [[1,1],[1,0]]. d_k=2, sqrt(d_k)=1.414. Divide: [[0.707,0.707],[0.707,0]]. Apply softmax row‑wise: row1 -> exp(0.707)=2.028, exp(0.707)=2.028, sum=4.056, weights=[0.5,0.5]; row2 -> exp(0.707)=2.028, exp(0)=1, sum=3.028, weights=[0.669,0.331]. Multiply by V: output = [[0.5*2+0.5*0, 0.5*0+0.5*2],[0.669*2+0.331*0, 0.669*0+0.331*2]] = [[1,1],[1.338,0.662]]. Rounded to two decimals: [[1.00,1.00],[1.34,0.66]]."
+    },
+    {
+      "question": "Implement a two‑head attention module in PyTorch for d_model=6, h=2. Show the shapes of all intermediate tensors.",
+      "answer": "import torch\nclass TwoHeadAttn(torch.nn.Module):\n    def __init__(self):\n        super().__init__()\n        d_model=6; heads=2; d_h=3\n        self.Wq = torch.nn.ParameterList([torch.nn.Parameter(torch.randn(d_model,d_h)) for _ in range(heads)])\n        self.Wk = torch.nn.ParameterList([torch.nn.Parameter(torch.randn(d_model,d_h)) for _ in range(heads)])\n        self.Wv = torch.nn.ParameterList([torch.nn.Parameter(torch.randn(d_model,d_h)) for _ in range(heads)])\n        self.Wo = torch.nn.Parameter(torch.randn(heads*d_h,d_model))\n    def forward(self,x):\n        # x: (seq,6)\n        heads_out=[]\n        for i in range(2):\n            Q = x @ self.Wq[i]   # (seq,3)\n            K = x @ self.Wk[i]   # (seq,3)\n            V = x @ self.Wv[i]   # (seq,3)\n            scores = Q @ K.t() / (3**0.5)   # (seq,seq)\n            attn = torch.softmax(scores,dim=-1)   # (seq,seq)\n            heads_out.append(attn @ V)   # (seq,3)\n        concat = torch.cat(heads_out,dim=-1)   # (seq,6)\n        return concat @ self.Wo   # (seq,6)\nThe shapes are: input (seq,6), each Q/K/V (seq,3), scores (seq,seq), attn (seq,seq), head output (seq,3), concatenated (seq,6), final output (seq,6)."
+    },
+    {
+      "question": "Design a variant of multi‑head attention that shares the key and value projections across heads but keeps separate queries. Discuss the trade‑offs.",
+      "answer": "In this design, we define a single W_K and W_V shared by all heads, while each head i has its own W_Q^i. The forward pass computes K = X @ W_K and V = X @ W_V once, then for each head computes Q_i = X @ W_Q^i and performs attention with the shared K and V. The benefit is reduced parameter count and lower memory bandwidth because K and V are computed once, which can be advantageous for very long sequences or on hardware with limited cache. The downside is that all heads see the same key/value representation, limiting the diversity of attention patterns; heads can only differ in how they query the shared space, which may reduce the model's ability to capture multiple relational types simultaneously. Empirically, this trade‑off works well when the number of heads is large but the model dimension is modest."
+    },
+    {
+      "question": "A transformer decoder processes a sequence of length 4. After generating token 3, the KV cache holds K and V for positions 1‑3. If the query for token 4 is q4=[1,0,1,0] and cached K=[[1,0],[0,1],[1,1]], V=[[2,0],[0,2],[1,1]], compute the attention output for token 4.",
+      "answer": "Compute scores = q4 @ K^T = [1,0,1,0]·[[1,0,1],[0,1,1]]^T = [1*1+0*0+1*1, 1*0+0*1+1*1] = [2,1]. Scale by sqrt(d_k)=sqrt(2)=1.414 => [1.414,0.707]. Softmax: exp(1.414)=4.113, exp(0.707)=2.028, sum=6.141, weights=[0.670,0.330]. Output = 0.670*V1 + 0.330*V2 = 0.670*[2,0] + 0.330*[0,2] = [1.34,0] + [0,0.66] = [1.34,0.66]. Rounded: [1.34,0.66]."
+    },
+    {
+      "question": "Explain why layer normalization is typically applied after the residual addition in a Transformer block.",
+      "answer": "Applying layer normalization after the residual addition (post‑norm) ensures that the combined signal (sub‑layer output + shortcut) has zero mean and unit variance before it is fed to the next block. This stabilizes the distribution of activations across layers, preventing exploding or vanishing activations as depth increases. It also preserves the identity path of the residual connection, which is crucial for gradient flow. While pre‑norm can also work, post‑norm matches the original Transformer formulation and has been shown to produce comparable results when training schedules are carefully tuned."
+    },
+    {
+      "question": "Given a sequence length of 5 and model dimension 8, compute the memory required to store the full attention matrix (float32) and compare it to the memory needed for a KV cache storing keys and values for the same sequence.",
+      "answer": "Full attention matrix size = seq_len^2 * 4 bytes = 5*5*4 = 100 bytes. Keys and values each have shape (seq_len, d_k) and (seq_len, d_v). In standard Transformer d_k=d_v= d_model/num_heads; assume 1 head for simplicity, so d_k=d_v=8. Each matrix stores 5*8=40 floats => 40*4=160 bytes. KV cache stores both K and V, total = 160+160=320 bytes. Therefore, the KV cache uses more memory (320 B) than the attention matrix (100 B) for this tiny example, illustrating that caching trades compute for memory, which becomes advantageous when seq_len grows large because attention scales quadratically while KV cache scales linearly."
+    }
+  ],
+  "id": "dl-transformers",
+  "title": "Transformer Architecture & Attention",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2770
+}

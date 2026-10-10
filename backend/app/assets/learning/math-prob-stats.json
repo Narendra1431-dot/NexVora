@@ -1,0 +1,93 @@
+{
+  "introduction": "Probability and statistics form the mathematical backbone of data‑driven decision making. Whether you are estimating the chance of a coin landing heads, inferring the parameters of a distribution from observed data, or modeling sequential events such as weather patterns, a solid grasp of these ideas is essential. This chapter introduces the core concepts a beginner needs before tackling more sophisticated models. You will learn how to reason about uncertainty with Bayes Theorem, how to fit models to data using Maximum Likelihood Estimation, and how to describe stochastic processes with Markov Chains. By the end, you will be able to translate real‑world problems into probabilistic language, perform basic calculations by hand, and write simple Python code to simulate and analyze random phenomena.",
+  "foundations": "The study of probability begins with a sample space, the set of all possible outcomes of an experiment. Events are subsets of this space, and a probability measure assigns a number between 0 and 1 to each event, obeying the axioms of non‑negativity, normalization, and additivity. Random variables map outcomes to numeric values; their distributions describe how likely each value is. Expectation gives the average outcome, variance quantifies spread, and common families such as the Bernoulli, Binomial, Normal, and Poisson distributions provide templates for modeling. Statistics reverses the direction: given observed data, we aim to infer the underlying distribution or its parameters. Estimators are rules that produce parameter guesses; desirable properties include unbiasedness (average equals true value) and consistency (converges with more data). Hypothesis testing evaluates competing explanations by comparing observed evidence against a null model, often using p‑values or confidence intervals. These foundations enable the three subtopics that follow: Bayes Theorem for updating beliefs, Maximum Likelihood Estimation for fitting models, and Markov Chains for describing dependent sequences.",
+  "concepts": [
+    {
+      "title": "Bayes Theorem",
+      "explanation": "Bayes Theorem provides a systematic way to update the probability of a hypothesis when new evidence arrives. Formally, P(H|E) = P(E|H) * P(H) / P(E), where H is the hypothesis and E is the evidence. The prior P(H) captures belief before seeing data, the likelihood P(E|H) measures how probable the evidence is under the hypothesis, and the posterior P(H|E) is the revised belief. The denominator P(E) acts as a normalizing constant ensuring the posterior sums to one across all hypotheses. Bayes Theorem is powerful because it combines prior knowledge with observed data, allowing iterative refinement as more evidence accumulates. Trade‑offs include the need for a well‑specified prior, which can be subjective, and computational difficulty when the hypothesis space is large, often requiring approximation methods such as Monte Carlo sampling.",
+      "example": "Suppose a medical test for a disease is 99% sensitive (true positive) and 95% specific (true negative). The disease prevalence in the population is 1%. Let H be \"patient has disease\" and E be \"test is positive\". Prior P(H)=0.01. Likelihood P(E|H)=0.99. False‑positive rate is 1-0.95=0.05, so P(E|~H)=0.05. The evidence probability P(E)=P(E|H)P(H)+P(E|~H)P(~H)=0.99*0.01+0.05*0.99=0.0099+0.0495=0.0594. Posterior P(H|E)=0.99*0.01/0.0594≈0.1667. Even with a highly accurate test, the chance the patient actually has the disease after a positive result is only about 16.7% because the disease is rare."
+    },
+    {
+      "title": "Maximum Likelihood Estimation (MLE)",
+      "explanation": "Maximum Likelihood Estimation selects parameter values that make the observed data most probable under a chosen statistical model. Given data points x1,…,xn assumed independent and identically distributed from a distribution f(x;θ) with parameter θ, the likelihood function L(θ)=∏_{i=1}^n f(x_i;θ) measures joint probability of the data. The MLE θ̂ maximizes L(θ), often more conveniently by maximizing the log‑likelihood ℓ(θ)=log L(θ) because products become sums and derivatives are easier. Solving ∂ℓ/∂θ=0 yields candidate estimates; second‑order conditions confirm a maximum. MLE is asymptotically unbiased and efficient under regularity conditions, but it can be sensitive to model misspecification and outliers. In cases where the likelihood has multiple peaks, numerical optimization (e.g., gradient ascent) may be required, and care must be taken to avoid local maxima.",
+      "example": "Assume we observe three independent measurements of a physical quantity that we model as normally distributed with unknown mean μ and known variance σ^2=1. The data are x=[2.1, 1.9, 2.0]. The likelihood is L(μ)=∏_{i=1}^3 (1/√(2π)) exp(-(x_i-μ)^2/2). The log‑likelihood ℓ(μ)= -3/2 log(2π) - 0.5∑(x_i-μ)^2. Differentiating: dℓ/dμ = ∑(x_i-μ)=0 ⇒ 3μ = ∑x_i = 2.1+1.9+2.0 = 6.0 ⇒ μ̂ = 2.0. Thus the MLE for the mean is the sample average, a result that holds for any normal distribution with known variance."
+    },
+    {
+      "title": "Markov Chains",
+      "explanation": "A Markov Chain is a stochastic process that moves between a finite set of states with the property that the next state depends only on the current state, not on the sequence of past states. This memoryless property is formalized as P(S_{t+1}=j | S_t=i, S_{t-1}=k, …) = P(S_{t+1}=j | S_t=i) = T_{ij}, where T is the transition matrix. Each row of T sums to one, representing a probability distribution over next states. Chains can be classified by properties such as irreducibility (every state reachable from any other), aperiodicity (no fixed cycle length), and ergodicity (convergence to a unique stationary distribution π satisfying πT=π). Trade‑offs involve model simplicity versus realism: a first‑order Markov assumption may be too restrictive for processes with longer memory, prompting higher‑order extensions or hidden Markov models.",
+      "example": "Consider a simple weather model with two states: Sunny (S) and Rainy (R). Transition probabilities are: P(S→S)=0.8, P(S→R)=0.2, P(R→S)=0.4, P(R→R)=0.6. The transition matrix T = [[0.8,0.2],[0.4,0.6]]. Starting from Sunny, the probability of being Sunny after two days is computed by squaring the matrix: T^2 = [[0.8*0.8+0.2*0.4, 0.8*0.2+0.2*0.6],[0.4*0.8+0.6*0.4, 0.4*0.2+0.6*0.6]] = [[0.72,0.28],[0.56,0.44]]. Thus P(S after two days | start S)=0.72. The stationary distribution solves π = πT, yielding π = [0.667, 0.333]; in the long run, about two‑thirds of days are Sunny."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import random\n\ndef simulate_coin(p_head, n):\n    heads = sum(1 for _ in range(n) if random.random() < p_head)\n    return heads / n\n\n# Estimate probability of heads for a biased coin\nest = simulate_coin(0.7, 10000)\nprint('Estimated P(heads):', round(est, 4))",
+      "explanation": "The code defines a simple Monte Carlo simulation for a biased coin with true head probability 0.7. By drawing 10,000 random numbers and counting how many fall below 0.7, we approximate the empirical frequency of heads. The printed estimate will be close to 0.7, illustrating the law of large numbers: as the number of trials grows, the sample proportion converges to the true probability. Limitations include random variance; a single run may deviate by a few percent, and the method becomes inefficient for extremely rare events where many more trials are needed to obtain stable estimates."
+    },
+    {
+      "title": "Applied example",
+      "code": "# Pseudocode for MLE of exponential rate\n# data: list of observed lifetimes x_i\nsum_x = sum(data)\nN = len(data)\n# Log‑likelihood derivative set to zero gives lambda_hat = N / sum_x\nlambda_hat = N / sum_x\nprint('MLE rate λ =', lambda_hat)",
+      "explanation": "The pseudocode demonstrates the derivation of the Maximum Likelihood Estimator for the rate parameter λ of an exponential distribution, f(x;λ)=λ e^{-λx} for x≥0. The log‑likelihood is ℓ(λ)=N log λ - λ∑x_i. Differentiating with respect to λ and setting the derivative to zero yields N/λ - ∑x_i = 0, which solves to λ̂ = N / ∑x_i, the reciprocal of the sample mean. For independent exponential observations and N>1, this estimator is biased upward: E[lambda_hat]=N*lambda/(N-1). It is consistent and asymptotically unbiased, and easy to compute, making it a common choice in reliability engineering where lifetimes follow an exponential decay."
+    }
+  ],
+  "flow": [
+    "Define the random experiment and enumerate all possible outcomes (sample space).",
+    "Assign probabilities to elementary events ensuring the axioms of probability hold.",
+    "Introduce random variables and derive their probability mass or density functions.",
+    "Apply Bayes Theorem to update beliefs when new evidence is observed.",
+    "Formulate a likelihood function for the observed data and solve for the MLE.",
+    "Construct a transition matrix if the problem involves sequential dependence, then analyze its properties (stationary distribution, mixing time).",
+    "Validate results with simulation or analytical checks, and interpret the outcomes in the context of the original problem."
+  ],
+  "interview": [
+    {
+      "question": "Explain the difference between a prior and a likelihood in Bayesian inference.",
+      "answer": "A prior represents the probability distribution of a hypothesis before seeing any data; it encodes existing knowledge or assumptions. The likelihood, on the other hand, quantifies how probable the observed data are under each possible hypothesis. In Bayes Theorem, the prior is multiplied by the likelihood to produce the unnormalized posterior, which is then normalized by the evidence. The prior influences the posterior especially when data are scarce, while the likelihood dominates as more data accumulate."
+    },
+    {
+      "question": "Derive the MLE for the parameter p of a Bernoulli distribution given n observations.",
+      "answer": "For a Bernoulli trial, the probability mass function is f(x;p)=p^x (1-p)^{1-x} for x∈{0,1}. Given observations x1,…,xn, the likelihood is L(p)=∏_{i=1}^n p^{x_i}(1-p)^{1-x_i}=p^{∑x_i}(1-p)^{n-∑x_i}. The log‑likelihood is ℓ(p)=∑x_i log p + (n-∑x_i) log(1-p). Differentiating with respect to p and setting to zero: (∑x_i)/p - (n-∑x_i)/(1-p)=0. Solving gives p̂ = (∑x_i)/n, which is simply the sample mean of the binary outcomes."
+    },
+    {
+      "question": "What conditions guarantee that a Markov chain has a unique stationary distribution?",
+      "answer": "A finite Markov chain that is both irreducible (every state can be reached from any other) and aperiodic (the chain does not get trapped in cycles of fixed length) is guaranteed to have a unique stationary distribution. Irreducibility ensures the chain is one communicating class, while aperiodicity prevents oscillations. Under these conditions, the chain is ergodic, meaning that regardless of the initial state, the distribution of states converges to the stationary distribution as time goes to infinity."
+    },
+    {
+      "question": "How would you handle a situation where the likelihood function is intractable for Bayesian inference?",
+      "answer": "When the likelihood cannot be evaluated analytically, we resort to approximation techniques. One common approach is Markov Chain Monte Carlo (MCMC), which constructs a Markov chain whose stationary distribution matches the posterior, allowing us to draw samples without explicit likelihood values. Another method is Approximate Bayesian Computation (ABC), which simulates data from the model and accepts parameter values that produce simulated data close to the observed data according to a distance metric. Both methods trade computational cost for the ability to perform inference in complex models."
+    }
+  ],
+  "summary": "Probability and statistics provide a language for quantifying uncertainty and extracting insight from data. Starting from basic probability axioms, we learned to model random variables, compute expectations, and assess variability. Bayes Theorem equips us to revise beliefs in light of new evidence, balancing prior knowledge with observed data. Maximum Likelihood Estimation offers a principled way to fit parametric models by maximizing the probability of the observed sample, yielding estimators that are often simple functions of the data. Markov Chains extend probability to sequences where the future depends only on the present, enabling analysis of stochastic processes through transition matrices, stationary distributions, and convergence properties. Together, these tools form a foundation for more advanced topics such as Bayesian hierarchical models, hidden Markov models, and modern machine‑learning algorithms.",
+  "practice": [
+    {
+      "question": "A biased die has probability 0.2 of landing on 6 and equal probability for the other faces. What is the probability of rolling a 6 exactly twice in three independent throws?",
+      "answer": "Let p=0.2 for a 6, q=0.8 for not‑6. The number of successes follows a Binomial(3,0.2). P(X=2)=C(3,2)*p^2*q = 3 * 0.04 * 0.8 = 0.096."
+    },
+    {
+      "question": "Given data points [5.2, 4.8, 5.0] assumed drawn from N(μ, σ^2) with known σ=0.1, compute the MLE for μ.",
+      "answer": "The MLE for μ is the sample mean: (5.2+4.8+5.0)/3 = 5.0. Thus μ̂ = 5.0."
+    },
+    {
+      "question": "In a two‑state Markov chain with transition matrix [[0.9,0.1],[0.3,0.7]], compute the probability of being in state 2 after two steps starting from state 1.",
+      "answer": "Square the matrix: T^2 = [[0.9*0.9+0.1*0.3, 0.9*0.1+0.1*0.7],[0.3*0.9+0.7*0.3, 0.3*0.1+0.7*0.7]] = [[0.84,0.16],[0.48,0.52]]. Starting from state 1, the probability of being in state 2 after two steps is the (1,2) entry = 0.16."
+    },
+    {
+      "question": "Write a Python function that computes the posterior probability of a hypothesis H given binary evidence E using Bayes Theorem. Use inputs prior, likelihood, and evidence probability.",
+      "answer": "def bayes_posterior(prior, likelihood, evidence):\n    return (likelihood * prior) / evidence\n# Example usage:\n# prior=0.01, likelihood=0.99, evidence=0.0594\n# posterior ≈ 0.1667"
+    },
+    {
+      "question": "Design a simple weather prediction system using a first‑order Markov chain. Discuss the trade‑offs of using only the previous day's weather versus incorporating a longer history.",
+      "answer": "Model states as {Sunny, Cloudy, Rainy}. Estimate transition probabilities from historical data, forming a 3×3 matrix. The system predicts tomorrow's weather by multiplying the current state vector by the matrix. Trade‑offs: a first‑order model is easy to train and requires little data, but it cannot capture patterns like a multi‑day front that influence weather beyond one day. Extending to a second‑order chain (conditioning on the last two days) improves accuracy for such patterns but increases the number of parameters (from 9 to 27 probability entries, or 6 to 18 free parameters after row-sum constraints) and demands more data to estimate them reliably, raising the risk of overfitting."
+    },
+    {
+      "question": "A sample of 50 measurements has mean 12.3 and standard deviation 2.1. Assuming normality, construct a 95% confidence interval for the true mean.",
+      "answer": "For n=50, use t_{0.025,49}≈2.01. Margin = t * s/√n = 2.01 * 2.1 / √50 ≈ 2.01 * 0.297 = 0.597. CI = 12.3 ± 0.597 → (11.703, 12.897)."
+    }
+  ],
+  "id": "math-prob-stats",
+  "title": "Probability & Statistics",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2145
+}

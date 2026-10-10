@@ -1,0 +1,28 @@
+{
+  "features": [
+    "gap",
+    "careerImportance",
+    "difficultyFit",
+    "quality",
+    "timeFit"
+  ],
+  "coefficients": [
+    0.3537081612615552,
+    0.24538381603286888,
+    0.1979031948853991,
+    0.11795928822621564,
+    0.0789374604967012
+  ],
+  "intercept": 0.0025389950446645937,
+  "modelVersion": "demo-ranker-1",
+  "seed": 42,
+  "data": "SYNTHETIC DEMO DATA; no real-world accuracy claim",
+  "train": 900,
+  "validation": 300,
+  "test": 300,
+  "validationMAE": 0.023522180780571573,
+  "testMAE": 0.0232060473220407,
+  "testRMSE": 0.028876362023403726,
+  "testNDCGAt5": 0.995991125356139,
+  "constantBaselineMAE": 0.12189751913122478
+}

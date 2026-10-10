@@ -1,0 +1,93 @@
+{
+  "introduction": "Supervised learning algorithms form the backbone of many real‑world predictive systems, from credit scoring to image classification. They learn a mapping from input features to a target label by exploiting labeled examples. Understanding when to use a particular algorithm, how it builds its model, and what assumptions it makes is essential for any data scientist. This chapter introduces the fundamental ideas behind three widely used families—gradient boosted trees, regularization techniques for linear models, and support vector machines—starting from the mathematics that underpins them and progressing to practical implementation tips. By the end, a beginner will be able to select, train, and evaluate these models on small datasets, recognize common pitfalls, and discuss their trade‑offs in an interview setting.",
+  "foundations": "Supervised learning begins with a dataset D = {(x_i, y_i)}_{i=1}^n where each x_i is a vector of p features and y_i is the target. The goal is to find a function f(x;θ) parameterized by θ that minimizes a loss L(y, f(x)). For regression, L is often the squared error (y - f(x))^2; for classification, the logistic loss or hinge loss is common. Linear models assume f(x)=w^T x + b, leading to a convex optimization problem that can be solved analytically or with gradient descent. Regularization adds a penalty term R(w) to the objective, controlling model complexity and preventing over‑fitting. Tree‑based methods, in contrast, partition the feature space recursively, fitting simple constant values in each leaf. Gradient boosting builds an ensemble of such trees by iteratively fitting each new tree to the residuals of the current ensemble, effectively performing gradient descent in function space. Support vector machines construct a separating hyperplane with maximal margin; by mapping inputs into a higher‑dimensional space with a kernel, they can handle non‑linear patterns while still solving a convex quadratic program. All three approaches share the need for careful preprocessing, hyper‑parameter tuning, and validation to achieve reliable performance.",
+  "concepts": [
+    {
+      "title": "Gradient Boosted Trees (XGBoost)",
+      "explanation": "Gradient boosted trees combine many shallow decision trees to produce a strong predictor. Each tree is fit to the negative gradient of the loss with respect to the current model predictions, which is why the method is called gradient boosting. The algorithm proceeds in stages: start with a constant prediction (often the mean of y), compute residuals r_i = -∂L/∂f(x_i), fit a regression tree to r_i, and update the model f_new(x) = f_old(x) + η * tree(x) where η is the learning rate. Regularization appears both in the tree structure (max depth, min child weight) and in the objective (L2 penalty on leaf weights). XGBoost adds second‑order Taylor approximation of the loss, enabling efficient computation of optimal leaf values and providing built‑in handling of missing values. Trade‑offs include higher predictive power versus longer training time and greater sensitivity to noisy features if depth is not limited.",
+      "example": "Consider a tiny dataset with a single feature x and target y: (1,3), (2,5), (3,7), (4,9). The initial prediction is the mean y = 6. The residuals are [-3, -1, 1, 3]. Fit a depth‑1 tree that splits at x=2.5, assigning leaf values -2 for the left side and +2 for the right side (average residuals). With learning rate η=0.5, the updated predictions become 6 + 0.5*(-2) = 5 for x≤2.5 and 6 + 0.5*(2) = 7 for x>2.5. A second iteration repeats the process on new residuals, gradually shaping a piecewise linear approximation of the true relationship y=2x+1."
+    },
+    {
+      "title": "Regularization (L1/L2)",
+      "explanation": "Regularization adds a penalty to the loss function to discourage overly complex models. L2 regularization (ridge) adds λ||w||_2^2, shrinking all coefficients toward zero but never exactly zero, which improves numerical stability and reduces variance. L1 regularization (lasso) adds λ||w||_1, encouraging sparsity by driving some coefficients exactly to zero, thus performing feature selection. The combined elastic‑net penalty λ1||w||_1 + λ2||w||_2^2 balances both effects. In linear regression, the closed‑form ridge solution is w = (X^T X + λI)^{-1} X^T y, while lasso requires iterative solvers such as coordinate descent. Trade‑offs: L2 is easier to compute and works well when many small effects exist; L1 is useful when only a few features are truly predictive but can be unstable if features are highly correlated.",
+      "example": "Take a 3‑feature dataset: X = [[1,2,3],[1,0,1],[0,1,1]], y = [6,4,5]. Without regularization, the ordinary least squares solution solves (X^T X)w = X^T y. X^T X = [[2,2,4],[2,5,5],[4,5,11]] and X^T y = [15,14,27]. Solving gives w ≈ [1,1,1]. With L2 λ=1, compute (X^T X + I) = [[3,2,4],[2,6,5],[4,5,12]]. Inverting yields w_ridge ≈ [0.78,0.92,0.84]. The coefficients shrink toward zero, reducing sensitivity to noise."
+    },
+    {
+      "title": "Support Vector Machines",
+      "explanation": "Support vector machines (SVM) aim to find the hyperplane that maximizes the margin between two classes. For linearly separable data, the primal problem minimizes ½||w||^2 subject to y_i (w^T x_i + b) ≥ 1. Introducing slack variables ξ_i and a penalty C yields the soft‑margin formulation, allowing some misclassifications. The dual problem involves Lagrange multipliers α_i and depends only on inner products x_i·x_j, enabling the kernel trick: replace the inner product with a kernel function K(x_i,x_j) to implicitly map data into a high‑dimensional space. Common kernels include polynomial K = (γ x_i·x_j + r)^d and radial basis function K = exp(-γ||x_i - x_j||^2). Only points with α_i > 0 (support vectors) influence the decision boundary. Trade‑offs: SVMs provide strong theoretical guarantees and work well on medium‑size datasets, but training scales poorly with n and requires careful kernel and C selection.",
+      "example": "A binary dataset: x = [[0,0],[2,2],[2,0],[0,2]], y = [-1,-1,1,1]. The optimal separating line is x_1 = x_2. The margin is √2/2. The support vectors are (0,0) and (2,2) for class -1 and (2,0) and (0,2) for class +1. Solving the dual yields α = [0.5,0.5,0.5,0.5]. The decision function f(x) = Σ α_i y_i K(x_i,x) + b simplifies to f(x) = x_1 - x_2, correctly classifying all points."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Worked example",
+      "code": "import numpy as np\nX = np.array([[1],[2],[3],[4]])\ny = np.array([3,5,7,9])\n# initial constant prediction\nf0 = np.mean(y)\nres = y - f0\n# simple depth-1 tree split at 2.5\nleft = res[X[:,0]<=2.5].mean()\nright = res[X[:,0]>2.5].mean()\neta = 0.5\npred = f0 + eta*np.where(X[:,0]<=2.5, left, right)\nprint('pred:', pred)",
+      "explanation": "The code implements the first two boosting iterations on a tiny regression problem. The initial prediction f0 = 6 is the mean of y. Residuals are computed, then a single split at x=2.5 yields average residuals -2 (left) and +2 (right). With learning rate 0.5 the updated predictions become [5,5,7,7]. The output shows how gradient boosting incrementally improves the fit. Limitations include the use of only one tree depth and a very small dataset; real‑world models require many trees, regularization, and validation to avoid over‑fitting."
+    },
+    {
+      "title": "Applied example",
+      "code": "def train_svm(X, y, C=1.0, gamma=0.5):\n    # Pseudocode for soft‑margin RBF SVM\n    K = np.exp(-gamma * np.sum((X[:,None]-X[None,:])**2, axis=2))\n    # Solve dual: maximize sum(alpha) - 0.5*alpha^T (YKY) alpha\n    # subject to 0 <= alpha_i <= C and sum(alpha_i y_i)=0\n    alpha = quadratic_program_solver(K, y, C)\n    sv = alpha > 1e-6\n    w = np.sum(alpha[sv][:,None] * y[sv][:,None] * X[sv], axis=0)\n    b = np.mean(y[sv] - K[sv][:,sv] @ (alpha[sv] * y[sv]))\n    return w, b\n# Note: quadratic_program_solver is a placeholder for a QP library.",
+      "explanation": "The pseudocode outlines the steps to train a soft‑margin SVM with an RBF kernel. First, the kernel matrix K is built using the Gaussian formula. The dual optimization problem is then solved for the Lagrange multipliers alpha, respecting box constraints and the equality constraint. Support vectors are identified where alpha is non‑zero. The weight vector w in the implicit feature space is reconstructed as a weighted sum of support vectors, and the bias b is computed by averaging over support vectors. In practice, a library such as cvxopt or scikit‑learn handles the quadratic programming. The example highlights the importance of choosing C and gamma: large C reduces regularization, while large gamma makes the kernel narrow, both affecting margin and over‑fitting."
+    }
+  ],
+  "flow": [
+    "1. Load and clean the data, ensuring numeric types and handling missing values.",
+    "2. Split the dataset into training and validation sets to estimate generalization error.",
+    "3. Choose a model family (tree boosting, regularized linear, or SVM) based on data size and feature types.",
+    "4. Define the loss function and add regularization terms if applicable; set hyper‑parameters.",
+    "5. Train the model: for boosting iterate tree fitting on residuals; for linear solve the regularized normal equations; for SVM solve the dual quadratic program.",
+    "6. Evaluate on validation data using appropriate metrics (RMSE for regression, accuracy/F1 for classification).",
+    "7. Perform hyper‑parameter tuning (grid or Bayesian) and repeat steps 4‑6 until performance stabilizes."
+  ],
+  "interview": [
+    {
+      "question": "Explain how gradient boosting reduces bias and variance compared to a single decision tree.",
+      "answer": "A single decision tree often has high variance because small changes in the data can produce a very different structure; it also may be shallow, leading to bias. Gradient boosting builds an ensemble where each new tree corrects the residual errors of the current model, effectively performing functional gradient descent. By adding many weak learners, the bias is reduced as the ensemble can approximate complex functions. Simultaneously, regularization techniques such as learning rate, tree depth limits, and subsampling control variance, preventing the ensemble from over‑fitting the training data."
+    },
+    {
+      "question": "What is the effect of L1 regularization on feature selection, and when might it be harmful?",
+      "answer": "L1 regularization adds a penalty proportional to the absolute value of coefficients, encouraging many weights to become exactly zero. This yields an implicit feature selection, which is useful when the true model is sparse. However, if features are highly correlated, L1 may arbitrarily keep one and discard others, leading to instability and loss of predictive information. In such cases, an elastic‑net or pure L2 penalty may be preferable."
+    },
+    {
+      "question": "Describe the kernel trick and give an example of a kernel that maps data to an infinite‑dimensional space.",
+      "answer": "The kernel trick replaces the inner product x_i·x_j in the dual SVM formulation with a kernel function K(x_i,x_j) that computes the inner product in a transformed feature space without explicitly performing the transformation. The radial basis function kernel K = exp(-γ||x_i - x_j||^2) corresponds to mapping data into an infinite‑dimensional Hilbert space of Gaussian basis functions. This allows the SVM to create highly non‑linear decision boundaries while keeping the optimization problem dependent only on pairwise kernel evaluations."
+    },
+    {
+      "question": "How does the learning rate η influence the training of a gradient boosted model?",
+      "answer": "The learning rate scales the contribution of each newly fitted tree to the ensemble. A small η (e.g., 0.01) forces the model to take many incremental steps, often improving generalization because each tree makes only a modest correction, reducing the risk of over‑fitting. Conversely, a large η (e.g., 0.5) speeds up convergence but can cause the model to fit noise quickly, leading to higher variance. Practitioners typically pair a small η with a larger number of trees."
+    }
+  ],
+  "summary": "Supervised learning algorithms translate labeled data into predictive functions by minimizing a loss while controlling model complexity. Gradient boosted trees iteratively fit shallow trees to residuals, offering high accuracy at the cost of training time and hyper‑parameter sensitivity. Regularization, through L1 or L2 penalties, shrinks linear model coefficients to reduce variance; L1 also performs feature selection but can be unstable with correlated inputs. Support vector machines construct maximal‑margin hyperplanes, leveraging kernels to handle non‑linear patterns, yet they scale poorly with large datasets. Across all methods, proper data preprocessing, validation, and systematic hyper‑parameter tuning are essential to balance bias, variance, and computational resources.",
+  "practice": [
+    {
+      "question": "Given X=[[1,2],[2,1],[3,3]], y=[4,5,10], compute the ridge regression coefficients with λ=2 using the closed‑form solution.",
+      "answer": "First compute X^T X = [[1+4+9, 2+2+9],[2+2+9,4+1+9]] = [[14,13],[13,14]]. Add λI: [[16,13],[13,16]]. Compute the inverse: determinant = 16*16-13*13 = 256-169 = 87. Inverse = (1/87)*[[16,-13],[-13,16]]. Compute X^T y = [1*4+2*5+3*10, 2*4+1*5+3*10] = [4+10+30, 8+5+30] = [44,43]. Multiply: w = (1/87)*[[16,-13],[-13,16]] @ [44,43] = (1/87)*[16*44-13*43, -13*44+16*43] = (1/87)*[704-559, -572+688] = (1/87)*[145,116] ≈ [1.666,1.333]. Thus the ridge coefficients are w1≈1.67, w2≈1.33."
+    },
+    {
+      "question": "Fit a depth‑1 decision stump to the residuals r=[-2,-2,2,2] of a 4‑point dataset with feature x=[1,2,3,4]. What are the leaf predictions and the updated model after one boosting step with η=0.5?",
+      "answer": "A depth‑1 stump chooses a split that separates negative from positive residuals. Splitting at x=2.5 yields left leaf residuals [-2,-2] with mean -2, right leaf residuals [2,2] with mean 2. With learning rate η=0.5, leaf contributions are -1 and +1 respectively. If the current model prediction is f0 (e.g., the mean of y), the updated prediction becomes f1 = f0 + leaf_contrib. For example, if f0=6, predictions become 5 for x≤2.5 and 7 for x>2.5."
+    },
+    {
+      "question": "Implement Lasso regression using coordinate descent for a 2‑feature dataset X=[[1,0],[0,1],[1,1]], y=[1,2,3] with λ=0.5. Show one full cycle of updates.",
+      "answer": "Initialize w=[0,0]. Update w1: residual = y - X[:,1]*w2 = [1,2,3] - [0,1,1]*0 = [1,2,3]. Compute rho = X[:,0]^T residual = 1*1+0*2+1*3 = 4. Apply soft‑threshold: w1 = sign(rho)*max(|rho|-λ,0)/ (X[:,0]^T X[:,0]) = 1*max(4-0.5,0)/2 = 3.5/2 = 1.75. Update w2: residual = y - X[:,0]*w1 = [1,2,3] - [1,0,1]*1.75 = [ -0.75, 2, 1.25]. rho = X[:,1]^T residual = 0*(-0.75)+1*2+1*1.25 = 3.25. w2 = sign(3.25)*max(3.25-0.5,0)/2 = 2.75/2 = 1.375. After one cycle, w≈[1.75,1.38]."
+    },
+    {
+      "question": "Design a binary classifier for a dataset with 10,000 samples and 500 features where most features are sparse. Choose between a linear SVM and gradient boosted trees and justify the trade‑off.",
+      "answer": "A linear SVM with an L1 penalty is preferable for high‑dimensional sparse data because it operates on inner products and can exploit sparsity, leading to fast training and a model that uses only a subset of features. Gradient boosted trees would need to examine many dense splits, incurring high memory and time costs, and may over‑fit due to the large feature space. The trade‑off is that trees can capture non‑linear interactions, but with 500 sparse features the linear decision boundary is often sufficient and far more scalable."
+    },
+    {
+      "question": "Compute the squared approximation error and the L2 norm error for approximating vector v=[3,4] by u=[2,5].",
+      "answer": "Squared approximation error = Σ (v_i - u_i)^2 = (3-2)^2 + (4-5)^2 = 1^2 + (-1)^2 = 2. L2 norm error = sqrt(2) ≈ 1.414. The squared error is useful in loss functions; the norm error gives the Euclidean distance."
+    },
+    {
+      "question": "Using scikit‑learn, write a short Python snippet to train an XGBoost classifier with max_depth=3 and evaluate accuracy on a hold‑out set.",
+      "answer": "import numpy as np\nfrom sklearn.model_selection import train_test_split\nfrom xgboost import XGBClassifier\nX = np.random.randn(200,5)\ny = (X[:,0] + X[:,1] > 0).astype(int)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\nmodel = XGBClassifier(max_depth=3, n_estimators=50, use_label_encoder=False, eval_metric='logloss')\nmodel.fit(X_train, y_train)\nacc = model.score(X_test, y_test)\nprint('Accuracy:', acc)"
+    }
+  ],
+  "id": "ml-supervised",
+  "title": "Supervised Learning Algorithms",
+  "version": "learning-v1",
+  "source": "CareerIQ original AI-assisted educational notes",
+  "generatedAt": "2026-09-30",
+  "wordCount": 2403
+}

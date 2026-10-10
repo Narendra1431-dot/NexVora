@@ -1,0 +1,381 @@
+
+=================================== ERRORS ====================================
+_______________ ERROR collecting app/tests/test_agent_graph.py ________________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_agent_graph.py:6: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+------------------------------- Captured stdout -------------------------------
+conftest.py: MONGODB_DB=career_intelligence_qa
+conftest.py: settings.mongodb_db=career_intelligence_qa
+conftest.py: settings.seed_on_startup=False
+conftest.py: DISABLE_RAG_INDEX=true
+________________ ERROR collecting app/tests/test_assistant.py _________________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_assistant.py:8: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+___________ ERROR collecting app/tests/test_certificate_samples.py ____________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_certificate_samples.py:6: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_______________ ERROR collecting app/tests/test_certificates.py _______________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_certificates.py:10: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_________________ ERROR collecting app/tests/test_copilot.py __________________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_copilot.py:7: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+___________ ERROR collecting app/tests/test_external_credentials.py ___________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_external_credentials.py:8: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_____________ ERROR collecting app/tests/test_governed_runtime.py _____________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_governed_runtime.py:4: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_______________ ERROR collecting app/tests/test_integration.py ________________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_integration.py:6: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_______________ ERROR collecting app/tests/test_intelligence.py _______________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_intelligence.py:12: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_______________ ERROR collecting app/tests/test_learning_hub.py _______________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_learning_hub.py:8: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+______________ ERROR collecting app/tests/test_profile_avatar.py ______________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_profile_avatar.py:6: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_______________ ERROR collecting app/tests/test_resume_flow.py ________________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_resume_flow.py:5: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+_____________ ERROR collecting app/tests/test_resume_generator.py _____________
+.venv\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+.venv\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Python314\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1406: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1371: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1342: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:938: in _load_unlocked
+    ???
+.venv\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+app\tests\test_resume_generator.py:11: in <module>
+    from app.main import app
+app\main.py:20: in <module>
+    from .routers import ai, auth, catalog, mutations, notifications, student, documents, workflow, reviews
+E     File "F:\Download\NSRIT HACKTHON\backend\app\routers\auth.py", line 122
+E       if not user or not verify_password(payload.password, user.get("passwordHash", "")):
+E       ^^
+E   IndentationError: expected an indented block after 'if' statement on line 120
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:40
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+.venv\Lib\site-packages\fastapi\routing.py:233
+.venv\Lib\site-packages\fastapi\routing.py:233
+.venv\Lib\site-packages\fastapi\routing.py:233
+.venv\Lib\site-packages\fastapi\routing.py:233
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\fastapi\routing.py:233: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    is_coroutine = asyncio.iscoroutinefunction(dependant.call)
+
+.venv\Lib\site-packages\starlette\_utils.py:39
+.venv\Lib\site-packages\starlette\_utils.py:39
+.venv\Lib\site-packages\starlette\_utils.py:39
+.venv\Lib\site-packages\starlette\_utils.py:39
+  F:\Download\NSRIT HACKTHON\backend\.venv\Lib\site-packages\starlette\_utils.py:39: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    return asyncio.iscoroutinefunction(obj) or (callable(obj) and asyncio.iscoroutinefunction(obj.__call__))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR app/tests/test_agent_graph.py
+ERROR app/tests/test_assistant.py
+ERROR app/tests/test_certificate_samples.py
+ERROR app/tests/test_certificates.py
+ERROR app/tests/test_copilot.py
+ERROR app/tests/test_external_credentials.py
+ERROR app/tests/test_governed_runtime.py
+ERROR app/tests/test_integration.py
+ERROR app/tests/test_intelligence.py
+ERROR app/tests/test_learning_hub.py
+ERROR app/tests/test_profile_avatar.py
+ERROR app/tests/test_resume_flow.py
+ERROR app/tests/test_resume_generator.py
+!!!!!!!!!!!!!!!!!! Interrupted: 13 errors during collection !!!!!!!!!!!!!!!!!!!
+9 warnings, 13 errors in 9.48s

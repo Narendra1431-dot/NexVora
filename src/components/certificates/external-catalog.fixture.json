@@ -1,0 +1,178 @@
+[
+  {
+    "id": "aws-developer",
+    "name": "AWS Certified Developer - Associate",
+    "provider": "Amazon Web Services",
+    "initials": "AWS",
+    "categories": [
+      "Cloud",
+      "Development"
+    ],
+    "level": "Associate",
+    "description": "Develop, deploy and troubleshoot applications on AWS.",
+    "officialUrl": "https://aws.amazon.com/certification/certified-developer-associate/",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "google-cloud-engineer",
+    "name": "Google Cloud Associate Cloud Engineer",
+    "provider": "Google Cloud",
+    "initials": "GC",
+    "categories": [
+      "Cloud"
+    ],
+    "level": "Associate",
+    "description": "Deploy applications and manage cloud infrastructure and access.",
+    "officialUrl": "https://cloud.google.com/learn/certification/cloud-engineer",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "azure-ai-developer",
+    "name": "Microsoft Azure AI Cloud Developer Associate",
+    "provider": "Microsoft",
+    "initials": "MS",
+    "categories": [
+      "AI/ML",
+      "Cloud",
+      "Development"
+    ],
+    "level": "Associate",
+    "description": "Implement AI solutions and back-end services on Azure.",
+    "officialUrl": "https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-cloud-developer-associate/",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "terraform-associate",
+    "name": "HashiCorp Terraform Associate",
+    "provider": "HashiCorp",
+    "initials": "HC",
+    "categories": [
+      "DevOps",
+      "Cloud"
+    ],
+    "level": "Associate",
+    "description": "Validate foundational infrastructure-as-code skills with Terraform.",
+    "officialUrl": "https://developer.hashicorp.com/certifications",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "ckad",
+    "name": "Linux Foundation CKAD",
+    "provider": "Linux Foundation / CNCF",
+    "initials": "LF",
+    "categories": [
+      "DevOps",
+      "Cloud"
+    ],
+    "level": "Intermediate",
+    "description": "Design, build and deploy cloud-native applications for Kubernetes.",
+    "officialUrl": "https://training.linuxfoundation.org/certification/certified-kubernetes-application-developer-ckad/",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "github-foundations",
+    "name": "GitHub Foundations Certification",
+    "provider": "GitHub",
+    "initials": "GH",
+    "categories": [
+      "Development",
+      "DevOps"
+    ],
+    "level": "Beginner",
+    "description": "Git, repositories, collaboration and modern development practices.",
+    "officialUrl": "https://learn.microsoft.com/en-us/credentials/certifications/github-foundations/",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "mongodb-developer",
+    "name": "MongoDB Associate Developer Certification",
+    "provider": "MongoDB",
+    "initials": "MDB",
+    "categories": [
+      "Database",
+      "Development"
+    ],
+    "level": "Associate",
+    "description": "Validate application development skills using MongoDB. Select your programming language on the official page.",
+    "officialUrl": "https://learn.mongodb.com/pages/mongodb-associate-developer-exam",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "fcc-javascript",
+    "name": "freeCodeCamp JavaScript Certification",
+    "provider": "freeCodeCamp",
+    "initials": "fCC",
+    "categories": [
+      "Development"
+    ],
+    "level": null,
+    "description": "Learn JavaScript through lessons, projects and a certification exam.",
+    "officialUrl": "https://www.freecodecamp.org/learn/javascript-v9",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "fcc-web-design",
+    "name": "freeCodeCamp Responsive Web Design",
+    "provider": "freeCodeCamp",
+    "initials": "fCC",
+    "categories": [
+      "Development"
+    ],
+    "level": null,
+    "description": "Build responsive websites with HTML and CSS through practical projects.",
+    "officialUrl": "https://www.freecodecamp.org/learn/responsive-web-design-v9",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "fcc-python",
+    "name": "freeCodeCamp Python",
+    "provider": "freeCodeCamp",
+    "initials": "fCC",
+    "categories": [
+      "Development"
+    ],
+    "level": null,
+    "description": "Practice Python programming, data structures and algorithms.",
+    "officialUrl": "https://www.freecodecamp.org/learn/python-v9",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "fcc-databases",
+    "name": "freeCodeCamp Relational Databases",
+    "provider": "freeCodeCamp",
+    "initials": "fCC",
+    "categories": [
+      "Database"
+    ],
+    "level": null,
+    "description": "Develop relational database and SQL skills through hands-on coursework.",
+    "officialUrl": "https://www.freecodecamp.org/learn/relational-databases-v9",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "cisco-exams",
+    "name": "Cisco Certification Exams",
+    "provider": "Cisco",
+    "initials": "CS",
+    "categories": [
+      "Networking"
+    ],
+    "level": "Multiple levels",
+    "description": "Explore Cisco certification exams. This is a certification family; identify your specific award in the credential ID or URL.",
+    "officialUrl": "https://www.cisco.com/site/us/en/learn/training-certifications/exams/index.html",
+    "linkCheckedAt": "2026-09-30"
+  },
+  {
+    "id": "redhat-rhcsa",
+    "name": "Red Hat RHCSA",
+    "provider": "Red Hat",
+    "initials": "RH",
+    "categories": [
+      "Linux"
+    ],
+    "level": null,
+    "description": "Demonstrate core Red Hat Enterprise Linux system administration skills.",
+    "officialUrl": "https://www.redhat.com/en/services/certification/rhcsa",
+    "linkCheckedAt": "2026-09-30"
+  }
+]

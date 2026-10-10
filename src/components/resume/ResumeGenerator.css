@@ -1,0 +1,9 @@
+.resume-generator-grid {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start;}
+@media(min-width:768px){.resume-generator-grid{grid-template-columns:200px minmax(0,1fr);}.resume-generator-grid>aside:last-child{grid-column:1/-1;}}
+@media(min-width:1280px){.resume-generator-grid{grid-template-columns:190px minmax(0,1fr) 220px;}.resume-generator-grid>aside:last-child{grid-column:auto;}}
+.resume-paper{background:white;border:1px solid #e2e8f0;border-radius:8px;padding:clamp(16px,2vw,40px);color:#111827;font-family:Arial,sans-serif;font-size:var(--resume-size,14px);line-height:1.4;min-width:0;}
+.resume-paper input,.resume-edit-text{display:block;width:100%;border:1px solid transparent;border-radius:3px;background:transparent;color:inherit;outline-offset:2px;min-width:0;}
+.resume-paper input:focus,.resume-edit-text:focus{outline:2px solid #0f766e;border-color:#99f6e4;}
+.resume-name{font-size:32px;font-weight:700;line-height:1.2;}.resume-headline{font-size:16px;margin-top:6px;}.resume-contact{font-size:13px;margin-top:6px;}
+.resume-section-heading{color:var(--resume-accent);font-family:Arial,sans-serif;font-size:16px;font-weight:700;}
+.resume-edit-text{resize:vertical;min-height:2.8em;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;padding:2px;}

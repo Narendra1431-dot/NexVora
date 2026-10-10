@@ -1,0 +1,115 @@
+{
+  "id": "agt-87a8d444fc2bbb79a958feaa",
+  "status": "COMPLETED",
+  "proof": {
+    "agentsExecuted": 11,
+    "toolCalls": 11,
+    "sourcesRetrieved": 1,
+    "approvals": 0,
+    "durationMs": 8265,
+    "stateVersionBefore": 3,
+    "stateVersionAfter": 3
+  },
+  "error": null,
+  "modelUsage": [
+    {
+      "phase": "planning",
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "totalTokens": 522,
+      "latency": 1672,
+      "requestCount": 1,
+      "fallbackAttempts": [
+        {
+          "provider": "openrouter",
+          "errorCode": "http_401"
+        }
+      ]
+    },
+    {
+      "phase": "synthesis",
+      "provider": "groq",
+      "model": "openai/gpt-oss-120b",
+      "totalTokens": 4447,
+      "latency": 4406,
+      "requestCount": 1,
+      "fallbackAttempts": [
+        {
+          "provider": "openrouter",
+          "errorCode": "http_401"
+        }
+      ]
+    }
+  ],
+  "stateVersionBefore": 3,
+  "stateVersionAfter": 3,
+  "steps": [
+    {
+      "agent": "profile",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.095Z",
+      "completedAt": "2026-10-08T20:44:39.115Z"
+    },
+    {
+      "agent": "resume",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.118Z",
+      "completedAt": "2026-10-08T20:44:39.131Z"
+    },
+    {
+      "agent": "evidence",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.138Z",
+      "completedAt": "2026-10-08T20:44:39.150Z"
+    },
+    {
+      "agent": "competency",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.156Z",
+      "completedAt": "2026-10-08T20:44:39.172Z"
+    },
+    {
+      "agent": "career",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.179Z",
+      "completedAt": "2026-10-08T20:44:39.189Z"
+    },
+    {
+      "agent": "gap",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.194Z",
+      "completedAt": "2026-10-08T20:44:39.208Z"
+    },
+    {
+      "agent": "rag",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.211Z",
+      "completedAt": "2026-10-08T20:44:39.564Z"
+    },
+    {
+      "agent": "roadmap",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.567Z",
+      "completedAt": "2026-10-08T20:44:39.584Z"
+    },
+    {
+      "agent": "resources",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.592Z",
+      "completedAt": "2026-10-08T20:44:39.849Z"
+    },
+    {
+      "agent": "assessment",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.854Z",
+      "completedAt": "2026-10-08T20:44:39.869Z"
+    },
+    {
+      "agent": "projects",
+      "status": "COMPLETED",
+      "startedAt": "2026-10-08T20:44:39.874Z",
+      "completedAt": "2026-10-08T20:44:39.883Z"
+    }
+  ],
+  "sseVerified": true
+}
