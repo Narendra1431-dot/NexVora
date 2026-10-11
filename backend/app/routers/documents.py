@@ -55,7 +55,14 @@ async def analyze(payload: ResumeText, student_id: str = StudentId):
         from ..workers.queue import enqueue
         id=new_id('material')
         await col('intelligence_documents').insert_one({'id':id,'studentId':student_id,'fileName':payload.fileName,'documentType':'resume','extension':'txt','data':payload.text.encode('utf-8'),'createdAt':iso_now(),'status':'Queued'})
-        return await enqueue(student_id,'resume_analysis',[id],id)
+        job = await enqueue(student_id,'resume_analysis',[id],id)
+        # Only return 202 if the job was successfully dispatched to Redis
+        # Check if queueStatus indicates success
+        if job.get('queueStatus') == 'dispatched':
+            return JSONResponse(status_code=202, content=job)
+        else:
+            # If Redis dispatch failed but the job was saved in MongoDB, return appropriate status
+            return JSONResponse(status_code=503, content={'error': 'Background job queue unavailable', 'jobId': job.get('jobId')})
     return await ingest(payload.text, payload.fileName, student_id)
 
 @router.post('/documents/upload')
@@ -78,8 +85,18 @@ async def documents_upload(file: UploadFile = File(...), student_id: str = Stude
     from ..workers.queue import enqueue
     id=new_id('material')
     await col('intelligence_documents').insert_one({'id':id,'studentId':student_id,'fileName':file.filename or 'resume','documentType':'resume','extension':suffix,'data':data,'createdAt':iso_now(),'status':'Queued'})
-    job = await enqueue(student_id,'resume_analysis',[id],id)
-    return JSONResponse(status_code=202, content=job)
+    try:
+        job = await enqueue(student_id,'resume_analysis',[id],id)
+        # Only return 202 if the job was successfully dispatched to Redis
+        # Check if queueStatus indicates success
+        if job.get('queueStatus') == 'dispatched':
+            return JSONResponse(status_code=202, content=job)
+        else:
+            # If Redis dispatch failed but the job was saved in MongoDB, return appropriate status
+            return JSONResponse(status_code=503, content={'error': 'Background job queue unavailable', 'jobId': job.get('jobId')})
+    except Exception as e:
+        # If there's an error during enqueue, return appropriate error status
+        return JSONResponse(status_code=503, content={'error': 'Background job queue unavailable', 'message': str(e)})
 
 @router.post('/documents')
 async def documents(file: UploadFile = File(...), student_id: str = StudentId):

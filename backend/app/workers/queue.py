@@ -37,7 +37,12 @@ async def enqueue(student_id,type,input_refs,request_id,*,state_version=None):
     try:await col('intelligence_jobs').insert_one(job)
     except DuplicateKeyError:
         return public(await col('intelligence_jobs').find_one({'studentId':student_id,'requestId':request_id}))
-    await dispatch(job)
+    try:
+        await dispatch(job)
+    except Exception:
+        # If dispatch fails (e.g., Redis unavailable), keep the job in Queued status with unavailable queue status
+        # The job is already saved in MongoDB, so we return it without raising the exception
+        pass
     return public(await col('intelligence_jobs').find_one({'jobId':job['jobId']}))
 
 async def dispatch(job,pool=None):
@@ -47,9 +52,11 @@ async def dispatch(job,pool=None):
         await pool.enqueue_job('process_job',job['jobId'],_job_id=job['jobId'],_queue_name=QUEUE)
         await col('intelligence_jobs').update_one({'jobId':job['jobId'],'status':'Queued'},
             {'$set':{'queueStatus':'dispatched','stage':'Waiting for background worker'}})
-    except Exception:
+    except Exception as e:
+        # If Redis is unavailable, keep the job in Queued status with unavailable queue status
         await col('intelligence_jobs').update_one({'jobId':job['jobId'],'status':'Queued'},
             {'$set':{'queueStatus':'unavailable','stage':'Waiting for queue service. Your request is saved.'}})
+        # Don't re-raise the exception so the caller knows there was an issue but the job was saved
     finally:
         if owned and pool:await pool.aclose()
 
@@ -66,9 +73,19 @@ async def recover(ctx):
 async def health():
     pool=None
     try:
-        pool=await connection();await pool.ping()
-        heartbeat=await pool.get(QUEUE+':health-check')
-        return {'jobQueue':'healthy','workers':'healthy' if heartbeat else 'unavailable'}
-    except Exception:return {'jobQueue':'unavailable','workers':'unavailable'}
+        pool=await connection()
+        try:
+            await pool.ping()
+            try:
+                heartbeat=await pool.get(QUEUE+':health-check')
+                return {'jobQueue':'healthy','workers':'healthy' if heartbeat else 'unavailable'}
+            except Exception:
+                # Redis is available but heartbeat key is missing
+                return {'jobQueue':'healthy','workers':'unavailable'}
+        except Exception:
+            # Redis connection failed
+            return {'jobQueue':'unavailable','workers':'unavailable'}
+    except Exception:
+        return {'jobQueue':'unavailable','workers':'unavailable'}
     finally:
         if pool:await pool.aclose()
