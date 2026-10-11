@@ -4,6 +4,7 @@ import asyncio
 from weakref import WeakValueDictionary
 import re
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
 from ..config import settings
@@ -77,7 +78,8 @@ async def documents_upload(file: UploadFile = File(...), student_id: str = Stude
     from ..workers.queue import enqueue
     id=new_id('material')
     await col('intelligence_documents').insert_one({'id':id,'studentId':student_id,'fileName':file.filename or 'resume','documentType':'resume','extension':suffix,'data':data,'createdAt':iso_now(),'status':'Queued'})
-    return await enqueue(student_id,'resume_analysis',[id],id)
+    job = await enqueue(student_id,'resume_analysis',[id],id)
+    return JSONResponse(status_code=202, content=job)
 
 @router.post('/documents')
 async def documents(file: UploadFile = File(...), student_id: str = StudentId):

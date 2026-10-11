@@ -171,10 +171,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const login = async (demo = false) => {
     setBusy(true); setError('');
     try {
-      const data = await api(demo ? '/auth/demo' : register ? '/auth/register' : '/auth/login', demo ? {} : {email,password,name});
-      sessionStorage.setItem('plcip_token', data.token); setToken(data.token); setBaseline([]);
-      setOnboardingOpen(register && !demo);
-    } catch(e) { setError((e as Error).message); } finally {setBusy(false);}
+      if (demo) {
+        const data = await api('/auth/demo', {});
+        sessionStorage.setItem('plcip_token', data.token); setToken(data.token); setBaseline([]);
+        setOnboardingOpen(false);
+      } else if (register) {
+        const data = await api('/auth/register', {email,password,name});
+        sessionStorage.setItem('plcip_token', data.token); setToken(data.token); setBaseline([]);
+        setOnboardingOpen(true);
+      } else {
+        const data = await api('/auth/login', {email,password});
+        sessionStorage.setItem('plcip_token', data.token); setToken(data.token); setBaseline([]);
+        setOnboardingOpen(false);
+      }
+    } catch(e) { 
+      setError((e as Error).message); 
+    } finally {setBusy(false);}
   };
   const logout = () => {editHistory?.clear();sessionStorage.removeItem('plcip_token'); setToken(''); setSnapshot(null); setMentorMessages([]); setBaseline([]); setError('');};
   const mutate = async (path: string, body?: any, method = 'POST') => {
@@ -257,12 +269,23 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   };
   const triggerHackathonStep = (step: number) => {setDemoStep(step); setActiveTab(['resume','assessments','careers','competencies','careers','roadmap','resources','assessments','projects','dashboard'][step-1] || 'dashboard');};
   if(token && !snapshot && !error) return <main className="min-h-screen flex flex-col gap-4 items-center justify-center bg-slate-50"><p role="status">Loading your workspace...</p><button onClick={logout} className="underline">Clear session and retry</button></main>;
-  if(!token || !snapshot) return <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6"><form className="w-full max-w-md bg-white border rounded-2xl p-8 space-y-4" onSubmit={e=>{e.preventDefault(); login();}}><Brand/><h1 className="text-2xl font-bold">Learning & Career Intelligence</h1><p>Sign in to your evidence-driven learning workspace.</p>{error && <p role="alert" className="text-red-700">{error}</p>}{register && <input aria-label="Name" placeholder="Name" required value={name} onChange={e=>setName(e.target.value)} className="border p-3 w-full rounded"/>}<input aria-label="Email" type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)} className="border p-3 w-full rounded"/><input aria-label="Password" type="password" placeholder="Password" required minLength={register?8:1} value={password} onChange={e=>setPassword(e.target.value)} className="border p-3 w-full rounded"/><button disabled={busy} className="bg-teal-700 text-white p-3 rounded w-full">{register?'Create account':'Sign in'}</button><button type="button" onClick={()=>setRegister(!register)} className="underline">{register?'Use existing account':'Create an account'}</button><button type="button" disabled={busy} onClick={()=>login(true)} className="border p-3 rounded w-full">Explore seeded demo</button>{token && <button type="button" onClick={logout}>Clear session and retry</button>}</form></main>;
+  if(!token || !snapshot) return <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6"><form className="w-full max-w-md bg-white border rounded-2xl p-8 space-y-4" onSubmit={e=>{e.preventDefault(); login();}}><Brand/><h1 className="text-2xl font-bold">Learning & Career Intelligence</h1><p>Sign in to your evidence-driven learning workspace.</p>{error && <div role="alert" className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"><p>{error}</p></div>}{register && <input aria-label="Name" placeholder="Name" required value={name} onChange={e=>setName(e.target.value)} className="border p-3 w-full rounded"/>}<input aria-label="Email" type="email" placeholder="Email" required value={email} onChange={e=>setEmail(e.target.value)} className="border p-3 w-full rounded"/><input aria-label="Password" type="password" placeholder="Password" required minLength={register?8:1} value={password} onChange={e=>setPassword(e.target.value)} className="border p-3 w-full rounded"/><button disabled={busy} className="bg-teal-700 text-white p-3 rounded w-full">{register?'Create account':'Sign in'}</button><button type="button" onClick={()=>setRegister(!register)} className="underline">{register?'Use existing account':'Create an account'}</button><button type="button" disabled={busy} onClick={()=>login(true)} className="border p-3 rounded w-full">Explore seeded demo</button>{token && <button type="button" onClick={logout}>Clear session and retry</button>}</form></main>;
   const student = snapshot.profile;
   const competencyNodes = snapshot.competencies;
   const evidenceItems = snapshot.evidence;
-  const careers = snapshot.careers;
-  const targetCareer = careers.find((c:CareerRole)=>c.id===student.targetCareerId) || careers[0];
+  const careers = snapshot.careers || [];
+  const targetCareer = careers.find((c:CareerRole)=>c.id===student.targetCareerId) || careers[0] || {
+    id: student.targetCareerId || '',
+    title: student.targetCareerTitle || 'Career not set',
+    category: '',
+    description: '',
+    marketDemand: 'Stable' as const,
+    avgSalary: '',
+    currentReadiness: 0,
+    requiredCompetencies: [],
+    recommendedProjects: [],
+    recommendedCertifications: [],
+  };
   const roadmap = snapshot.milestones;
   const resources = snapshot.resources;
   const assessments = snapshot.assessments;

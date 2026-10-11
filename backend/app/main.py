@@ -69,8 +69,8 @@ async def _startup_sequence() -> None:
     
     from .services import llm
     await llm.is_available()
-    
-        from .services import openrouter
+
+    from .services import openrouter
     if settings.openrouter_api_key and llm.provider_name()!='OpenRouter':
         await openrouter.is_available()
     
@@ -134,26 +134,6 @@ async def _shutdown_sequence(background_tasks: list) -> None:
     await close()
     logger.info("Application shutdown complete")
 
-
-@app.get("/health/agents",include_in_schema=False)
-
-
-async def _rag_indexing_background_task() -> None:
-    """Background task to build RAG index without blocking startup."""
-    global _rag_indexing_task, _rag_indexing_complete
-    try:
-        from .services.rag import ensure_index
-        logger.info("Starting background RAG indexing...")
-        result = await ensure_index()
-        logger.info("Background RAG indexing completed: %s chunks using %s", result.get('chunks', 0), result.get('backend', 'unknown'))
-        _rag_indexing_complete = True
-    except asyncio.CancelledError:
-        logger.info("RAG indexing task was cancelled")
-        raise
-    except Exception as exc:
-        logger.error("Background RAG indexing failed: %s", exc, exc_info=True)
-    finally:
-        _rag_indexing_task = None
 
 
 @app.get("/health", include_in_schema=False)

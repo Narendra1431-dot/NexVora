@@ -19,14 +19,10 @@ if 'app.main' in sys.modules:
     import importlib
     importlib.reload(sys.modules['app.main'])
 
-print(f"conftest.py: MONGODB_DB={os.environ.get('MONGODB_DB')}")
-
 # Add backend to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from app.config import settings
-print(f"conftest.py: settings.mongodb_db={settings.mongodb_db}")
-print(f"conftest.py: settings.seed_on_startup={settings.seed_on_startup}")
-print(f"conftest.py: DISABLE_RAG_INDEX={os.environ.get('DISABLE_RAG_INDEX')}")
 
 @pytest.fixture(autouse=True)
 def reset_rate_limiter():
