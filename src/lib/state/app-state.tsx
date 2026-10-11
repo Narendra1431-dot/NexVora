@@ -149,8 +149,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     const headers: Record<string,string> = {Authorization: `Bearer ${token}`};
     if (!(body instanceof FormData)) headers['Content-Type'] = 'application/json';
     const r = await fetch('/api/v1' + path, {method, headers, body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body)});
-    const data = await r.json().catch(() => ({detail: 'Invalid server response'}));
-    if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail));
+    const contentType = r.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      // Proxy/edge returned an HTML error page or empty body — do not treat as API data.
+      throw new Error(r.ok ? 'Unexpected non-JSON response from server.' : `Request failed (${r.status}). Please try again.`);
+    }
+    const data = await r.json().catch(() => ({detail: 'Unexpected non-JSON response from server.'}));
+    if (!r.ok) throw new Error(typeof data.detail === 'string' ? data.detail : Array.isArray(data.detail) ? data.detail.map((d: any) => d.msg).join('; ') : 'Request failed. Please try again.');
     return data;
   };
   const refresh = async () => {
