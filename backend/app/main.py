@@ -1,17 +1,6 @@
-"""FastAPI application entrypoint.
-
-Run with::
-
-    uvicorn app.main:app --reload --port 8000   # from the backend/ directory
-
-Startup order matters: connect → indexes → seed → RAG index (lazy, first use).
-"""
-
-from __future__ import annotations
-
 import logging
+import asyncio
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,14 +12,24 @@ from .seed.run import seed_all
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger("plcip.main")
 
+# Global task tracking for RAG indexing
+_rag_indexing_task = None
+_rag_indexing_started = False
+_rag_indexing_complete = False
+_rag_indexing_lock = asyncio.Lock()
 @asynccontextmanager
 async def lifespan(application: FastAPI):
-    await on_startup()
+    # Store background tasks to manage them properly
+    background_tasks = []
+    
+    # Startup sequence
+    await _startup_sequence()
+    
     try:
-        yield
+        yield {"background_tasks": background_tasks}
     finally:
-        await close()
-
+        # Shutdown sequence
+        await _shutdown_sequence(background_tasks)
 app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan)
 from .middleware import rate_limit
 app.middleware("http")(rate_limit)
@@ -54,25 +53,107 @@ app.include_router(workflow.router, prefix=settings.api_prefix + "/v1")
 app.include_router(reviews.router, prefix=settings.api_prefix + "/v1")
 
 
-async def on_startup() -> None:
+async def _startup_sequence() -> None:
+    """Run startup sequence but don't wait for RAG indexing."""
+    logger.info("Starting application startup sequence...")
+    
+    # Essential startup that should complete quickly
     await ensure_database()
     await ensure_indexes()
+    
     if settings.seed_on_startup:
         await seed_all()
+    
     from .routers.coding import initialize
     await initialize()
-    from .services.rag import ensure_index
-    await ensure_index()
+    
     from .services import llm
     await llm.is_available()
-    from .services import openrouter
+    
+        from .services import openrouter
     if settings.openrouter_api_key and llm.provider_name()!='OpenRouter':
         await openrouter.is_available()
-    logger.info("API ready (prefix %s)", settings.api_prefix)
+    
+    logger.info("API ready (prefix %s), starting RAG indexing in background", settings.api_prefix)
+    
+    # Start RAG indexing in background task
+    global _rag_indexing_task, _rag_indexing_started
+    if not _rag_indexing_started:
+        _rag_indexing_started = True
+        _rag_indexing_task = asyncio.create_task(_rag_indexing_background_task())
+        logger.info("Started RAG indexing background task")
+    else:
+        logger.info("RAG indexing already started, skipping")
 
 
-async def on_shutdown() -> None:
+async def _rag_indexing_background_task() -> None:
+    """Background task to build RAG index without blocking startup."""
+    global _rag_indexing_task, _rag_indexing_complete
+    try:
+        from .services.rag import ensure_index
+        logger.info("Starting background RAG indexing...")
+        result = await ensure_index()
+        logger.info("Background RAG indexing completed: %s chunks using %s", result.get('chunks', 0), result.get('backend', 'unknown'))
+        _rag_indexing_complete = True
+    except asyncio.CancelledError:
+        logger.info("RAG indexing task was cancelled")
+        raise
+    except Exception as exc:
+        logger.error("Background RAG indexing failed: %s", exc, exc_info=True)
+    finally:
+        _rag_indexing_task = None
+
+
+async def _shutdown_sequence(background_tasks: list) -> None:
+    """Shutdown sequence - cancel background tasks."""
+    logger.info("Shutting down application...")
+    
+    # Cancel RAG indexing task if it's running
+    global _rag_indexing_task
+    if _rag_indexing_task and not _rag_indexing_task.done():
+        logger.info("Cancelling RAG indexing task...")
+        _rag_indexing_task.cancel()
+        try:
+            await _rag_indexing_task
+        except asyncio.CancelledError:
+            logger.info("RAG indexing task successfully cancelled")
+        except Exception as exc:
+            logger.error("Error during RAG indexing task cancellation: %s", exc)
+    
+    # Cancel any other background tasks
+    for task in background_tasks:
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            except Exception as exc:
+                logger.error("Error during background task cancellation: %s", exc)
+    
     await close()
+    logger.info("Application shutdown complete")
+
+
+@app.get("/health/agents",include_in_schema=False)
+
+
+async def _rag_indexing_background_task() -> None:
+    """Background task to build RAG index without blocking startup."""
+    global _rag_indexing_task, _rag_indexing_complete
+    try:
+        from .services.rag import ensure_index
+        logger.info("Starting background RAG indexing...")
+        result = await ensure_index()
+        logger.info("Background RAG indexing completed: %s chunks using %s", result.get('chunks', 0), result.get('backend', 'unknown'))
+        _rag_indexing_complete = True
+    except asyncio.CancelledError:
+        logger.info("RAG indexing task was cancelled")
+        raise
+    except Exception as exc:
+        logger.error("Background RAG indexing failed: %s", exc, exc_info=True)
+    finally:
+        _rag_indexing_task = None
 
 
 @app.get("/health", include_in_schema=False)

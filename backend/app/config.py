@@ -36,9 +36,16 @@ def _csv(name: str, default: str) -> list[str]:
 
 def _validate_settings(settings: Settings) -> None:
     """Validate critical configuration settings."""
-    if not settings.jwt_secret:
-        raise ValueError("JWT_SECRET environment variable is required for production")
+    # Check if we're in production mode
+    is_production = bool(os.getenv("PRODUCTION", os.getenv("IS_PRODUCTION", "false")).lower() in {"1", "true", "yes", "on"})
     
+    # Ensure JWT_SECRET is set and strong in production (critical requirement for security)
+    if is_production and not settings.jwt_secret:
+        raise ValueError("JWT_SECRET environment variable is required for production")
+    if is_production and len(settings.jwt_secret) < 32:
+        raise ValueError("JWT_SECRET must be at least 32 characters for production security")
+    
+    # Validate other critical production settings
     if settings.seed_on_startup and not (settings.demo_email and settings.demo_password):
         raise ValueError("DEMO_EMAIL and DEMO_PASSWORD environment variables are required when SEED_ON_STARTUP is true")
 

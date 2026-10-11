@@ -35,4 +35,4 @@ if response.status_code == 200:
             has_student_id = 'studentId' in entry
             is_current = entry.get('isCurrent', False)
             coding_xp = entry.get('codingXP', 0)
-            print(f'Entry {i}: studentId={'present' if has_student_id else 'missing'}, isCurrent={is_current}, codingXP={coding_xp}')
+            print(f'Entry {i}: studentId={\'present\' if has_student_id else \'missing\'}, isCurrent={is_current}, codingXP={coding_xp}')

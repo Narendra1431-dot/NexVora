@@ -57,6 +57,28 @@ async def analyze(payload: ResumeText, student_id: str = StudentId):
         return await enqueue(student_id,'resume_analysis',[id],id)
     return await ingest(payload.text, payload.fileName, student_id)
 
+@router.post('/documents/upload')
+async def documents_upload(file: UploadFile = File(...), student_id: str = StudentId):
+    """Upload and process a document for resume analysis (background job queue)."""
+    suffix = (file.filename or '').lower().rsplit('.',1)[-1]
+    if suffix not in {'pdf','txt','md'}: raise HTTPException(415, 'Upload PDF or UTF-8 TXT.')
+    if file.content_type not in settings.allowed_upload_types and file.content_type not in {'application/octet-stream',''}: raise HTTPException(415, 'Upload PDF or plain text.')
+    data = await file.read(settings.max_upload_bytes + 1)
+    if len(data) > settings.max_upload_bytes: raise HTTPException(413, 'Upload exceeds 8 MB.')
+    try:
+        if suffix == 'pdf':
+            if not data.startswith(b'%PDF-'): raise ValueError('Invalid PDF')
+            reader = PdfReader(io.BytesIO(data))
+            if len(reader.pages) > 100: raise ValueError('Too many pages')
+            text = '\n'.join(p.extract_text() or '' for p in reader.pages)
+        else: text = data.decode('utf-8')
+    except Exception:
+        raise HTTPException(422, 'Could not parse this document; upload a text-based PDF or UTF-8 text.')
+    from ..workers.queue import enqueue
+    id=new_id('material')
+    await col('intelligence_documents').insert_one({'id':id,'studentId':student_id,'fileName':file.filename or 'resume','documentType':'resume','extension':suffix,'data':data,'createdAt':iso_now(),'status':'Queued'})
+    return await enqueue(student_id,'resume_analysis',[id],id)
+
 @router.post('/documents')
 async def documents(file: UploadFile = File(...), student_id: str = StudentId):
     suffix = (file.filename or '').lower().rsplit('.',1)[-1]

@@ -398,9 +398,12 @@ async def retrieve(query: str, *, top_k: Optional[int] = None, tags: Optional[li
     """Hybrid lexical + vector retrieval over the local knowledge base."""
     load_embedder()
     top_k = top_k or settings.rag_top_k
-    await ensure_index()
+    
+    # Get RAG index data without blocking for indexing
     record = await col("concepts").find_one({"kind": "rag_index"})
     chunks = (record or {}).get("chunks", [])
+    
+    # If no indexed chunks, return empty list
     if not chunks:
         return []
 
